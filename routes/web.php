@@ -18,7 +18,7 @@ Route::get('/', function () {
 });
 
 
-Auth::routes();
+Auth::routes();  
 
 Route::get('/states/list', [App\Http\Controllers\MasterDataController::class, 'listStates'])->name('stateslisting');
 Route::get('/state/add', [App\Http\Controllers\MasterDataController::class, 'addState'])->name('addstate');
