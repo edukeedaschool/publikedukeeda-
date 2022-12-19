@@ -162,7 +162,9 @@ class CommonHelper
         }
 
         $types = [IMAGETYPE_JPEG, IMAGETYPE_PNG, IMAGETYPE_GIF, IMAGETYPE_BMP, IMAGETYPE_WEBP];
-        $type = exif_imagetype ($imagePath);
+        //$type = exif_imagetype ($imagePath);
+        $typeData = getimagesize($imagePath);
+        $type = $typeData[2];
 
         if (!in_array ($type, $types)) {
             return null;
