@@ -107,6 +107,12 @@
                 <a href="{{url('subscriber/list')}}" class="dropdown-item">Subscribers</a>
             </div>
         </div>
+        <div class="btn-group" style="margin-left:0px; ">
+            <button type="button" class="btn btn-dialog dropdown-toggle" data-toggle="dropdown">Users</button>
+            <div class="dropdown-menu">
+                <a href="{{url('user/list')}}" class="dropdown-item">Users</a>
+            </div>
+        </div>
     </div>
 </div>
 @endif
