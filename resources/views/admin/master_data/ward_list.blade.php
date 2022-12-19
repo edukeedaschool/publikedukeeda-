@@ -1,0 +1,68 @@
+@extends('layouts.default')
+@section('content')
+
+    <section class="product_area">
+        <div class="container-fluid" >
+           <div class="separator-10">&nbsp;</div>
+           
+            <form method="get">
+                <div class="row" >
+                    <div class="col-6"></div>
+                    <div class="col-6">
+                        <div class="row justify-content-end">
+                            <div class="col-md-3" ><input type="button" name="addBtn" id="addBtn" value="Add Ward" class="btn btn-dialog" onclick="location.href='{{ url('/ward/add') }}'"></div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+            <div class="separator-10">&nbsp;</div>
+
+            <div id="requestsContainer">
+                <div class="table-responsive">
+                    <table class="table table-striped clearfix admin-table" cellspacing="0">
+                        <thead><tr class="header-tr">
+                            <th>ID</th>
+                            <th>Ward Name</th>
+                            <th>District</th>    
+                            <th>Municipal Corporation</th>
+                            <th>Municipality</th>
+                            <th>City Council</th>
+                            <th>State</th>    
+                            <th>Status</th>
+                            <th>Action</th></tr>
+                        </thead>
+                        <tbody>
+                            @for($i=0;$i<count($ward_list);$i++)
+                                <tr>  
+                                    <td>{{$ward_list[$i]['id']}}</td>
+                                    <td>{{$ward_list[$i]['ward_name']}}</td>
+                                    <td>{{$ward_list[$i]['district_name']}}</td>
+                                    <td>{{$ward_list[$i]['mc1_name']}}</td>
+                                    <td>{{$ward_list[$i]['mc2_name']}}</td>
+                                    <td>{{$ward_list[$i]['city_council_name']}}</td>
+                                    <td>{{$ward_list[$i]['state_name']}}</td>
+                                    <td>{{($ward_list[$i]['status'] == 1)?'Enabled':'Disabled'}}</td>
+                                    <td>
+                                        <a href="{{url('ward/edit/'.$ward_list[$i]['id'])}}" class="user-list-edit"><i  title="Edit Ward" class="far fa-edit"></i></a>&nbsp;&nbsp;
+                                    </td>
+                                </tr>
+                            @endfor
+                        </tbody>
+                    </table>
+                    
+                    <p class="pagination">
+                        {{ $ward_list->withQueryString()->links('pagination::bootstrap-4') }}
+                        <p>Displaying {{$ward_list->count()}} of {{ $ward_list->total() }} Wards.</p>
+                    </p>
+                    
+                </div>
+            </div>
+        </div>
+    </section>
+
+@endsection
+
+@section('scripts')
+
+
+@endsection
