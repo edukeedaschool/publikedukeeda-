@@ -178,4 +178,11 @@ Route::get('/subscriber/review-data/edit', [App\Http\Controllers\SubscriberContr
 Route::post('/subscriber/review-data/edit', [App\Http\Controllers\SubscriberController::class, 'submitEditSubscriberReviewData'])->name('submiteditreviewdata');
 Route::get('/subscriber/review-range/data/{Id}', [App\Http\Controllers\SubscriberController::class, 'getReviewRangeData'])->name('getreviewrangedata');
 
+Route::get('/user/list', [App\Http\Controllers\UserController::class, 'listUser'])->name('userlisting');
+Route::get('/user/add', [App\Http\Controllers\UserController::class, 'addUser'])->name('adduser');
+Route::post('/user/add', [App\Http\Controllers\UserController::class, 'submitAddUser'])->name('submitadduser');
+Route::get('/user/edit/{Id}', [App\Http\Controllers\UserController::class, 'editUser'])->name('edituser');
+Route::post('/user/edit/{Id}', [App\Http\Controllers\UserController::class, 'submitEditUser'])->name('submitedituser');
+Route::post('/user/update', [App\Http\Controllers\UserController::class, 'updateUser'])->name('updateuser');
+
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
