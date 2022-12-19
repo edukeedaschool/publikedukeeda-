@@ -30,7 +30,7 @@ class UserController extends Controller
             $country_list = CountryList::where('is_deleted',0)->get()->toArray();
             $states_list = StateList::where('is_deleted',0)->get()->toArray();
             
-            $params = [];
+            $params = ['country_list'=>$country_list,'states_list'=>$states_list];
             
             return view('admin/user/user_add',$params);
             
