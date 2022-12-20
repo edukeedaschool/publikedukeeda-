@@ -214,4 +214,18 @@ class UserController extends Controller
         }  
     }
     
+    public function getUserData(Request $request,$email){
+        try{
+            $data = $request->all();
+            
+            $user_data = User::where('email',$email)->first();   
+           
+            return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'success','message' => 'User Data','user_data'=>$user_data),200);
+            
+        }catch (\Exception $e){
+            \DB::rollBack();
+            return response(array("httpStatus"=>500,"dateTime"=>time(),'status' => 'fail','message' =>$e->getMessage()),500);
+        }  
+    }
+    
 }

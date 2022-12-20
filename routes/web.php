@@ -184,5 +184,22 @@ Route::post('/user/add', [App\Http\Controllers\UserController::class, 'submitAdd
 Route::get('/user/edit/{Id}', [App\Http\Controllers\UserController::class, 'editUser'])->name('edituser');
 Route::post('/user/edit/{Id}', [App\Http\Controllers\UserController::class, 'submitEditUser'])->name('submitedituser');
 Route::post('/user/update', [App\Http\Controllers\UserController::class, 'updateUser'])->name('updateuser');
+Route::get('/user/data/{email}', [App\Http\Controllers\UserController::class, 'getUserData'])->name('getuserdata');
+
+Route::get('/team-designation/list', [App\Http\Controllers\TeamController::class, 'listTeamDesignation'])->name('teamdesignationlisting');
+Route::get('/team-designation/add', [App\Http\Controllers\TeamController::class, 'addTeamDesignation'])->name('addteamdesignation');
+Route::post('/team-designation/add', [App\Http\Controllers\TeamController::class, 'submitAddTeamDesignation'])->name('submitaddteamdesignation');
+Route::get('/team-designation/edit/{Id}', [App\Http\Controllers\TeamController::class, 'editTeamDesignation'])->name('editteamdesignation');
+Route::post('/team-designation/edit/{Id}', [App\Http\Controllers\TeamController::class, 'submitEditTeamDesignation'])->name('submiteditteamdesignation');
+Route::post('/team-designation/update', [App\Http\Controllers\TeamController::class, 'updateTeamDesignation'])->name('updateteamdesignation');
+Route::get('/team-designation/data/{Id}', [App\Http\Controllers\TeamController::class, 'getTeamDesignationData'])->name('getteamdesignationdata');
+
+Route::get('/team-member/list', [App\Http\Controllers\TeamController::class, 'listTeamMember'])->name('teammemberlisting');
+Route::get('/team-member/add', [App\Http\Controllers\TeamController::class, 'addTeamMember'])->name('addteammember');
+Route::post('/team-member/add', [App\Http\Controllers\TeamController::class, 'submitAddTeamMember'])->name('submitaddteammember');
+Route::get('/team-member/edit/{Id}', [App\Http\Controllers\TeamController::class, 'editTeamMember'])->name('editteammember');
+Route::post('/team-member/edit/{Id}', [App\Http\Controllers\TeamController::class, 'submitEditTeamMember'])->name('submiteditteammember');
+Route::post('/team-member/update', [App\Http\Controllers\TeamController::class, 'updateTeamMember'])->name('updateteammember');
+
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
