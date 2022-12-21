@@ -35,7 +35,7 @@
                                 <tr>  
                                     <td><input type="checkbox" name="member_id_chk" id="member_id_chk" value="{{$member_list[$i]['id']}}" class="member-id-chk"> {{$member_list[$i]['id']}}</td>
                                     <td>{{$member_list[$i]['member_name']}}</td>
-                                    <td>{{$member_list[$i]['representation_area']}}</td>
+                                    <td>{{$member_list[$i]['designation_name']}}</td>
                                     <td>{{$member_list[$i]['subscriber_name']}}</td>
                                     <td>{{($member_list[$i]['status'] == 1)?'Enabled':'Disabled'}}</td>
                                     <td>
@@ -54,12 +54,11 @@
                 </div>
                 
                 <div class="form-row ">
-                    
                     <div class="form-group col-md-12" >
                         <button type="button" id="member_delete_submit" name="member_delete_submit" class="btn btn-dialog" onclick="updateTeamMember('delete');">Delete Selected</button>
                         <button type="button" id="member_enable_submit" name="member_enable_submit" class="btn btn-dialog" onclick="updateTeamMember('enable');">Enable Selected</button>
                         <button type="button" id="member_disable_submit" name="member_disable_submit" class="btn btn-dialog" onclick="updateTeamMember('disable');">Disable Selected</button>
-                   </div>    
+                    </div>    
                 </div>
                 <div class="separator-10">&nbsp;</div>
             </div>

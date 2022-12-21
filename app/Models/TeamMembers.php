@@ -15,6 +15,6 @@ class TeamMembers extends Model
      *
      * @var array<int, string>
      */
-    protected $fillable = ['user_id','subscriber_id','designation_id','status','is_deleted'];
+    protected $fillable = ['user_id','subscriber_id','designation_id','country_tm','state_tm','district_tm','lac_tm','pc_tm','mc1_tm','mc2_tm','cc_tm','block_tm','ward_tm','sub_district_tm','village_tm','status','is_deleted'];
 
 }

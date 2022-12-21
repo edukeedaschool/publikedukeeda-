@@ -227,6 +227,7 @@ class TeamController extends Controller
         try{
             $data = $request->all();
             $user = Auth::user();
+            $user_data = [];
             
             $validationRules = array('emailAddress'=>'required','designation'=>'required','memberStatus'=>'required');
             $attributes = array('emailAddress'=>'Email Address','designation'=>'Designation','memberStatus'=>'Member Status','userName'=>'Name','mobileNumber'=>'Mobile Number','DOB'=>'DOB');
@@ -238,8 +239,8 @@ class TeamController extends Controller
                 $attributes[$key.'_tm'] = $value;
             }
             
-            if(!empty($data['email'])){
-                $user_data = User::where('email',trim($data['email']))->where('is_deleted',0)->first();
+            if(!empty($data['emailAddress'])){
+                $user_data = User::where('email',trim($data['emailAddress']))->where('is_deleted',0)->first();
                 if(empty($user_data)){
                     $validationRules['userName'] = $validationRules['mobileNumber'] = $validationRules['gender'] = $validationRules['DOB'] = 'required';
                 }
@@ -268,11 +269,140 @@ class TeamController extends Controller
                 return response(array('httpStatus'=>200, "dateTime"=>time(), 'status'=>'fail', 'message'=>'Validation error', 'errors' => $validator->errors()));
             }	
             
-            $insertArray = array('designation_name'=>trim($data['designationName']),'rep_area_id'=>trim($data['representationArea']),'subscriber_id'=>$user->id);
+            if(empty($user_data)){
+                $insertArray = array('name'=>trim($data['userName']),'email'=>trim($data['emailAddress']),'mobile_no'=>trim($data['mobileNumber']),'gender'=>trim($data['gender']),
+                'dob'=>trim($data['DOB']),'user_role'=>3,'password'=>Hash::make('12345678'));
+                
+                $user_exists = User::where('email',trim($data['emailAddress']))->where('is_deleted',0)->first();
+                if(!empty($user_exists)){
+                    return response(array('httpStatus'=>200, "dateTime"=>time(), 'status'=>'fail', 'message'=>'User already exists with Email Address', 'errors' => 'User already exists with Email Address'));
+                }
+
+                $user_data = User::create($insertArray);
+            }
+            
+            $insertArray = array('user_id'=>$user_data->id,'designation_id'=>trim($data['designation']),'subscriber_id'=>$user->id);
+            
+            $fieldsArray = ['country_tm'=>'country_tm','state_tm'=>'state_tm','district_tm'=>'district_tm','lac_tm'=>'LAC_tm','pc_tm'=>'PC_tm','mc1_tm'=>'MC1_tm','mc2_tm'=>'MC2_tm',
+            'cc_tm'=>'CC_tm','block_tm'=>'block_tm','ward_tm'=>'ward_tm','sub_district_tm'=>'subDistrict_tm','village_tm'=>'village_tm'];
+            
+            foreach($fieldsArray as $key=>$value){
+                $insertArray[$key] = (isset($data[$value]) && !empty($data[$value]))?trim($data[$value]):null;
+            }
+            
+            //print_r($insertArray);exit;
        
-            $designation = TeamDesignations::create($insertArray);
+            $team_member = TeamMembers::create($insertArray);
           
-            return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'success','message' => 'Designation added successfully'),200);
+            return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'success','message' => 'Team Member added successfully'),200);
+            
+        }catch (\Exception $e){
+            return response(array("httpStatus"=>500,"dateTime"=>time(),'status' => 'fail','message' =>$e->getMessage()),500);
+        }  
+    }
+    
+    public function editTeamMember(Request $request,$id){
+        try{
+            $data = $request->all();
+            $user = Auth::user();
+            
+            $tm_id = $id;
+            $tm_data = TeamMembers::where('id',$tm_id)->first();
+            $user_data = User::where('id',$tm_data->user_id)->where('is_deleted',0)->first();
+            
+            $designation_list = TeamDesignations::join('representation_area_list as ral', 'ral.id', '=', 'team_designations.rep_area_id')
+            ->where('team_designations.subscriber_id',$user->id)                        
+            ->where('team_designations.is_deleted',0)        
+            ->where('ral.is_deleted',0)                
+            ->select('team_designations.*','ral.representation_area')        
+            ->orderBy('team_designations.id','ASC')
+            ->get()->toArray();
+            
+            $country_list = CountryList::where('is_deleted',0)->get()->toArray();
+            $states_list = StateList::where('is_deleted',0)->get()->toArray();
+            
+            $params = ['country_list'=>$country_list,'states_list'=>$states_list,'designation_list'=>$designation_list,'title'=>'Edit Team Member','tm_data'=>$tm_data,'user_data'=>$user_data];
+            
+            return view('admin/team/team_member_edit',$params);
+            
+        }catch (\Exception $e){
+            return view('admin/page_error',array('message' =>$e->getMessage()));
+        }
+    }
+    
+    public function submitEditTeamMember(Request $request,$id){
+        try{
+            $data = $request->all();
+            $user = Auth::user();
+            $user_data = [];
+            
+            $tm_id = $id;
+            $tm_data = TeamMembers::where('id',$tm_id)->first();
+            
+            $validationRules = array('emailAddress'=>'required','designation'=>'required','memberStatus'=>'required');
+            $attributes = array('emailAddress'=>'Email Address','designation'=>'Designation','memberStatus'=>'Member Status','userName'=>'Name','mobileNumber'=>'Mobile Number','DOB'=>'DOB');
+            
+            $fields = ['country'=>'Country','state'=>'State','district'=>'District','LAC'=>'Legislative Assembly Constituency','PC'=>'Parliamentary Constituency',
+            'MC1'=>'Municipal Corporation','MC2'=>'Municipality','CC'=>'City Council','block'=>'Block','ward'=>'Ward','subDistrict'=>'Sub District','village'=>'Village'];
+            
+            foreach($fields as $key=>$value){
+                $attributes[$key.'_tm'] = $value;
+            }
+            
+            if(!empty($data['emailAddress'])){
+                $user_data = User::where('email',trim($data['emailAddress']))->where('is_deleted',0)->first();
+                if(empty($user_data)){
+                    $validationRules['userName'] = $validationRules['mobileNumber'] = $validationRules['gender'] = $validationRules['DOB'] = 'required';
+                }
+            }else{
+                $validationRules['userName'] = $validationRules['mobileNumber'] = $validationRules['gender'] = $validationRules['DOB'] = 'required';
+            }
+            
+            if(!empty($data['designation'])){
+                $designation_data = TeamDesignations::join('representation_area_list as ral', 'ral.id', '=', 'team_designations.rep_area_id')
+                ->where('team_designations.id',$data['designation'])  
+                ->where('team_designations.is_deleted',0)        
+                ->where('ral.is_deleted',0)                        
+                ->select('team_designations.*','ral.representation_area','ral.rep_area_fields')        
+                ->first();   
+                
+                $req_fields = explode(',',$designation_data->rep_area_fields);
+                        
+                for($i=0;$i<count($req_fields);$i++){
+                    $field = $req_fields[$i].'_tm';
+                    $validationRules[$field] = 'required';
+                }
+            }
+            
+            $validator = Validator::make($data,$validationRules,array(),$attributes);
+            if ($validator->fails()){ 
+                return response(array('httpStatus'=>200, "dateTime"=>time(), 'status'=>'fail', 'message'=>'Validation error', 'errors' => $validator->errors()));
+            }	
+            
+            if(empty($user_data)){
+                $insertArray = array('name'=>trim($data['userName']),'email'=>trim($data['emailAddress']),'mobile_no'=>trim($data['mobileNumber']),'gender'=>trim($data['gender']),
+                'dob'=>trim($data['DOB']),'user_role'=>3,'password'=>Hash::make('12345678'));
+                
+                $user_exists = User::where('email',trim($data['emailAddress']))->where('is_deleted',0)->first();
+                if(!empty($user_exists)){
+                    return response(array('httpStatus'=>200, "dateTime"=>time(), 'status'=>'fail', 'message'=>'User already exists with Email Address', 'errors' => 'User already exists with Email Address'));
+                }
+
+                $user_data = User::create($insertArray);
+            }
+            
+            $updateArray = array('user_id'=>$user_data->id,'designation_id'=>trim($data['designation']),'status'=>$data['memberStatus']);
+            
+            $fieldsArray = ['country_tm'=>'country_tm','state_tm'=>'state_tm','district_tm'=>'district_tm','lac_tm'=>'LAC_tm','pc_tm'=>'PC_tm','mc1_tm'=>'MC1_tm','mc2_tm'=>'MC2_tm',
+            'cc_tm'=>'CC_tm','block_tm'=>'block_tm','ward_tm'=>'ward_tm','sub_district_tm'=>'subDistrict_tm','village_tm'=>'village_tm'];
+            
+            foreach($fieldsArray as $key=>$value){
+                $updateArray[$key] = (isset($data[$value]) && !empty($data[$value]))?trim($data[$value]):null;
+            }
+            
+            TeamMembers::where('id',$tm_id)->update($updateArray);
+          
+            return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'success','message' => 'Team Member updated successfully'),200);
             
         }catch (\Exception $e){
             return response(array("httpStatus"=>500,"dateTime"=>time(),'status' => 'fail','message' =>$e->getMessage()),500);
@@ -299,5 +429,35 @@ class TeamController extends Controller
         }  
     }
     
+    public function updateTeamMember(Request $request){
+        try{
+            $data = $request->all();
+            $user = Auth::user();
+            
+            $ids = explode(',',trim($data['ids']));
+            
+            if(empty($data['ids'])){
+                return response(array('httpStatus'=>200, "dateTime"=>time(), 'status'=>'fail', 'message'=>'Please select Team Member', 'errors' => 'Please select Team Member'));
+            }
+            
+            if($data['action'] == 'delete'){
+                TeamMembers::wherein('id',$ids)->update(['is_deleted'=>1]);
+            }
+            
+            if($data['action'] == 'disable'){
+                TeamMembers::wherein('id',$ids)->update(['status'=>0]);
+            }
+            
+            if($data['action'] == 'enable'){
+                TeamMembers::wherein('id',$ids)->update(['status'=>1]);
+            }
+            
+            return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'success','message' => 'Team Member updated successfully'),200);
+            
+        }catch (\Exception $e){
+            \DB::rollBack();
+            return response(array("httpStatus"=>500,"dateTime"=>time(),'status' => 'fail','message' =>$e->getMessage()),500);
+        }  
+    }
     
 }

@@ -107,6 +107,14 @@
                 <a href="{{url('subscriber/list')}}" class="dropdown-item">Subscribers</a>
             </div>
         </div>
+        
+        <div class="btn-group" style="margin-left:0px; ">
+            <button type="button" class="btn btn-dialog dropdown-toggle" data-toggle="dropdown">Team</button>
+            <div class="dropdown-menu">
+                <a href="{{url('team-designation/list')}}" class="dropdown-item">Team Designations</a>
+                <a href="{{url('team-member/list')}}" class="dropdown-item">Team Members</a>
+            </div>
+        </div>
         <div class="btn-group" style="margin-left:0px; ">
             <button type="button" class="btn btn-dialog dropdown-toggle" data-toggle="dropdown">Users</button>
             <div class="dropdown-menu">

@@ -151,6 +151,8 @@ function getDistrictFieldsData(val,pos_type,sel_val){
 }
 
 function getTeamMemberData(email){
+    if(email == '') return false;
+        
     $.ajax({
         url:ROOT_PATH+"/user/data/"+email,
         method:"GET",
@@ -211,6 +213,84 @@ function submitAddTeamMember(){
             }
         },error:function(obj,status,error){
             $("#addTeamMemberErrorMessage").html('Error in processing request').show();
+        }
+    });
+}
+
+function submitEditTeamMember(){
+    $("#addTeamMemberErrorMessage,#addTeamMemberSuccessMessage,.invalid-feedback").html('').hide();
+    var form_data = $("#editTeamMemberFrm").serialize();
+    var tm_id = $("#tm_id").val();
+    ajaxSetup();
+
+    $.ajax({
+        url:ROOT_PATH+"/team-member/edit/"+tm_id,
+        method:"POST",
+        data:form_data,
+        success:function(msg){
+            if(objectPropertyExists(msg,'status')){
+                if(msg.status == 'fail'){
+                    var errors = getResponseErrors(msg,'<br/>','error_validation_');
+                    if(errors != ''){
+                        $("#addTeamMemberErrorMessage").html(errors).show();
+                    } 
+                }else{ 
+                    $("#addTeamMemberSuccessMessage").html(msg.message).show();
+                    $("#addTeamMemberErrorMessage,.invalid-feedback").html('').hide();
+                    
+                    var url = ROOT_PATH+"/team-member/list";
+                    setTimeout(function(){  window.location.href = url; }, 1000);
+                }
+            }else{
+                displayResponseError(msg,'addTeamMemberErrorMessage');
+            }
+        },error:function(obj,status,error){
+            $("#addTeamMemberErrorMessage").html('Error in processing request').show();
+        }
+    });
+}
+
+
+function updateTeamMember(action){
+    var chk_vals = [];
+    
+    $(".member-id-chk").each(function (){
+        if($(this).is(":checked")){
+            chk_vals.push($(this).val());
+        }
+    });
+    
+    if(chk_vals.length == 0){
+        alert('Please select Team Member');
+        return false;
+    }
+    
+    chk_vals = chk_vals.join(',');
+    
+    ajaxSetup();
+
+    $.ajax({
+        url:ROOT_PATH+"/team-member/update",
+        method:"POST",
+        data:{ids:chk_vals,action:action},
+        success:function(msg){
+            if(objectPropertyExists(msg,'status')){
+                if(msg.status == 'fail'){
+                    var errors = getResponseErrors(msg,'<br/>','error_validation_');
+                    if(errors != ''){
+                        $("#memberErrorMessage").html(errors).show();
+                    } 
+                }else{ 
+                    $("#memberSuccessMessage").html(msg.message).show();
+                    $("#memberErrorMessage,.invalid-feedback").html('').hide();
+                    document.getElementById("memberSuccessMessage").scrollIntoView();
+                    setTimeout(function(){  window.location.reload(); }, 1000);
+                }
+            }else{
+                displayResponseError(msg,'memberErrorMessage');
+            }
+        },error:function(obj,status,error){
+            $("#memberErrorMessage").html('Error in processing request').show();
         }
     });
 }
