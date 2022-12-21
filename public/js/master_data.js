@@ -1965,7 +1965,7 @@ function updateBulkData(action,type){
                 }else{ 
                     $("#"+type+"UpdateSuccessMessage").html(msg.message).show();
                     $("#"+type+"UpdateErrorMessage").html('').hide();
-                    //document.getElementById("#"+type+"UpdateSuccessMessage").scrollIntoView();
+                    document.getElementById(type+"UpdateSuccessMessage").scrollIntoView();
                     setTimeout(function(){  window.location.reload(); }, 1000);
                 }
             }else{

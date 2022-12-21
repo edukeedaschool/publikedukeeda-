@@ -15,13 +15,16 @@
                     </div>
                 </div>
             </form>
+            
             <div class="separator-10">&nbsp;</div>
-
+            <div class="alert alert-success alert-dismissible elem-hidden" id="non_Profit_OrganizationUpdateSuccessMessage"></div>
+            <div class="alert alert-danger alert-dismissible elem-hidden"  id="non_Profit_OrganizationUpdateErrorMessage"></div>
+            
             <div id="requestsContainer">
                 <div class="table-responsive">
                     <table class="table table-striped clearfix admin-table" cellspacing="0">
                         <thead><tr class="header-tr">
-                            <th>ID</th>
+                            <th><input type="checkbox" name="non_Profit_Organization_id_chk_all" id="non_Profit_Organization_id_chk_all" onclick="checkAllCheckboxes(this,'non_Profit_Organization-id')"> ID</th>
                             <th>Organization Name</th>
                             <th>Short Name</th>
                             <th>Type</th>
@@ -32,7 +35,7 @@
                         <tbody>
                             @for($i=0;$i<count($np_org_list);$i++)
                                 <tr>  
-                                    <td>{{$np_org_list[$i]['id']}}</td>
+                                    <td><input type="checkbox" name="non_Profit_Organization_id_chk" id="non_Profit_Organization_id_chk" value="{{$np_org_list[$i]['id']}}" class="non_Profit_Organization-id-chk"> {{$np_org_list[$i]['id']}}</td>
                                     <td>{{$np_org_list[$i]['organization_name']}}</td>
                                     <td>{{$np_org_list[$i]['organization_short_name']}}</td>
                                     <td>{{$np_org_list[$i]['organization_type']}}</td>
@@ -53,12 +56,21 @@
                     
                 </div>
             </div>
+            
+            <div class="form-row ">
+                <div class="separator-10">&nbsp;</div>
+                <div class="form-group col-md-12" >
+                    <button type="button" id="non_Profit_Organization_delete_submit" name="non_Profit_Organization_delete_submit" class="btn btn-dialog" onclick="updateBulkData('delete','non_Profit_Organization');"><i title="Delete Selected" class="fa fa-trash fas-icon" ></i> Delete Selected</button>
+                    <button type="button" id="non_Profit_Organization_enable_submit" name="non_Profit_Organization_enable_submit" class="btn btn-dialog" onclick="updateBulkData('enable','non_Profit_Organization');"><i title="Enable Selected" class="fa fa-check-circle fas-icon" ></i> Enable Selected</button>
+                    <button type="button" id="non_Profit_Organization_disable_submit" name="non_Profit_Organization_disable_submit" class="btn btn-dialog" onclick="updateBulkData('disable','non_Profit_Organization');"><i title="Disable Selected" class="fa fa-ban fas-icon" ></i> Disable Selected</button>
+               </div>    
+            </div>
+            
         </div>
     </section>
 
 @endsection
 
 @section('scripts')
-
-
+<script src="{{ asset('js/master_data.js') }}" ></script>
 @endsection

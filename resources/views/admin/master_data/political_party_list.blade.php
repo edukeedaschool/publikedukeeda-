@@ -15,13 +15,16 @@
                     </div>
                 </div>
             </form>
+            
             <div class="separator-10">&nbsp;</div>
-
+            <div class="alert alert-success alert-dismissible elem-hidden" id="political_PartyUpdateSuccessMessage"></div>
+            <div class="alert alert-danger alert-dismissible elem-hidden"  id="political_PartyUpdateErrorMessage"></div>
+            
             <div id="requestsContainer">
                 <div class="table-responsive">
                     <table class="table table-striped clearfix admin-table" cellspacing="0">
                         <thead><tr class="header-tr">
-                            <th>ID</th>
+                            <th><input type="checkbox" name="political_Party_id_chk_all" id="political_Party_id_chk_all" onclick="checkAllCheckboxes(this,'political_Party-id')"> ID</th>
                             <th>Political Party Name</th>
                             <th>Short Name</th>    
                             <th>Party Status</th>    
@@ -31,7 +34,7 @@
                         <tbody>
                             @for($i=0;$i<count($pp_list);$i++)
                                 <tr>  
-                                    <td>{{$pp_list[$i]['id']}}</td>
+                                    <td><input type="checkbox" name="political_Party_id_chk" id="political_Party_id_chk" value="{{$pp_list[$i]['id']}}" class="political_Party-id-chk"> {{$pp_list[$i]['id']}}</td>
                                     <td>{{$pp_list[$i]['party_name']}}</td>
                                     <td>{{$pp_list[$i]['party_short_name']}}</td>
                                     <td>{{$pp_list[$i]['party_status']}}</td>
@@ -51,12 +54,21 @@
                     
                 </div>
             </div>
+            
+            <div class="form-row ">
+                <div class="separator-10">&nbsp;</div>
+                <div class="form-group col-md-12" >
+                    <button type="button" id="political_Party_delete_submit" name="political_Party_delete_submit" class="btn btn-dialog" onclick="updateBulkData('delete','political_Party');"><i title="Delete Selected" class="fa fa-trash fas-icon" ></i> Delete Selected</button>
+                    <button type="button" id="political_Party_enable_submit" name="political_Party_enable_submit" class="btn btn-dialog" onclick="updateBulkData('enable','political_Party');"><i title="Enable Selected" class="fa fa-check-circle fas-icon" ></i> Enable Selected</button>
+                    <button type="button" id="political_Party_disable_submit" name="political_Party_disable_submit" class="btn btn-dialog" onclick="updateBulkData('disable','political_Party');"><i title="Disable Selected" class="fa fa-ban fas-icon" ></i> Disable Selected</button>
+               </div>    
+            </div>
+            
         </div>
     </section>
 
 @endsection
 
 @section('scripts')
-
-
+<script src="{{ asset('js/master_data.js') }}" ></script>
 @endsection

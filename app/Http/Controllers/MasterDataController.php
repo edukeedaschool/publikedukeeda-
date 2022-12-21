@@ -27,6 +27,7 @@ use App\Models\SubGroupList;
 use App\Models\SubmissionPurposeList;
 use App\Models\SubmissionTypeList;
 use App\Models\ReviewLevel;
+use App\Models\RepresentationAreaList;
 use App\Helpers\CommonHelper;
 use Validator;
 use Illuminate\Support\Facades\DB;
@@ -158,8 +159,13 @@ class MasterDataController extends Controller
             
             $districts_list = DistrictList::join('state_list as s', 's.id', '=', 'district_list.state_id')
             ->where('district_list.is_deleted',0)
-            ->where('s.is_deleted',0)        
-            ->select('district_list.*','s.state_name')        
+            ->where('s.is_deleted',0);        
+            
+            if(isset($data['dis_name']) && !empty($data['dis_name'])){
+                $districts_list = $districts_list->where('district_list.district_name','LIKE','%'.trim($data['dis_name']).'%');
+            }
+            
+            $districts_list = $districts_list->select('district_list.*','s.state_name')        
             ->orderBy('district_list.id','ASC')
             ->paginate(50);
             
@@ -267,8 +273,13 @@ class MasterDataController extends Controller
             
             $mc1_list = Mc1List::join('state_list as s', 's.id', '=', 'mc_mahanagar_palika.state_id')
             ->where('mc_mahanagar_palika.is_deleted',0)
-            ->where('s.is_deleted',0)        
-            ->select('mc_mahanagar_palika.*','s.state_name')        
+            ->where('s.is_deleted',0);        
+            
+            if(isset($data['mc1_name']) && !empty($data['mc1_name'])){
+                $mc1_list = $mc1_list->where('mc_mahanagar_palika.mc_name','LIKE','%'.trim($data['mc1_name']).'%');
+            }
+            
+            $mc1_list = $mc1_list->select('mc_mahanagar_palika.*','s.state_name')        
             ->orderBy('mc_mahanagar_palika.id','ASC')
             ->paginate(50);
             
@@ -378,8 +389,13 @@ class MasterDataController extends Controller
             ->join('state_list as s', 's.id', '=', 'd.state_id')
             ->where('mc_nagar_palika.is_deleted',0)
             ->where('d.is_deleted',0)        
-            ->where('s.is_deleted',0)           
-            ->select('mc_nagar_palika.*','s.state_name','d.district_name')        
+            ->where('s.is_deleted',0);
+            
+            if(isset($data['mc2_name']) && !empty($data['mc2_name'])){
+                $mc2_list = $mc2_list->where('mc_nagar_palika.mc_name','LIKE','%'.trim($data['mc2_name']).'%');
+            }
+            
+            $mc2_list = $mc2_list->select('mc_nagar_palika.*','s.state_name','d.district_name')        
             ->orderBy('mc_nagar_palika.id','ASC')
             ->paginate(50);
             
@@ -503,8 +519,13 @@ class MasterDataController extends Controller
             ->join('state_list as s', 's.id', '=', 'd.state_id')
             ->where('city_council.is_deleted',0)
             ->where('d.is_deleted',0)        
-            ->where('s.is_deleted',0)           
-            ->select('city_council.*','s.state_name','d.district_name')        
+            ->where('s.is_deleted',0);  
+            
+            if(isset($data['cc_name']) && !empty($data['cc_name'])){
+                $city_council_list = $city_council_list->where('city_council.city_council_name','LIKE','%'.trim($data['cc_name']).'%');
+            }
+            
+            $city_council_list = $city_council_list->select('city_council.*','s.state_name','d.district_name')        
             ->orderBy('city_council.id','ASC')
             ->paginate(50);
             
@@ -615,8 +636,13 @@ class MasterDataController extends Controller
             ->join('state_list as s', 's.id', '=', 'd.state_id')
             ->where('block_list.is_deleted',0)
             ->where('d.is_deleted',0)        
-            ->where('s.is_deleted',0)           
-            ->select('block_list.*','s.state_name','d.district_name')        
+            ->where('s.is_deleted',0);          
+            
+            if(isset($data['block_name']) && !empty($data['block_name'])){
+                $block_list = $block_list->where('block_list.block_name','LIKE','%'.trim($data['block_name']).'%');
+            }
+            
+            $block_list = $block_list->select('block_list.*','s.state_name','d.district_name')        
             ->orderBy('block_list.id','ASC')
             ->paginate(50);
             
@@ -728,8 +754,13 @@ class MasterDataController extends Controller
             ->join('state_list as s', 's.id', '=', 'd.state_id')
             ->where('sub_district_list.is_deleted',0)
             ->where('d.is_deleted',0)        
-            ->where('s.is_deleted',0)           
-            ->select('sub_district_list.*','s.state_name','d.district_name')        
+            ->where('s.is_deleted',0);
+            
+            if(isset($data['sd_name']) && !empty($data['sd_name'])){
+                $sub_district_list = $sub_district_list->where('sub_district_list.sub_district_name','LIKE','%'.trim($data['sd_name']).'%');
+            }
+            
+            $sub_district_list = $sub_district_list->select('sub_district_list.*','s.state_name','d.district_name')        
             ->orderBy('sub_district_list.id','ASC')
             ->paginate(50);
             
@@ -2709,9 +2740,12 @@ class MasterDataController extends Controller
         try{
             $data = $request->all();
             
+            $rep_area_data = RepresentationAreaList::where('rep_area_key',$data['type'])->first();
+            $rep_area_text = !empty($rep_area_data)?$rep_area_data->representation_area:ucwords(str_replace('_',' ',$data['type']));
+                    
             $ids = explode(',',trim($data['ids']));
             if(empty($data['ids'])){
-                return response(array('httpStatus'=>200, "dateTime"=>time(), 'status'=>'fail', 'message'=>'Please select '.ucfirst($data['type']), 'errors' => 'Please select '.ucfirst($data['type'])));
+                return response(array('httpStatus'=>200, "dateTime"=>time(), 'status'=>'fail', 'message'=>'Please select '.$rep_area_text, 'errors' => 'Please select '.$rep_area_text));
             }
             
             if($data['action'] == 'delete'){
@@ -2724,9 +2758,51 @@ class MasterDataController extends Controller
             
             if($data['type'] == 'district'){
                 DistrictList::wherein('id',$ids)->update($updateArray);
+            }elseif($data['type'] == 'state'){
+                StateList::wherein('id',$ids)->update($updateArray);
+            }elseif($data['type'] == 'mc1'){
+                Mc1List::wherein('id',$ids)->update($updateArray);
+            }elseif($data['type'] == 'mc2'){
+                Mc2List::wherein('id',$ids)->update($updateArray);
+            }elseif($data['type'] == 'cc'){
+                CityCouncil::wherein('id',$ids)->update($updateArray);
+            }elseif($data['type'] == 'block'){
+                BlockList::wherein('id',$ids)->update($updateArray);
+            }elseif($data['type'] == 'subDistrict'){
+                SubDistrictList::wherein('id',$ids)->update($updateArray);
+            }elseif($data['type'] == 'ward'){
+                WardList::wherein('id',$ids)->update($updateArray);
+            }elseif($data['type'] == 'village'){
+                VillageList::wherein('id',$ids)->update($updateArray);
+            }elseif($data['type'] == 'postal_Code'){
+                PostalCodeList::wherein('id',$ids)->update($updateArray);
+            }elseif($data['type'] == 'political_Party'){
+                PoliticalPartyList::wherein('id',$ids)->update($updateArray);
+            }elseif($data['type'] == 'LAC'){
+                LegislativeAssemblyConstituency::wherein('id',$ids)->update($updateArray);
+            }elseif($data['type'] == 'PC'){
+                ParliamentaryConstituency::wherein('id',$ids)->update($updateArray);
+            }elseif($data['type'] == 'elected_Official_Position'){
+                ElectedOfficialPosition::wherein('id',$ids)->update($updateArray);
+            }elseif($data['type'] == 'political_Party_Official_Position'){
+                PoliticalPartyOfficialPosition::wherein('id',$ids)->update($updateArray);
+            }elseif($data['type'] == 'government_Department'){
+                GovernmentDepartment::wherein('id',$ids)->update($updateArray);
+            }elseif($data['type'] == 'non_Profit_Organization'){
+                NonProfitOrganization::wherein('id',$ids)->update($updateArray);
+            }elseif($data['type'] == 'group'){
+                GroupList::wherein('id',$ids)->update($updateArray);
+            }elseif($data['type'] == 'sub_Group'){
+                SubGroupList::wherein('id',$ids)->update($updateArray);
+            }elseif($data['type'] == 'submission_Purpose'){
+                SubmissionPurposeList::wherein('id',$ids)->update($updateArray);
+            }elseif($data['type'] == 'submission_Type'){
+                SubmissionTypeList::wherein('id',$ids)->update($updateArray);
+            }elseif($data['type'] == 'review_Level'){
+                ReviewLevel::wherein('id',$ids)->update($updateArray);
             }
             
-            return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'success','message' => ucfirst($data['type']).' updated successfully'),200);
+            return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'success','message' => $rep_area_text.' updated successfully'),200);
             
         }catch (\Exception $e){
             return response(array("httpStatus"=>500,"dateTime"=>time(),'status' => 'fail','message' =>$e->getMessage()),500);

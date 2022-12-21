@@ -15,13 +15,16 @@
                     </div>
                 </div>
             </form>
+            
             <div class="separator-10">&nbsp;</div>
-
+            <div class="alert alert-success alert-dismissible elem-hidden" id="LACUpdateSuccessMessage"></div>
+            <div class="alert alert-danger alert-dismissible elem-hidden"  id="LACUpdateErrorMessage"></div>
+            
             <div id="requestsContainer">
                 <div class="table-responsive">
                     <table class="table table-striped clearfix admin-table" cellspacing="0">
                         <thead><tr class="header-tr">
-                            <th>ID</th>
+                            <th><input type="checkbox" name="LAC_id_chk_all" id="LAC_id_chk_all" onclick="checkAllCheckboxes(this,'LAC-id')"> ID</th>
                             <th>Constituency Name</th>
                             <th>State</th>    
                             <th>Status</th>
@@ -30,7 +33,7 @@
                         <tbody>
                             @for($i=0;$i<count($la_constituency_list);$i++)
                                 <tr>  
-                                    <td>{{$la_constituency_list[$i]['id']}}</td>
+                                    <td><input type="checkbox" name="LAC_id_chk" id="LAC_id_chk" value="{{$la_constituency_list[$i]['id']}}" class="LAC-id-chk"> {{$la_constituency_list[$i]['id']}}</td>
                                     <td>{{$la_constituency_list[$i]['constituency_name']}}</td>
                                     <td>{{$la_constituency_list[$i]['state_name']}}</td>
                                     <td>{{($la_constituency_list[$i]['status'] == 1)?'Enabled':'Disabled'}}</td>
@@ -49,12 +52,21 @@
                     
                 </div>
             </div>
+            
+            <div class="form-row ">
+                <div class="separator-10">&nbsp;</div>
+                <div class="form-group col-md-12" >
+                    <button type="button" id="LAC_delete_submit" name="LAC_delete_submit" class="btn btn-dialog" onclick="updateBulkData('delete','LAC');"><i title="Delete Selected" class="fa fa-trash fas-icon" ></i> Delete Selected</button>
+                    <button type="button" id="LAC_enable_submit" name="LAC_enable_submit" class="btn btn-dialog" onclick="updateBulkData('enable','LAC');"><i title="Enable Selected" class="fa fa-check-circle fas-icon" ></i> Enable Selected</button>
+                    <button type="button" id="LAC_disable_submit" name="LAC_disable_submit" class="btn btn-dialog" onclick="updateBulkData('disable','LAC');"><i title="Disable Selected" class="fa fa-ban fas-icon" ></i> Disable Selected</button>
+               </div>    
+            </div>
+            
         </div>
     </section>
 
 @endsection
 
 @section('scripts')
-
-
+<script src="{{ asset('js/master_data.js') }}" ></script>
 @endsection

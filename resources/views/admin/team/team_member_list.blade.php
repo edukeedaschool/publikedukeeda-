@@ -55,9 +55,9 @@
                 
                 <div class="form-row ">
                     <div class="form-group col-md-12" >
-                        <button type="button" id="member_delete_submit" name="member_delete_submit" class="btn btn-dialog" onclick="updateTeamMember('delete');">Delete Selected</button>
-                        <button type="button" id="member_enable_submit" name="member_enable_submit" class="btn btn-dialog" onclick="updateTeamMember('enable');">Enable Selected</button>
-                        <button type="button" id="member_disable_submit" name="member_disable_submit" class="btn btn-dialog" onclick="updateTeamMember('disable');">Disable Selected</button>
+                        <button type="button" id="member_delete_submit" name="member_delete_submit" class="btn btn-dialog" onclick="updateTeamMember('delete');"><i title="Delete Selected" class="fa fa-trash fas-icon" ></i> Delete Selected</button>
+                        <button type="button" id="member_enable_submit" name="member_enable_submit" class="btn btn-dialog" onclick="updateTeamMember('enable');"><i title="Enable Selected" class="fa fa-check-circle fas-icon" ></i> Enable Selected</button>
+                        <button type="button" id="member_disable_submit" name="member_disable_submit" class="btn btn-dialog" onclick="updateTeamMember('disable');"><i title="Disable Selected" class="fa fa-ban fas-icon" ></i> Disable Selected</button>
                     </div>    
                 </div>
                 <div class="separator-10">&nbsp;</div>

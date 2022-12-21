@@ -61,9 +61,9 @@
                 <div class="form-row ">
                     <div class="separator-10">&nbsp;</div>
                     <div class="form-group col-md-12" >
-                        <button type="button" id="subscriber_delete_submit" name="subscriber_delete_submit" class="btn btn-dialog" onclick="updateSubscribers('delete');">Delete Selected</button>
-                        <button type="button" id="subscriber_enable_submit" name="subscriber_enable_submit" class="btn btn-dialog" onclick="updateSubscribers('enable');">Enable Selected</button>
-                        <button type="button" id="subscriber_disable_submit" name="subscriber_disable_submit" class="btn btn-dialog" onclick="updateSubscribers('disable');">Disable Selected</button>
+                        <button type="button" id="subscriber_delete_submit" name="subscriber_delete_submit" class="btn btn-dialog" onclick="updateSubscribers('delete');"><i title="Delete Selected" class="fa fa-trash fas-icon" ></i> Delete Selected</button>
+                        <button type="button" id="subscriber_enable_submit" name="subscriber_enable_submit" class="btn btn-dialog" onclick="updateSubscribers('enable');"><i title="Enable Selected" class="fa fa-check-circle fas-icon" ></i> Enable Selected</button>
+                        <button type="button" id="subscriber_disable_submit" name="subscriber_disable_submit" class="btn btn-dialog" onclick="updateSubscribers('disable');"><i title="Disable Selected" class="fa fa-ban fas-icon" ></i> Disable Selected</button>
                    </div>    
                 </div>
                 

@@ -10,6 +10,12 @@
                     <div class="col-6"></div>
                     <div class="col-6">
                         <div class="row justify-content-end">
+                            <div class="col-md-3" >
+                                <input type="text" name="dis_name" id="dis_name" placeholder="District" class="form-control" value="{{request('dis_name')}}">
+                            </div>
+                            <div class="col-md-2" >
+                                <input type="submit" name="searchBtn" id="searchBtn" value="Search" class="btn btn-dialog" >
+                            </div>
                             <div class="col-md-3" ><input type="button" name="addStateBtn" id="addStateBtn" value="Add District" class="btn btn-dialog" onclick="location.href='{{ url('/district/add') }}'"></div>
                         </div>
                     </div>
@@ -57,9 +63,9 @@
             <div class="form-row ">
                 <div class="separator-10">&nbsp;</div>
                 <div class="form-group col-md-12" >
-                    <button type="button" id="district_delete_submit" name="district_delete_submit" class="btn btn-dialog" onclick="updateBulkData('delete','district');">Delete Selected</button>
-                    <button type="button" id="district_enable_submit" name="district_enable_submit" class="btn btn-dialog" onclick="updateBulkData('enable','district');">Enable Selected</button>
-                    <button type="button" id="district_disable_submit" name="district_disable_submit" class="btn btn-dialog" onclick="updateBulkData('disable','district');">Disable Selected</button>
+                    <button type="button" id="district_delete_submit" name="district_delete_submit" class="btn btn-dialog" onclick="updateBulkData('delete','district');"><i title="Delete Selected" class="fa fa-trash fas-icon" ></i> Delete Selected</button>
+                    <button type="button" id="district_enable_submit" name="district_enable_submit" class="btn btn-dialog" onclick="updateBulkData('enable','district');"><i title="Enable Selected" class="fa fa-check-circle fas-icon" ></i> Enable Selected</button>
+                    <button type="button" id="district_disable_submit" name="district_disable_submit" class="btn btn-dialog" onclick="updateBulkData('disable','district');"><i title="Disable Selected" class="fa fa-ban fas-icon" ></i> Disable Selected</button>
                </div>    
             </div>
             
