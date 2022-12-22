@@ -11,12 +11,12 @@
                     <div class="col-6">
                         <div class="row justify-content-end">
                             <div class="col-md-3" >
-                                <input type="text" name="mc2_name" id="mc2_name" placeholder="Municipal Corporation" class="form-control" value="{{request('mc2_name')}}">
+                                <input type="text" name="mc2_name" id="mc2_name" placeholder="Municipality" class="form-control" value="{{request('mc2_name')}}">
                             </div>
                             <div class="col-md-2" >
                                 <input type="submit" name="searchBtn" id="searchBtn" value="Search" class="btn btn-dialog" >
                             </div>
-                            <div class="col-md-3" ><input type="button" name="addBtn" id="addBtn" value="Add MC" class="btn btn-dialog" onclick="location.href='{{ url('/mc2/add') }}'"></div>
+                            <div class="col-md-3" ><input type="button" name="addBtn" id="addBtn" value="Add Municipality" class="btn btn-dialog" onclick="location.href='{{ url('/mc2/add') }}'"></div>
                         </div>
                     </div>
                 </div>
@@ -32,7 +32,7 @@
                     <table class="table table-striped clearfix admin-table" cellspacing="0">
                         <thead><tr class="header-tr">
                             <th><input type="checkbox" name="mc2_id_chk_all" id="mc2_id_chk_all" onclick="checkAllCheckboxes(this,'mc2-id')"> ID</th>
-                            <th>MC Name</th>
+                            <th>Municipality Name</th>
                             <th>District</th>    
                             <th>State</th>    
                             <th>Status</th>
@@ -56,7 +56,7 @@
                     
                     <p class="pagination">
                     {{ $mc2_list->withQueryString()->links('pagination::bootstrap-4') }}
-                    <p>Displaying {{$mc2_list->count()}} of {{ $mc2_list->total() }} MC.</p>
+                    <p>Displaying {{$mc2_list->count()}} of {{ $mc2_list->total() }} Municipality.</p>
                     </p>
                     
                 </div>

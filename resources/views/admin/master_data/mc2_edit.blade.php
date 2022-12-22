@@ -14,7 +14,7 @@
 
                     <div class="form-row">
                         <div class="form-group col-md-6" >
-                            <label>MC Name</label>
+                            <label>Municipality Name</label>
                             <input id="mcName" type="text" class="form-control" name="mcName" value="{{$mc_data->mc_name}}" >
                             <div class="invalid-feedback" id="error_validation_mcName"></div>
                             <input id="mc_id" type="hidden" name="mc_id" value="{{$mc_data->id}}" >

@@ -15,7 +15,7 @@
                     <div class="form-row">
                         <div class="form-group col-md-6" >
                             <label>Subscriber Name</label>
-                            <input id="subscriberName" type="text" class="form-control" name="subscriberName" value="{{$subscriber_data->subscriber_name}}" >
+                            <input id="subscriberName" type="text" class="form-control" name="subscriberName" value="{{$user_data->name}}" >
                             <input type="hidden" name="subscriber_id" id="subscriber_id" value="{{$subscriber_data->id}}">
                             <div class="invalid-feedback" id="error_validation_subscriberName"></div>
                         </div>
@@ -434,15 +434,23 @@
                     <div class="form-row">
                         <div class="form-group col-md-6" >
                             <label>Email Address</label>
-                            <input id="emailAddress" type="text" class="form-control" name="emailAddress" value="{{$subscriber_data->email_address}}" >
+                            <input id="emailAddress" type="text" class="form-control" name="emailAddress" value="{{$user_data->email}}" readonly="true">
                             <div class="invalid-feedback" id="error_validation_emailAddress"></div>
                         </div>
                     </div>  
                     
+                    <?php /* ?> <div class="form-row">
+                        <div class="form-group col-md-6" >
+                            <label>Password</label>
+                            <input id="password" type="password" class="form-control" name="password" value="" >
+                            <div class="invalid-feedback" id="error_validation_password"></div>
+                        </div>
+                    </div>  <?php */ ?>
+                    
                     <div class="form-row">
                         <div class="form-group col-md-6" >
                             <label>Mobile Number</label>
-                            <input id="mobileNumber" type="text" class="form-control" name="mobileNumber" value="{{$subscriber_data->mobile_no}}" maxlength="12">
+                            <input id="mobileNumber" type="text" class="form-control" name="mobileNumber" value="{{$user_data->mobile_no}}" maxlength="10">
                             <div class="invalid-feedback" id="error_validation_mobileNumber"></div>
                         </div>
                     </div>  
@@ -450,7 +458,7 @@
                     <div class="form-row">
                         <div class="form-group col-md-6" >
                             <label>Image</label>
-                            <img src="{{url('images/subscriber_images/'.$subscriber_data->image)}}" style="width:80px;" class="img-thumbnail">  
+                            <img src="{{url('images/user_images/'.$user_data->image)}}" style="width:80px;" class="img-thumbnail">  
                             <input id="subscriberImage" type="file" class="form-control" name="subscriberImage" value="" >
                             <div class="invalid-feedback" id="error_validation_subscriberImage"></div>
                         </div>
@@ -459,7 +467,7 @@
                     <div class="form-row">
                         <div class="form-group col-md-6" >
                             <label>Address Line 1</label>
-                            <input id="addressLine1" type="text" class="form-control" name="addressLine1" value="{{$subscriber_data->address_line1}}" >
+                            <input id="addressLine1" type="text" class="form-control" name="addressLine1" value="{{$user_data->address_line1}}" >
                             <div class="invalid-feedback" id="error_validation_addressLine1"></div>
                         </div>
                     </div>  
@@ -467,7 +475,7 @@
                     <div class="form-row">
                         <div class="form-group col-md-6" >
                             <label>Postal Code</label>
-                            <input id="postalCode" type="text" class="form-control" name="postalCode" value="{{$subscriber_data->postal_code}}" onkeyup="updatePostalCodeData(this.value);" maxlength="6">
+                            <input id="postalCode" type="text" class="form-control" name="postalCode" value="{{$user_data->postal_code}}" onkeyup="updatePostalCodeData(this.value);" maxlength="6">
                             <div class="invalid-feedback" id="error_validation_postalCode"></div>
                             <div class="alert alert-danger alert-dismissible elem-hidden" id="postalCodeError" style="padding-top:2px;padding-bottom:2px; "></div>
                         </div>
@@ -479,7 +487,7 @@
                             <select id="country" class="form-control" name="country" >
                                 <option value="">Country</option>
                                 @for($i=0;$i<count($country_list);$i++)
-                                    <?php $sel = ($country_list[$i]['id'] == $subscriber_data->country)?'selected':''; ?>
+                                    <?php $sel = ($country_list[$i]['id'] == $user_data->country)?'selected':''; ?>
                                     <option {{$sel}} value="{{$country_list[$i]['id']}}">{{$country_list[$i]['country_name']}}</option>
                                 @endfor    
                             </select>    
@@ -493,7 +501,7 @@
                             <select id="state" class="form-control" name="state" onchange="getDistrictList(this.value,'district','addSubscriberErrorMessage');">
                                 <option value="">State</option>
                                 @for($i=0;$i<count($states_list);$i++)
-                                    <?php $sel = ($states_list[$i]['id'] == $subscriber_data->state)?'selected':''; ?>
+                                    <?php $sel = ($states_list[$i]['id'] == $user_data->state)?'selected':''; ?>
                                     <option {{$sel}} value="{{$states_list[$i]['id']}}">{{$states_list[$i]['state_name']}}</option>
                                 @endfor    
                             </select>    
@@ -507,7 +515,7 @@
                             <select id="district" class="form-control" name="district" onchange="getSubDistrictList(this.value,'subDistrict','addSubscriberErrorMessage');">
                                 <option value="">District</option>
                                 @for($i=0;$i<count($district_list);$i++)
-                                    <?php $sel = ($district_list[$i]['id'] == $subscriber_data->district)?'selected':''; ?>
+                                    <?php $sel = ($district_list[$i]['id'] == $user_data->district)?'selected':''; ?>
                                     <option {{$sel}} value="{{$district_list[$i]['id']}}">{{$district_list[$i]['district_name']}}</option>
                                 @endfor 
                             </select>    
@@ -521,7 +529,7 @@
                             <select id="subDistrict" class="form-control" name="subDistrict" onchange="getVillageList(this.value,'village','addSubscriberErrorMessage');">
                                 <option value="">Sub District</option>
                                 @for($i=0;$i<count($sub_district_list);$i++)
-                                    <?php $sel = ($sub_district_list[$i]['id'] == $subscriber_data->sub_district)?'selected':''; ?>
+                                    <?php $sel = ($sub_district_list[$i]['id'] == $user_data->sub_district)?'selected':''; ?>
                                     <option {{$sel}} value="{{$sub_district_list[$i]['id']}}">{{$sub_district_list[$i]['sub_district_name']}}</option>
                                 @endfor 
                             </select>    
@@ -535,7 +543,7 @@
                             <select id="village" class="form-control" name="village" >
                                 <option value="">City/Village/Town</option>
                                 @for($i=0;$i<count($village_list);$i++)
-                                    <?php $sel = ($village_list[$i]['id'] == $subscriber_data->village)?'selected':''; ?>
+                                    <?php $sel = ($village_list[$i]['id'] == $user_data->village)?'selected':''; ?>
                                     <option {{$sel}} value="{{$village_list[$i]['id']}}">{{$village_list[$i]['village_name']}}</option>
                                 @endfor 
                             </select>    

@@ -399,7 +399,7 @@ class MasterDataController extends Controller
             ->orderBy('mc_nagar_palika.id','ASC')
             ->paginate(50);
             
-            return view('admin/master_data/mc2_list',array('mc2_list'=>$mc2_list,'title'=>'Municipal Corporation (Nagar Palika) List'));
+            return view('admin/master_data/mc2_list',array('mc2_list'=>$mc2_list,'title'=>'Municipality (Nagar Palika) List'));
          
         }catch (\Exception $e){
             return view('admin/page_error',array('message' =>$e->getMessage()));
@@ -442,7 +442,7 @@ class MasterDataController extends Controller
             $country_list = CountryList::where('is_deleted',0)->get()->toArray();
             $states_list = StateList::where('is_deleted',0)->get()->toArray();
             
-            return view('admin/master_data/mc2_add',array('country_list'=>$country_list,'states_list'=>$states_list,'title'=>'Add Municipal Corporation (Nagar Palika)'));
+            return view('admin/master_data/mc2_add',array('country_list'=>$country_list,'states_list'=>$states_list,'title'=>'Add Municipality (Nagar Palika)'));
             
         }catch (\Exception $e){
              return view('admin/page_error',array('message' =>$e->getMessage()));
@@ -472,7 +472,7 @@ class MasterDataController extends Controller
             $district_data = DistrictList::where('id',$mc_data->district_id)->where('is_deleted',0)->first();
             $state_data = StateList::where('id',$district_data->state_id)->where('is_deleted',0)->first();
             
-            return view('admin/master_data/mc2_edit',array('mc_data'=>$mc_data,'country_list'=>$country_list,'states_list'=>$states_list,'state_data'=>$state_data,'title'=>'Edit Municipal Corporation (Nagar Palika)'));
+            return view('admin/master_data/mc2_edit',array('mc_data'=>$mc_data,'country_list'=>$country_list,'states_list'=>$states_list,'state_data'=>$state_data,'title'=>'Edit Municipality (Nagar Palika)'));
         }catch (\Exception $e){
             return view('admin/page_error',array('message' =>$e->getMessage()));
         }

@@ -80,7 +80,7 @@
                 <a href="{{url('states/list')}}" class="dropdown-item">States</a>
                 <a href="{{url('districts/list')}}" class="dropdown-item">Districts</a>
                 <a href="{{url('mc1/list')}}" class="dropdown-item">Municipal Corporation (Mahanagar Palika)</a>
-                <a href="{{url('mc2/list')}}" class="dropdown-item">Municipal Corporation (Nagar Palika)</a>
+                <a href="{{url('mc2/list')}}" class="dropdown-item">Municipality (Nagar Palika)</a>
                 <a href="{{url('city-council/list')}}" class="dropdown-item">City Council</a>
                 <a href="{{url('block/list')}}" class="dropdown-item">Blocks</a>
                 <a href="{{url('sub-district/list')}}" class="dropdown-item">Sub Districts</a>

@@ -17,10 +17,12 @@ use App\Models\VillageList;
 use App\Models\SubscriberReview;
 use App\Models\ReviewLevel;
 use App\Models\ReviewRange;
+use App\Models\User;
 use App\Helpers\CommonHelper;
 use Validator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Hash;
 
 class SubscriberController extends Controller
 {
@@ -60,7 +62,8 @@ class SubscriberController extends Controller
             $data = $request->all();
             
             $validationRules = array('subscriberName'=>'required','officeBelongsTo'=>'required','emailAddress'=>'required|email','mobileNumber'=>'required','addressLine1'=>'required',
-            'postalCode'=>'required','country'=>'required','state'=>'required','district'=>'required','subscriberImage'=>'required|image|mimes:jpeg,png,jpg,gif|max:3072','subscriberStatus'=>'required');
+            'postalCode'=>'required','country'=>'required','state'=>'required','district'=>'required','subscriberImage'=>'required|image|mimes:jpeg,png,jpg,gif|max:3072',
+            'subscriberStatus'=>'required','password'=>'required|min:6|max:100');
             
             $attributes = array('subscriberName'=>'Subscriber Name','officeBelongsTo'=>'Office Belongs To','emailAddress'=>'Email Address','mobileNumber'=>'Mobile Number',
             'addressLine1'=>'Address Line1','postalCode'=>'Postal Code','subscriberImage'=>'Subscriber Image','subscriberStatus'=>'Status','politicalParty'=>'Political Party',
@@ -131,23 +134,31 @@ class SubscriberController extends Controller
                 return response(array('httpStatus'=>200, "dateTime"=>time(), 'status'=>'fail', 'message'=>'Validation error', 'errors' => $validator->errors()));
             }	
             
-            $sub_exists = SubscriberList::where('email_address',trim($data['emailAddress']))->where('is_deleted',0)->first();
+            //$sub_exists = SubscriberList::where('email_address',trim($data['emailAddress']))->where('is_deleted',0)->first();
+            $sub_exists = User::where('email',trim($data['emailAddress']))->where('is_deleted',0)->first();
             if(!empty($sub_exists)){
                 return response(array('httpStatus'=>200, "dateTime"=>time(), 'status'=>'fail', 'message'=>'Subscriber already exists with this Email Address', 'errors' => 'Subscriber already exists with this Email Address'));
             }
             
-            $sub_exists = SubscriberList::where('mobile_no',trim($data['mobileNumber']))->where('is_deleted',0)->first();
+            $image_name = CommonHelper::uploadImage($request,$request->file('subscriberImage'),'images/user_images');
+            
+            $insertArray = array('name'=>trim($data['subscriberName']),'email'=>trim($data['emailAddress']),'mobile_no'=>trim($data['mobileNumber']),'address_line1'=>trim($data['addressLine1']),
+            'postal_code'=>trim($data['postalCode']),'user_role'=>2,'country'=>trim($data['country']),'state'=>trim($data['state']),'district'=>trim($data['district']),
+            'sub_district'=>trim($data['subDistrict']),'village'=>trim($data['village']),'sub_district'=>trim($data['subDistrict']),'image'=>$image_name,'password'=>Hash::make($data['password']));
+                
+            $user_data = User::create($insertArray);
+            
+            /*$sub_exists = SubscriberList::where('mobile_no',trim($data['mobileNumber']))->where('is_deleted',0)->first();
             if(!empty($sub_exists)){
                 return response(array('httpStatus'=>200, "dateTime"=>time(), 'status'=>'fail', 'message'=>'Subscriber already exists with this Mobile Number', 'errors' => 'Subscriber already exists with this Mobile Number'));
-            }
+            }*/
             
-            $image_name = CommonHelper::uploadImage($request,$request->file('subscriberImage'),'images/subscriber_images');
+            $insertArray = [];
             
-            $fieldsArray = ['subscriber_name'=>'subscriberName','office_belongs_to'=>'officeBelongsTo','political_party'=>'politicalParty','gender'=>'subscriberGender','dob'=>'subscriberDOB',
+            $fieldsArray = ['office_belongs_to'=>'officeBelongsTo','political_party'=>'politicalParty','gender'=>'subscriberGender','dob'=>'subscriberDOB',
             'off_pos_pol_party'=>'politicalPartyOfficialPosition','rep_area_off_party_pos'=>'repAreaOfficialPartyPosition','elec_off_pos_name'=>'electedOfficialPositionName',
             'rep_area_elec_off_pos'=>'repAreaElectedOfficialPosition','key_identity1'=>'keyIdentity1','key_identity2'=>'keyIdentity2','org_name'=>'organizationName',
-            'auth_person_name'=>'authorizedPersonName','auth_person_designation'=>'authorizedPersonDesignation','email_address'=>'emailAddress','mobile_no'=>'mobileNumber','image'=>'',
-            'address_line1'=>'addressLine1','postal_code'=>'postalCode','country'=>'country','state'=>'state','district'=>'district','sub_district'=>'subDistrict','village'=>'village',
+            'auth_person_name'=>'authorizedPersonName','auth_person_designation'=>'authorizedPersonDesignation',
             'country_pp'=>'country_pp','state_pp'=>'state_pp','district_pp'=>'district_pp','lac_pp'=>'LAC_pp','pc_pp'=>'PC_pp','mc1_pp'=>'MC1_pp','mc2_pp'=>'MC2_pp',
             'cc_pp'=>'CC_pp','block_pp'=>'block_pp','ward_pp'=>'ward_pp','sub_district_pp'=>'subDistrict_pp','village_pp'=>'village_pp',
             'country_eo'=>'country_eo','state_eo'=>'state_eo','district_eo'=>'district_eo','lac_eo'=>'LAC_eo','pc_eo'=>'PC_eo','mc1_eo'=>'MC1_eo','mc2_eo'=>'MC2_eo',
@@ -157,7 +168,7 @@ class SubscriberController extends Controller
                 $insertArray[$key] = (isset($data[$value]) && !empty($data[$value]))?trim($data[$value]):null;
             }
             
-            $insertArray['image'] = $image_name;
+            $insertArray['user_id'] = $user_data->id;
             
             $subscriber = SubscriberList::create($insertArray);
           
@@ -178,7 +189,6 @@ class SubscriberController extends Controller
         return $loc_list;
     }
     
-    
     public function editSubscriber(Request $request,$id){
         try{
             $data = $request->all();
@@ -186,13 +196,14 @@ class SubscriberController extends Controller
             $rep_area_pp_state_def_val = $rep_area_pp_district_def_val = $rep_area_eo_state_def_val = $rep_area_eo_district_def_val = '';
             
             $subscriber_data = SubscriberList::where('id',$subscriber_id)->first();
+            $user_data = User::where('id',$subscriber_data->user_id)->where('is_deleted',0)->first();
             
             $country_list = CountryList::where('is_deleted',0)->get()->toArray();
             $states_list = StateList::where('is_deleted',0)->get()->toArray();
             
-            $district_list = DistrictList::where('state_id',$subscriber_data->state)->where('is_deleted',0)->get()->toArray();
-            $sub_district_list = SubDistrictList::where('district_id',$subscriber_data->district)->where('is_deleted',0)->get()->toArray();
-            $village_list = VillageList::where('sub_district_id',$subscriber_data->sub_district)->where('is_deleted',0)->get()->toArray();
+            $district_list = DistrictList::where('state_id',$user_data->state)->where('is_deleted',0)->get()->toArray();
+            $sub_district_list = SubDistrictList::where('district_id',$user_data->district)->where('is_deleted',0)->get()->toArray();
+            $village_list = VillageList::where('sub_district_id',$user_data->sub_district)->where('is_deleted',0)->get()->toArray();
                 
             $sub_group_list = SubGroupList::where('is_deleted',0)->get()->toArray();
             $pol_party_list = PoliticalPartyList::where('is_deleted',0)->get()->toArray();
@@ -269,7 +280,7 @@ class SubscriberController extends Controller
             $params = ['country_list'=>$country_list,'sub_group_list'=>$sub_group_list,'pol_party_list'=>$pol_party_list,'title'=>'Edit Subscriber','off_pos_pol_party'=>$off_pos_pol_party,
             'elec_off_position'=>$elec_off_position,'country_list'=>$country_list,'states_list'=>$states_list,'rep_area'=>$rep_area,'subscriber_data'=>$subscriber_data,'district_list'=>$district_list,
             'sub_district_list'=>$sub_district_list,'village_list'=>$village_list,'rep_area_pp_state_def_val'=>$rep_area_pp_state_def_val,'rep_area_pp_district_def_val'=>$rep_area_pp_district_def_val,
-            'rep_area_eo_state_def_val'=>$rep_area_eo_state_def_val,'rep_area_eo_district_def_val'=>$rep_area_eo_district_def_val,'group_data'=>$group_data];
+            'rep_area_eo_state_def_val'=>$rep_area_eo_state_def_val,'rep_area_eo_district_def_val'=>$rep_area_eo_district_def_val,'group_data'=>$group_data,'user_data'=>$user_data];
             
             return view('admin/subscriber/subscriber_edit',$params);
             
@@ -277,7 +288,6 @@ class SubscriberController extends Controller
             return view('admin/page_error',array('message' =>$e->getMessage()));
         }
     }
-    
     
     public function submitEditSubscriber(Request $request,$id){
         try{
@@ -358,7 +368,7 @@ class SubscriberController extends Controller
                 return response(array('httpStatus'=>200, "dateTime"=>time(), 'status'=>'fail', 'message'=>'Validation error', 'errors' => $validator->errors()));
             }	
             
-            $sub_exists = SubscriberList::where('email_address',trim($data['emailAddress']))->where('id','!=',$subscriber_id)->where('is_deleted',0)->first();
+            /*$sub_exists = SubscriberList::where('email_address',trim($data['emailAddress']))->where('id','!=',$subscriber_id)->where('is_deleted',0)->first();
             if(!empty($sub_exists)){
                 return response(array('httpStatus'=>200, "dateTime"=>time(), 'status'=>'fail', 'message'=>'Subscriber already exists with this Email Address', 'errors' => 'Subscriber already exists with this Email Address'));
             }
@@ -366,13 +376,12 @@ class SubscriberController extends Controller
             $sub_exists = SubscriberList::where('mobile_no',trim($data['mobileNumber']))->where('id','!=',$subscriber_id)->where('is_deleted',0)->first();
             if(!empty($sub_exists)){
                 return response(array('httpStatus'=>200, "dateTime"=>time(), 'status'=>'fail', 'message'=>'Subscriber already exists with this Mobile Number', 'errors' => 'Subscriber already exists with this Mobile Number'));
-            }
+            }*/
             
-            $fieldsArray = ['subscriber_name'=>'subscriberName','office_belongs_to'=>'officeBelongsTo','political_party'=>'politicalParty','gender'=>'subscriberGender','dob'=>'subscriberDOB',
+            $fieldsArray = ['office_belongs_to'=>'officeBelongsTo','political_party'=>'politicalParty','gender'=>'subscriberGender','dob'=>'subscriberDOB',
             'off_pos_pol_party'=>'politicalPartyOfficialPosition','rep_area_off_party_pos'=>'repAreaOfficialPartyPosition','elec_off_pos_name'=>'electedOfficialPositionName',
             'rep_area_elec_off_pos'=>'repAreaElectedOfficialPosition','key_identity1'=>'keyIdentity1','key_identity2'=>'keyIdentity2','org_name'=>'organizationName',
-            'auth_person_name'=>'authorizedPersonName','auth_person_designation'=>'authorizedPersonDesignation','email_address'=>'emailAddress','mobile_no'=>'mobileNumber',
-            'address_line1'=>'addressLine1','postal_code'=>'postalCode','country'=>'country','state'=>'state','district'=>'district','sub_district'=>'subDistrict','village'=>'village',
+            'auth_person_name'=>'authorizedPersonName','auth_person_designation'=>'authorizedPersonDesignation',
             'country_pp'=>'country_pp','state_pp'=>'state_pp','district_pp'=>'district_pp','lac_pp'=>'LAC_pp','pc_pp'=>'PC_pp','mc1_pp'=>'MC1_pp','mc2_pp'=>'MC2_pp',
             'cc_pp'=>'CC_pp','block_pp'=>'block_pp','ward_pp'=>'ward_pp','sub_district_pp'=>'subDistrict_pp','village_pp'=>'village_pp',
             'country_eo'=>'country_eo','state_eo'=>'state_eo','district_eo'=>'district_eo','lac_eo'=>'LAC_eo','pc_eo'=>'PC_eo','mc1_eo'=>'MC1_eo','mc2_eo'=>'MC2_eo',
@@ -382,12 +391,18 @@ class SubscriberController extends Controller
                 $updateArray[$key] = (isset($data[$value]) && !empty($data[$value]))?trim($data[$value]):null;
             }
             
+            $subscriber = SubscriberList::where('id',$subscriber_id)->update($updateArray);
+            
+            $updateArray = array('name'=>trim($data['subscriberName']),'mobile_no'=>trim($data['mobileNumber']),'address_line1'=>trim($data['addressLine1']),
+            'postal_code'=>trim($data['postalCode']),'country'=>trim($data['country']),'state'=>trim($data['state']),'district'=>trim($data['district']),
+            'sub_district'=>trim($data['subDistrict']),'village'=>trim($data['village']),'sub_district'=>trim($data['subDistrict']));
+            
             if(!empty($request->file('subscriberImage'))){
-                $image_name = CommonHelper::uploadImage($request,$request->file('subscriberImage'),'images/subscriber_images');
+                $image_name = CommonHelper::uploadImage($request,$request->file('subscriberImage'),'images/user_images');
                 $updateArray['image'] = $image_name;
             }
-            
-            $subscriber = SubscriberList::where('id',$subscriber_id)->update($updateArray);
+                
+            User::where('id',$subscriber_data->user_id)->update($updateArray);
           
             return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'success','message' => 'Subscriber updated successfully'),200);
             
@@ -401,9 +416,10 @@ class SubscriberController extends Controller
             $data = $request->all();
             
             $subscriber_list = SubscriberList::join('sub_group_list as sg', 'sg.id', '=', 'subscriber_list.office_belongs_to')
-            ->join('country_list as c', 'c.id', '=', 'subscriber_list.country')        
-            ->join('state_list as s', 's.id', '=', 'subscriber_list.state')        
-            ->join('district_list as d', 'd.id', '=', 'subscriber_list.district')                
+            ->join('users as u1', 'u1.id', '=', 'subscriber_list.user_id')          
+            ->join('country_list as c', 'c.id', '=', 'u1.country')        
+            ->join('state_list as s', 's.id', '=', 'u1.state')        
+            ->join('district_list as d', 'd.id', '=', 'u1.district')                
             ->where('subscriber_list.is_deleted',0)        
             ->where('sg.is_deleted',0);
             
@@ -411,7 +427,7 @@ class SubscriberController extends Controller
                 $subscriber_list = $subscriber_list->where('subscriber_list.subscriber_name','LIKE','%'.trim($data['sub_name']).'%');
             }
             
-            $subscriber_list = $subscriber_list->select('subscriber_list.*','sg.sub_group_name','c.country_name','s.state_name','d.district_name')        
+            $subscriber_list = $subscriber_list->select('subscriber_list.*','sg.sub_group_name','c.country_name','s.state_name','d.district_name','u1.name as subscriber_name')        
             ->orderBy('subscriber_list.id','ASC')
             ->paginate(50);
             
