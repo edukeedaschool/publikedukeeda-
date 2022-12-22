@@ -10,6 +10,12 @@
                     <div class="col-6"></div>
                     <div class="col-6">
                         <div class="row justify-content-end">
+                            <div class="col-md-3" >
+                                <input type="text" name="pc_name" id="pc_name" placeholder="Constituency Name" class="form-control" value="{{request('pc_name')}}">
+                            </div>
+                            <div class="col-md-2" >
+                                <input type="submit" name="searchBtn" id="searchBtn" value="Search" class="btn btn-dialog" >
+                            </div>
                             <div class="col-md-3" ><input type="button" name="addBtn" id="addBtn" value="Add Constituency" class="btn btn-dialog" onclick="location.href='{{ url('/pa-constituency/add') }}'"></div>
                         </div>
                     </div>

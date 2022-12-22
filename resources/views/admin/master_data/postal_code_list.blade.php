@@ -10,6 +10,12 @@
                     <div class="col-6"></div>
                     <div class="col-6">
                         <div class="row justify-content-end">
+                            <div class="col-md-3" >
+                                <input type="text" name="postal_code" id="postal_code" placeholder="Postal Code" class="form-control" value="{{request('postal_code')}}">
+                            </div>
+                            <div class="col-md-2" >
+                                <input type="submit" name="searchBtn" id="searchBtn" value="Search" class="btn btn-dialog" >
+                            </div>
                             <div class="col-md-3" ><input type="button" name="addBtn" id="addBtn" value="Add Postal Code" class="btn btn-dialog" onclick="location.href='{{ url('/postal-code/add') }}'"></div>
                         </div>
                     </div>

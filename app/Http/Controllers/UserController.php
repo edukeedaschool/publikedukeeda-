@@ -172,8 +172,14 @@ class UserController extends Controller
             $data = $request->all();
             
             $user_list = User::join('user_roles as ur', 'ur.id', '=', 'users.user_role')
-            ->where('users.is_deleted',0)        
-            ->select('users.*','ur.role_name')        
+            ->where('users.is_deleted',0);
+            
+            if(isset($data['user_name']) && !empty($data['user_name'])){
+                $user_name = trim($data['user_name']);
+                $user_list = $user_list->whereRaw("(users.name LIKE '%$user_name%' OR users.email LIKE '%$user_name%')");
+            }
+            
+            $user_list = $user_list->select('users.*','ur.role_name')        
             ->orderBy('users.id','ASC')
             ->paginate(50);
             

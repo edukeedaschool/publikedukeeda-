@@ -873,8 +873,13 @@ class MasterDataController extends Controller
             ->join('city_council as cc', 'cc.id', '=', 'ward_list.city_council_id')
             ->where('ward_list.is_deleted',0)
             ->where('d.is_deleted',0)        
-            ->where('s.is_deleted',0)           
-            ->select('ward_list.*','s.state_name','d.district_name','mc1.mc_name as mc1_name','mc2.mc_name as mc2_name','cc.city_council_name')        
+            ->where('s.is_deleted',0);           
+            
+            if(isset($data['ward_name']) && !empty($data['ward_name'])){
+                $ward_list = $ward_list->where('ward_list.ward_name','LIKE','%'.trim($data['ward_name']).'%');
+            }
+            
+            $ward_list = $ward_list->select('ward_list.*','s.state_name','d.district_name','mc1.mc_name as mc1_name','mc2.mc_name as mc2_name','cc.city_council_name')        
             ->orderBy('ward_list.id','ASC')
             ->paginate(50);
             
@@ -1093,8 +1098,13 @@ class MasterDataController extends Controller
             ->where('village_list.is_deleted',0)
             ->where('sd.is_deleted',0)                
             ->where('d.is_deleted',0)        
-            ->where('s.is_deleted',0)           
-            ->select('village_list.*','s.state_name','d.district_name','sd.sub_district_name')        
+            ->where('s.is_deleted',0);
+            
+            if(isset($data['village_name']) && !empty($data['village_name'])){
+                $village_list = $village_list->where('village_list.village_name','LIKE','%'.trim($data['village_name']).'%');
+            }
+            
+            $village_list = $village_list->select('village_list.*','s.state_name','d.district_name','sd.sub_district_name')        
             ->orderBy('village_list.id','ASC')
             ->paginate(50);
             
@@ -1207,8 +1217,13 @@ class MasterDataController extends Controller
             ->where('postal_code_list.is_deleted',0)
             ->where('sd.is_deleted',0)                
             ->where('d.is_deleted',0)        
-            ->where('s.is_deleted',0)           
-            ->select('postal_code_list.*','s.state_name','d.district_name','sd.sub_district_name')        
+            ->where('s.is_deleted',0);
+            
+            if(isset($data['postal_code']) && !empty($data['postal_code'])){
+                $postal_code_list = $postal_code_list->where('postal_code_list.postal_code','LIKE','%'.trim($data['postal_code']).'%');
+            }
+            
+            $postal_code_list = $postal_code_list->select('postal_code_list.*','s.state_name','d.district_name','sd.sub_district_name')        
             ->orderBy('postal_code_list.id','ASC')
             ->paginate(50);
             
@@ -1314,8 +1329,13 @@ class MasterDataController extends Controller
         try{
             $data = $request->all();
             
-            $pp_list = PoliticalPartyList::where('political_party_list.is_deleted',0)
-            ->select('political_party_list.*')        
+            $pp_list = PoliticalPartyList::where('political_party_list.is_deleted',0);
+            
+            if(isset($data['pp_name']) && !empty($data['pp_name'])){
+                $pp_list = $pp_list->where('political_party_list.party_name','LIKE','%'.trim($data['pp_name']).'%');
+            }
+            
+            $pp_list = $pp_list->select('political_party_list.*')        
             ->orderBy('political_party_list.id','ASC')
             ->paginate(50);
             
@@ -1426,8 +1446,13 @@ class MasterDataController extends Controller
             
             $la_constituency_list = LegislativeAssemblyConstituency::join('state_list as s', 's.id', '=', 'legislative_assembly_constituency.state_id')
             ->where('legislative_assembly_constituency.is_deleted',0)
-            ->where('s.is_deleted',0)           
-            ->select('legislative_assembly_constituency.*','s.state_name')        
+            ->where('s.is_deleted',0);
+            
+            if(isset($data['lac_name']) && !empty($data['lac_name'])){
+                $la_constituency_list = $la_constituency_list->where('legislative_assembly_constituency.constituency_name','LIKE','%'.trim($data['lac_name']).'%');
+            }
+            
+            $la_constituency_list = $la_constituency_list->select('legislative_assembly_constituency.*','s.state_name')        
             ->orderBy('legislative_assembly_constituency.id','ASC')
             ->paginate(50);
             
@@ -1535,8 +1560,13 @@ class MasterDataController extends Controller
             
             $pa_constituency_list = ParliamentaryConstituency::join('state_list as s', 's.id', '=', 'parliamentary_constituency.state_id')
             ->where('parliamentary_constituency.is_deleted',0)
-            ->where('s.is_deleted',0)           
-            ->select('parliamentary_constituency.*','s.state_name')        
+            ->where('s.is_deleted',0);
+            
+            if(isset($data['pc_name']) && !empty($data['pc_name'])){
+                $pa_constituency_list = $pa_constituency_list->where('parliamentary_constituency.constituency_name','LIKE','%'.trim($data['pc_name']).'%');
+            }
+            
+            $pa_constituency_list = $pa_constituency_list->select('parliamentary_constituency.*','s.state_name')        
             ->orderBy('parliamentary_constituency.id','ASC')
             ->paginate(50);
             
@@ -1645,8 +1675,13 @@ class MasterDataController extends Controller
             
             $govt_dept_list = GovernmentDepartment::leftJoin('country_list as c', 'c.id', '=', 'government_department.country_id')
             ->leftJoin('state_list as s', 's.id', '=', 'government_department.state_id')
-            ->where('government_department.is_deleted',0)
-            ->select('government_department.*','s.state_name','c.country_name')        
+            ->where('government_department.is_deleted',0);
+            
+            if(isset($data['dep_name']) && !empty($data['dep_name'])){
+                $govt_dept_list = $govt_dept_list->where('government_department.department_name','LIKE','%'.trim($data['dep_name']).'%');
+            }
+            
+            $govt_dept_list = $govt_dept_list->select('government_department.*','s.state_name','c.country_name')        
             ->orderBy('government_department.id','ASC')
             ->paginate(50);
             
@@ -1803,8 +1838,13 @@ class MasterDataController extends Controller
         try{
             $data = $request->all();
             
-            $np_org_list = NonProfitOrganization::where('non_profit_organization.is_deleted',0)
-            ->select('non_profit_organization.*')        
+            $np_org_list = NonProfitOrganization::where('non_profit_organization.is_deleted',0);
+            
+            if(isset($data['org_name']) && !empty($data['org_name'])){
+                $np_org_list = $np_org_list->where('non_profit_organization.organization_name','LIKE','%'.trim($data['org_name']).'%');
+            }
+            
+            $np_org_list = $np_org_list->select('non_profit_organization.*')        
             ->orderBy('non_profit_organization.id','ASC')
             ->paginate(50);
             
@@ -1920,8 +1960,13 @@ class MasterDataController extends Controller
         try{
             $data = $request->all();
             
-            $position_list = ElectedOfficialPosition::where('elected_official_position.is_deleted',0)
-            ->select('elected_official_position.*')        
+            $position_list = ElectedOfficialPosition::where('elected_official_position.is_deleted',0);
+            
+            if(isset($data['pos_name']) && !empty($data['pos_name'])){
+                $position_list = $position_list->where('elected_official_position.position_name','LIKE','%'.trim($data['pos_name']).'%');
+            }
+            
+            $position_list = $position_list->select('elected_official_position.*')        
             ->orderBy('elected_official_position.id','ASC')
             ->paginate(50);
             
@@ -2024,8 +2069,13 @@ class MasterDataController extends Controller
         try{
             $data = $request->all();
             
-            $position_list = PoliticalPartyOfficialPosition::where('political_party_official_position.is_deleted',0)
-            ->select('political_party_official_position.*')        
+            $position_list = PoliticalPartyOfficialPosition::where('political_party_official_position.is_deleted',0);
+            
+            if(isset($data['pos_name']) && !empty($data['pos_name'])){
+                $position_list = $position_list->where('political_party_official_position.position_name','LIKE','%'.trim($data['pos_name']).'%');
+            }
+            
+            $position_list = $position_list->select('political_party_official_position.*')        
             ->orderBy('political_party_official_position.id','ASC')
             ->paginate(50);
             
@@ -2129,8 +2179,13 @@ class MasterDataController extends Controller
         try{
             $data = $request->all();
             
-            $group_list = GroupList::where('group_list.is_deleted',0)
-            ->select('group_list.*')        
+            $group_list = GroupList::where('group_list.is_deleted',0);
+            
+            if(isset($data['group_name']) && !empty($data['group_name'])){
+                $group_list = $group_list->where('group_list.group_name','LIKE','%'.trim($data['group_name']).'%');
+            }
+            
+            $group_list  = $group_list->select('group_list.*')        
             ->orderBy('group_list.id','ASC')
             ->paginate(50);
             
@@ -2230,8 +2285,13 @@ class MasterDataController extends Controller
             
             $sub_group_list = SubGroupList::join('group_list as g', 'g.id', '=', 'sub_group_list.group_id')
             ->where('sub_group_list.is_deleted',0)        
-            ->where('g.is_deleted',0)
-            ->select('sub_group_list.*','g.group_name')        
+            ->where('g.is_deleted',0);
+            
+            if(isset($data['sub_group_name']) && !empty($data['sub_group_name'])){
+                $sub_group_list = $sub_group_list->where('sub_group_list.sub_group_name','LIKE','%'.trim($data['sub_group_name']).'%');
+            }
+            
+            $sub_group_list = $sub_group_list->select('sub_group_list.*','g.group_name')        
             ->orderBy('sub_group_list.id','ASC')
             ->paginate(50);
             
@@ -2350,8 +2410,13 @@ class MasterDataController extends Controller
             
             $sub_purpose_list = SubmissionPurposeList::join('group_list as g', 'g.id', '=', 'submission_purpose_list.group_id')
             ->where('submission_purpose_list.is_deleted',0)        
-            ->where('g.is_deleted',0)
-            ->select('submission_purpose_list.*','g.group_name')        
+            ->where('g.is_deleted',0);
+            
+            if(isset($data['sub_purpose_name']) && !empty($data['sub_purpose_name'])){
+                $sub_purpose_list = $sub_purpose_list->where('submission_purpose_list.submission_purpose','LIKE','%'.trim($data['sub_purpose_name']).'%');
+            }
+            
+            $sub_purpose_list = $sub_purpose_list->select('submission_purpose_list.*','g.group_name')        
             ->orderBy('submission_purpose_list.id','ASC')
             ->paginate(50);
             
@@ -2456,8 +2521,13 @@ class MasterDataController extends Controller
             
             $sub_type_list = SubmissionTypeList::join('group_list as g', 'g.id', '=', 'submission_type_list.group_id')
             ->where('submission_type_list.is_deleted',0)        
-            ->where('g.is_deleted',0)
-            ->select('submission_type_list.*','g.group_name')        
+            ->where('g.is_deleted',0);
+            
+            if(isset($data['sub_type']) && !empty($data['sub_type'])){
+                $sub_type_list = $sub_type_list->where('submission_type_list.submission_type','LIKE','%'.trim($data['sub_type']).'%');
+            }
+            
+            $sub_type_list = $sub_type_list->select('submission_type_list.*','g.group_name')        
             ->orderBy('submission_type_list.id','ASC')
             ->paginate(50);
             
@@ -2559,8 +2629,13 @@ class MasterDataController extends Controller
         try{
             $data = $request->all();
             
-            $review_level_list = ReviewLevel::where('review_level.is_deleted',0)        
-            ->select('review_level.*')        
+            $review_level_list = ReviewLevel::where('review_level.is_deleted',0);
+            
+            if(isset($data['review_level']) && !empty($data['review_level'])){
+                $review_level_list = $review_level_list->where('review_level.review_level','LIKE','%'.trim($data['review_level']).'%');
+            }
+            
+            $review_level_list = $review_level_list->select('review_level.*')        
             ->orderBy('review_level.id','ASC')
             ->paginate(50);
             

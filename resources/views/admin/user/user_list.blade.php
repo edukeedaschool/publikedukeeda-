@@ -10,6 +10,12 @@
                     <div class="col-6"></div>
                     <div class="col-6">
                         <div class="row justify-content-end">
+                            <div class="col-md-3" >
+                                <input type="text" name="user_name" id="user_name" placeholder="User Name / Email" class="form-control" value="{{request('user_name')}}">
+                            </div>
+                            <div class="col-md-2" >
+                                <input type="submit" name="searchBtn" id="searchBtn" value="Search" class="btn btn-dialog" >
+                            </div>
                             <div class="col-md-3" ><input type="button" name="addBtn" id="addBtn" value="Add User" class="btn btn-dialog" onclick="location.href='{{ url('/user/add') }}'"></div>
                         </div>
                     </div>

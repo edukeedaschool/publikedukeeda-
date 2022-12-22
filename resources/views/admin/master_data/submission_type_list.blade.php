@@ -10,6 +10,12 @@
                     <div class="col-6"></div>
                     <div class="col-6">
                         <div class="row justify-content-end">
+                            <div class="col-md-3" >
+                                <input type="text" name="sub_type" id="sub_type" placeholder="Submission Type" class="form-control" value="{{request('sub_type')}}">
+                            </div>
+                            <div class="col-md-2" >
+                                <input type="submit" name="searchBtn" id="searchBtn" value="Search" class="btn btn-dialog" >
+                            </div>
                             <div class="col-md-3" ><input type="button" name="addBtn" id="addBtn" value="Add Sub Type" class="btn btn-dialog" onclick="location.href='{{ url('/submission-type/add') }}'"></div>
                         </div>
                     </div>

@@ -130,11 +130,16 @@ class TeamController extends Controller
             
             $designation_list = TeamDesignations::join('representation_area_list as ral', 'ral.id', '=', 'team_designations.rep_area_id')
             ->join('users as u', 'u.id', '=', 'team_designations.subscriber_id')        
-            ->where('team_designations.subscriber_id',$user->id)               
+            //->where('team_designations.subscriber_id',$user->id)               
             ->where('team_designations.is_deleted',0)        
             ->where('ral.is_deleted',0)                
-            ->where('u.is_deleted',0)                
-            ->select('team_designations.*','ral.representation_area','u.name as subscriber_name')        
+            ->where('u.is_deleted',0);
+            
+            if(isset($data['des_name']) && !empty($data['des_name'])){
+                $designation_list = $designation_list->where('team_designations.designation_name','LIKE','%'.trim($data['des_name']).'%');
+            }
+            
+            $designation_list = $designation_list->select('team_designations.*','ral.representation_area','u.name as subscriber_name')        
             ->orderBy('team_designations.id','ASC')
             ->paginate(50);
             
@@ -186,8 +191,13 @@ class TeamController extends Controller
             ->where('team_members.is_deleted',0)        
             ->where('td.is_deleted',0)                
             ->where('u1.is_deleted',0)                
-            ->where('u2.is_deleted',0)                        
-            ->select('team_members.*','u1.name as member_name','u2.name as subscriber_name','td.designation_name')        
+            ->where('u2.is_deleted',0);
+            
+            if(isset($data['member_name']) && !empty($data['member_name'])){
+                $member_list = $member_list->where('u1.name','LIKE','%'.trim($data['member_name']).'%');
+            }
+            
+            $member_list = $member_list->select('team_members.*','u1.name as member_name','u2.name as subscriber_name','td.designation_name')        
             ->orderBy('team_members.id','ASC')
             ->paginate(50);
             

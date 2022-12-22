@@ -405,10 +405,15 @@ class SubscriberController extends Controller
             ->join('state_list as s', 's.id', '=', 'subscriber_list.state')        
             ->join('district_list as d', 'd.id', '=', 'subscriber_list.district')                
             ->where('subscriber_list.is_deleted',0)        
-            ->where('sg.is_deleted',0)
-            ->select('subscriber_list.*','sg.sub_group_name','c.country_name','s.state_name','d.district_name')        
+            ->where('sg.is_deleted',0);
+            
+            if(isset($data['sub_name']) && !empty($data['sub_name'])){
+                $subscriber_list = $subscriber_list->where('subscriber_list.subscriber_name','LIKE','%'.trim($data['sub_name']).'%');
+            }
+            
+            $subscriber_list = $subscriber_list->select('subscriber_list.*','sg.sub_group_name','c.country_name','s.state_name','d.district_name')        
             ->orderBy('subscriber_list.id','ASC')
-            ->paginate(50);//print_r($subscriber_list);
+            ->paginate(50);
             
             return view('admin/subscriber/subscriber_list',array('subscriber_list'=>$subscriber_list,'title'=>'Subscriber List'));
          

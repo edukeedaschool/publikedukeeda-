@@ -10,6 +10,12 @@
                     <div class="col-6"></div>
                     <div class="col-6">
                         <div class="row justify-content-end">
+                            <div class="col-md-3" >
+                                <input type="text" name="org_name" id="org_name" placeholder="Organization Name" class="form-control" value="{{request('org_name')}}">
+                            </div>
+                            <div class="col-md-2" >
+                                <input type="submit" name="searchBtn" id="searchBtn" value="Search" class="btn btn-dialog" >
+                            </div>
                             <div class="col-md-3" ><input type="button" name="addBtn" id="addBtn" value="Add Organization" class="btn btn-dialog" onclick="location.href='{{ url('/non-profit-organization/add') }}'"></div>
                         </div>
                     </div>

@@ -10,6 +10,12 @@
                     <div class="col-6"></div>
                     <div class="col-6">
                         <div class="row justify-content-end">
+                            <div class="col-md-3" >
+                                <input type="text" name="review_level" id="review_level" placeholder="Review Level" class="form-control" value="{{request('review_level')}}">
+                            </div>
+                            <div class="col-md-2" >
+                                <input type="submit" name="searchBtn" id="searchBtn" value="Search" class="btn btn-dialog" >
+                            </div>
                             <div class="col-md-3" ><input type="button" name="addBtn" id="addBtn" value="Add Review Level" class="btn btn-dialog" onclick="location.href='{{ url('/review-level/add') }}'"></div>
                         </div>
                     </div>
