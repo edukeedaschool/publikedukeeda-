@@ -3,6 +3,8 @@ namespace App\Helpers;
 
 use Illuminate\Http\Request;
 use App\Models\User_links;
+use App\Models\App_logs;
+use App\Models\RepresentationAreaList;
 use Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Auth;
@@ -505,10 +507,14 @@ class CommonHelper
     }
     
     public static function getRepresentationAreaList(){
-        return ['country'=>'Country','state'=>'State','district'=>'District','legislative_assembly_constituency'=>'Legislative Assembly Constituency',
+        /*return ['country'=>'Country','state'=>'State','district'=>'District','legislative_assembly_constituency'=>'Legislative Assembly Constituency',
         'parliamentary_constituency'=>'Parliamentary Constituency','municipal_corporation'=>'Municipal corporation (Mahanagar Palika)',
         'municipality'=>'Municipality (Nagar Palika)','city_council'=>'City Council (Nagar Panchayat)','block'=>'Block','ward'=>'Ward','sub_district'=>'Sub-district (Tehsil)',
-        'village'=>'Village'];
+        'village'=>'Village'];*/
+        
+        $rep_area_data = RepresentationAreaList::where('is_deleted',0)->get()->toArray();
+        
+        return $rep_area_data;
     }
     
 }

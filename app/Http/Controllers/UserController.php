@@ -48,7 +48,7 @@ class UserController extends Controller
             
             $validationRules = array('userName'=>'required','emailAddress'=>'required|email','mobileNumber'=>'required','gender'=>'required','DOB'=>'required','qualification'=>'required',
             'profession'=>'required','majorIdentity'=>'required','moreAboutYou'=>'required','userImage'=>'required|image|mimes:jpeg,png,jpg,gif|max:3072','addressLine1'=>'required','postalCode'=>'required',
-            'country'=>'required','state'=>'required','district'=>'required','subDistrict'=>'required','village'=>'required','userStatus'=>'required');
+            'country'=>'required','state'=>'required','district'=>'required','subDistrict'=>'required','village'=>'required','userStatus'=>'required','password'=>'required|min:6|max:100|confirmed');
             
             $attributes = array('userName'=>'Name','emailAddress'=>'Email Address','mobileNumber'=>'Mobile Number','majorIdentity'=>'Major Identity','moreAboutYou'=>'More About You',
             'userImage'=>'User Image','addressLine1'=>'Address Line 1','postalCode'=>'Postal Code','userStatus'=>'Status','DOB'=>'DOB','subDistrict'=>'Sub District','passOutYear'=>'Degree Year');
@@ -81,8 +81,8 @@ class UserController extends Controller
             'dob'=>trim($data['DOB']),'qualification'=>trim($data['qualification']),'degree_year'=>$degree_year,'course_name'=>$course_name,
             'profession'=>trim($data['profession']),'major_identity'=>trim($data['majorIdentity']),'image'=>$image_name,'address_line1'=>trim($data['addressLine1']),
             'postal_code'=>trim($data['postalCode']),'country'=>trim($data['country']),'state'=>trim($data['state']),'district'=>trim($data['district']),
-            'sub_district'=>trim($data['subDistrict']),'village'=>trim($data['village']),'status'=>trim($data['userStatus']),'password'=>Hash::make('12345678'),
-            'more_about_you'=>trim($data['moreAboutYou']),'user_role'=>1);
+            'sub_district'=>trim($data['subDistrict']),'village'=>trim($data['village']),'status'=>trim($data['userStatus']),'password'=>Hash::make(trim($data['password'])),
+            'more_about_you'=>trim($data['moreAboutYou']),'user_role'=>3);
        
             $user = User::create($insertArray);
           
@@ -130,6 +130,10 @@ class UserController extends Controller
                 $validationRules['courseName'] = 'required';
             }
             
+            if(isset($data['update_password']) && $data['update_password'] == 1){
+                $validationRules['password'] = 'required|min:6|max:100|confirmed';
+            }
+            
             $validator = Validator::make($data,$validationRules,array(),$attributes);
             if ($validator->fails()){ 
                 return response(array('httpStatus'=>200, "dateTime"=>time(), 'status'=>'fail', 'message'=>'Validation error', 'errors' => $validator->errors()));
@@ -152,6 +156,10 @@ class UserController extends Controller
             'profession'=>trim($data['profession']),'major_identity'=>trim($data['majorIdentity']),'address_line1'=>trim($data['addressLine1']),
             'postal_code'=>trim($data['postalCode']),'country'=>trim($data['country']),'state'=>trim($data['state']),'district'=>trim($data['district']),
             'sub_district'=>trim($data['subDistrict']),'village'=>trim($data['village']),'status'=>trim($data['userStatus']),'more_about_you'=>trim($data['moreAboutYou']));
+            
+            if(isset($data['update_password']) && $data['update_password'] == 1){
+                $updateArray['password'] = Hash::make(trim($data['password']));
+            }
             
             if(!empty($request->file('userImage'))){
                 $image_name = CommonHelper::uploadImage($request,$request->file('userImage'),'images/user_images');

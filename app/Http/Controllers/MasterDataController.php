@@ -1960,17 +1960,18 @@ class MasterDataController extends Controller
         try{
             $data = $request->all();
             
-            $position_list = ElectedOfficialPosition::where('elected_official_position.is_deleted',0);
+            $position_list = ElectedOfficialPosition::join('representation_area_list as s', 's.id', '=', 'elected_official_position.representation_area')
+            ->where('elected_official_position.is_deleted',0);
             
             if(isset($data['pos_name']) && !empty($data['pos_name'])){
                 $position_list = $position_list->where('elected_official_position.position_name','LIKE','%'.trim($data['pos_name']).'%');
             }
             
-            $position_list = $position_list->select('elected_official_position.*')        
+            $position_list = $position_list->select('elected_official_position.*','s.representation_area as representation_area_name')        
             ->orderBy('elected_official_position.id','ASC')
             ->paginate(50);
             
-            $rep_area = CommonHelper::getRepresentationAreaList();
+            $rep_area = []; //CommonHelper::getRepresentationAreaList();
             
             return view('admin/master_data/elected_official_position_list',array('position_list'=>$position_list,'title'=>'Elected Official Position List','rep_area'=>$rep_area));
          
@@ -2069,17 +2070,18 @@ class MasterDataController extends Controller
         try{
             $data = $request->all();
             
-            $position_list = PoliticalPartyOfficialPosition::where('political_party_official_position.is_deleted',0);
+            $position_list = PoliticalPartyOfficialPosition::join('representation_area_list as s', 's.id', '=', 'political_party_official_position.representation_area')
+            ->where('political_party_official_position.is_deleted',0);
             
             if(isset($data['pos_name']) && !empty($data['pos_name'])){
                 $position_list = $position_list->where('political_party_official_position.position_name','LIKE','%'.trim($data['pos_name']).'%');
             }
             
-            $position_list = $position_list->select('political_party_official_position.*')        
+            $position_list = $position_list->select('political_party_official_position.*','s.representation_area as representation_area_name')        
             ->orderBy('political_party_official_position.id','ASC')
             ->paginate(50);
             
-            $rep_area = CommonHelper::getRepresentationAreaList();
+            $rep_area = []; //CommonHelper::getRepresentationAreaList();
             
             return view('admin/master_data/political_party_official_position_list',array('position_list'=>$position_list,'rep_area'=>$rep_area,'title'=>'Political Party Official Position List'));
          

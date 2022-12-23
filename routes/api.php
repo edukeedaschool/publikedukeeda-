@@ -17,3 +17,27 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+Route::post('/login', [App\Http\Controllers\DataApiController::class, 'login'])->name('login');
+
+Route::group(['middleware' => ['data_api']], function () {
+    Route::get('/state/list', [App\Http\Controllers\DataApiController::class, 'getStateList'])->name('getstatelist');
+    Route::get('/district/list', [App\Http\Controllers\DataApiController::class, 'getDistrictList'])->name('getdistrictlist');
+    Route::get('/municipal-corporation/list', [App\Http\Controllers\DataApiController::class, 'getMunicipalCorporationList'])->name('getmunicipalcorporationlist');
+    Route::get('/municipality/list', [App\Http\Controllers\DataApiController::class, 'getMunicipalityList'])->name('getmunicipalitylist');
+    Route::get('/city-council/list', [App\Http\Controllers\DataApiController::class, 'getCityCouncilList'])->name('getcitycouncillist');
+    Route::get('/block/list', [App\Http\Controllers\DataApiController::class, 'getBlockList'])->name('getblocklist');
+    Route::get('/sub-district/list', [App\Http\Controllers\DataApiController::class, 'getSubDistrictList'])->name('getsubdistrictlist');
+    Route::get('/political-party/list', [App\Http\Controllers\DataApiController::class, 'getPoliticalPartyList'])->name('getpoliticalpartylist');
+    Route::get('/legislative-assembly/list', [App\Http\Controllers\DataApiController::class, 'getLegislativeAssemblyList'])->name('getlegislativeassemblylist');
+    Route::get('/parliamentary-assembly/list', [App\Http\Controllers\DataApiController::class, 'getParliamentaryAssemblyList'])->name('getparliamentaryassemblylist');
+    Route::get('/erop/list', [App\Http\Controllers\DataApiController::class, 'getEROPList'])->name('geteroplist');
+    Route::get('/ppop/list', [App\Http\Controllers\DataApiController::class, 'getPPOPList'])->name('getppoplist');
+    Route::get('/government-department/list', [App\Http\Controllers\DataApiController::class, 'getGovernmentDepartmentList'])->name('getgovernmentdepartmentlist');
+    Route::get('/non-profit-organization/list', [App\Http\Controllers\DataApiController::class, 'getNonProfitOrganizationList'])->name('getnonprofitorganizationList');
+    Route::get('/group/list', [App\Http\Controllers\DataApiController::class, 'getGroupList'])->name('getgrouplist');
+    Route::get('/sub-group/list', [App\Http\Controllers\DataApiController::class, 'getSubGroupList'])->name('getsubgrouplist');
+    Route::get('/submission-purpose/list', [App\Http\Controllers\DataApiController::class, 'getSubmissionPurposeList'])->name('getsubmissionpurposeList');
+    Route::get('/submission-type/list', [App\Http\Controllers\DataApiController::class, 'getSubmissionTypeList'])->name('getsubmissiontypeList');
+    Route::get('/review-level/list', [App\Http\Controllers\DataApiController::class, 'getReviewLevelList'])->name('getreviewlevelList');
+});

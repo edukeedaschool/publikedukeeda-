@@ -26,10 +26,10 @@
                             <label>Representation Area</label>
                             <select id="positionRepresentationArea" class="form-control" name="positionRepresentationArea" >
                                 <option value="">Representation Area</option>
-                                @foreach($rep_area as $key=>$value)
-                                    <?php $sel = ($key == $position_data->representation_area)?'selected':''; ?>
-                                    <option {{$sel}} value="{{$key}}">{{$value}}</option>
-                                @endforeach    
+                                @for($i=0;$i<count($rep_area);$i++ )
+                                    <?php $sel = ($rep_area[$i]['id'] == $position_data->representation_area)?'selected':''; ?>
+                                    <option {{$sel}} value="{{$rep_area[$i]['id']}}">{{$rep_area[$i]['representation_area']}}</option>
+                                @endfor     
                             </select> 
                             <div class="invalid-feedback" id="error_validation_positionRepresentationArea"></div>
                         </div>

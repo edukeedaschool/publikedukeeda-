@@ -31,6 +31,30 @@
                     
                     <div class="form-row">
                         <div class="form-group col-md-6" >
+                            <label>Password</label>
+                            <input id="password" type="password" class="form-control" name="password" value="" >
+                            <div class="invalid-feedback" id="error_validation_password"></div>
+                        </div>
+                    </div>  
+                    
+                    <div class="form-row">
+                        <div class="form-group col-md-6" >
+                            <label>Confirm Password</label>
+                            <input id="password_confirmation" type="password" class="form-control" name="password_confirmation" value="" >
+                            <div class="invalid-feedback" id="error_validation_password_confirmation"></div>
+                        </div>
+                        
+                    </div>  
+                    
+                    <div class="form-row">
+                        <div class="form-group col-md-4" >
+                            <label></label>
+                            <input id="update_password" type="checkbox"  name="update_password" value="1" > Update Password
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group col-md-6" >
                             <label>Mobile Number</label>
                             <input id="mobileNumber" type="text" class="form-control" name="mobileNumber" value="{{$user_data->mobile_no}}" maxlength="10">
                             <div class="invalid-feedback" id="error_validation_mobileNumber"></div>

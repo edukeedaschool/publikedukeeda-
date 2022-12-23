@@ -40,7 +40,7 @@
                                 <tr>  
                                     <td><input type="checkbox" name="elected_Official_Position_id_chk" id="elected_Official_Position_id_chk" value="{{$position_list[$i]['id']}}" class="elected_Official_Position-id-chk"> {{$position_list[$i]['id']}}</td>
                                     <td>{{$position_list[$i]['position_name']}}</td>
-                                    <td>{{isset($rep_area[$position_list[$i]['representation_area']])?$rep_area[$position_list[$i]['representation_area']]:'' }}</td>
+                                    <td>{{$position_list[$i]['representation_area_name'] }}</td>
                                     <td>{{($position_list[$i]['status'] == 1)?'Enabled':'Disabled'}}</td>
                                     <td>
                                         <a href="{{url('elected-official-position/edit/'.$position_list[$i]['id'])}}" class="user-list-edit"><i  title="Edit Elected Official Position" class="far fa-edit"></i></a>&nbsp;&nbsp;
