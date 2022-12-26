@@ -48,10 +48,10 @@ class UserController extends Controller
             
             $validationRules = array('userName'=>'required','emailAddress'=>'required|email','mobileNumber'=>'required','gender'=>'required','DOB'=>'required','qualification'=>'required',
             'profession'=>'required','majorIdentity'=>'required','moreAboutYou'=>'required','userImage'=>'required|image|mimes:jpeg,png,jpg,gif|max:3072','addressLine1'=>'required','postalCode'=>'required',
-            'country'=>'required','state'=>'required','district'=>'required','subDistrict'=>'required','village'=>'required','userStatus'=>'required','password'=>'required|min:6|max:100|confirmed');
+            'country'=>'required','state'=>'required','district'=>'required','subDistrict'=>'required','village'=>'required','userStatus'=>'required','password'=>'required|min:6|max:100|confirmed','user_Name'=>'required');
             
             $attributes = array('userName'=>'Name','emailAddress'=>'Email Address','mobileNumber'=>'Mobile Number','majorIdentity'=>'Major Identity','moreAboutYou'=>'More About You',
-            'userImage'=>'User Image','addressLine1'=>'Address Line 1','postalCode'=>'Postal Code','userStatus'=>'Status','DOB'=>'DOB','subDistrict'=>'Sub District','passOutYear'=>'Degree Year');
+            'userImage'=>'User Image','addressLine1'=>'Address Line 1','postalCode'=>'Postal Code','userStatus'=>'Status','DOB'=>'DOB','subDistrict'=>'Sub District','passOutYear'=>'Degree Year','user_Name'=>'Username');
             
             if(in_array($data['qualification'],['graduate','post_graduate','doctorate','pursing_graduate']) ){
                 $validationRules['passOutYear'] = 'required';
@@ -68,6 +68,11 @@ class UserController extends Controller
                 return response(array('httpStatus'=>200, "dateTime"=>time(), 'status'=>'fail', 'message'=>'User already exists with Email Address', 'errors' => 'User already exists with Email Address'));
             }
             
+            $user_exists = User::where('user_name',trim($data['user_Name']))->where('is_deleted',0)->first();
+            if(!empty($user_exists)){
+                return response(array('httpStatus'=>200, "dateTime"=>time(), 'status'=>'fail', 'message'=>'User already exists with Username', 'errors' => 'User already exists with Username'));
+            }
+            
             if(in_array($data['qualification'],['graduate','post_graduate','doctorate','pursing_graduate']) ){
                 $degree_year = $data['passOutYear'];
                 $course_name = $data['courseName'];
@@ -82,7 +87,7 @@ class UserController extends Controller
             'profession'=>trim($data['profession']),'major_identity'=>trim($data['majorIdentity']),'image'=>$image_name,'address_line1'=>trim($data['addressLine1']),
             'postal_code'=>trim($data['postalCode']),'country'=>trim($data['country']),'state'=>trim($data['state']),'district'=>trim($data['district']),
             'sub_district'=>trim($data['subDistrict']),'village'=>trim($data['village']),'status'=>trim($data['userStatus']),'password'=>Hash::make(trim($data['password'])),
-            'more_about_you'=>trim($data['moreAboutYou']),'user_role'=>3);
+            'more_about_you'=>trim($data['moreAboutYou']),'user_role'=>3,'user_name'=>trim($data['user_Name']));
        
             $user = User::create($insertArray);
           

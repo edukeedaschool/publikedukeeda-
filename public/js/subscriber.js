@@ -50,10 +50,10 @@ function getOfficeBelongsToData(val){
 
 function getLocList(){
     var loc_list = [];
-    loc_list['country'] = 'country'; loc_list['state'] = 'country,state'; loc_list['district'] = 'country,state,district';  loc_list['sub_district'] = 'country,state,district,subDistrict';
-    loc_list['legislative_assembly_constituency'] = 'country,state,district,LAC';loc_list['parliamentary_constituency'] = 'country,state,district,PC';
-    loc_list['municipal_corporation'] = 'country,state,MC1';loc_list['municipality'] = 'country,state,district,MC2';loc_list['city_council'] = 'country,state,district,CC';
-    loc_list['block'] = 'country,state,district,block';loc_list['ward'] = 'country,state,district,CC,ward';loc_list['village'] = 'country,state,district,subDistrict,village';
+    loc_list[1] = 'country'; loc_list[2] = 'country,state'; loc_list[3] = 'country,state,district';  loc_list[11] = 'country,state,district,subDistrict';
+    loc_list[4] = 'country,state,district,LAC';loc_list[5] = 'country,state,district,PC';
+    loc_list[6] = 'country,state,MC1';loc_list[7] = 'country,state,district,MC2';loc_list[8] = 'country,state,district,CC';
+    loc_list[9] = 'country,state,district,block';loc_list[10] = 'country,state,district,CC,ward';loc_list[12] = 'country,state,district,subDistrict,village';
     
     return loc_list;
 }

@@ -55,6 +55,14 @@
                     
                     <div class="form-row">
                         <div class="form-group col-md-6" >
+                            <label>Username</label>
+                            <input id="user_Name" type="text" class="form-control" name="user_Name" value="{{$user_data->user_name}}" readonly="true" >
+                            <div class="invalid-feedback" id="error_validation_user_Name"></div>
+                        </div>
+                    </div>  
+                    
+                    <div class="form-row">
+                        <div class="form-group col-md-6" >
                             <label>Mobile Number</label>
                             <input id="mobileNumber" type="text" class="form-control" name="mobileNumber" value="{{$user_data->mobile_no}}" maxlength="10">
                             <div class="invalid-feedback" id="error_validation_mobileNumber"></div>

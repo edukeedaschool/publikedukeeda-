@@ -65,12 +65,12 @@ class SubscriberController extends Controller
             
             $validationRules = array('subscriberName'=>'required','officeBelongsTo'=>'required','emailAddress'=>'required|email','mobileNumber'=>'required','addressLine1'=>'required',
             'postalCode'=>'required','country'=>'required','state'=>'required','district'=>'required','subscriberImage'=>'required|image|mimes:jpeg,png,jpg,gif|max:3072',
-            'subscriberStatus'=>'required','password'=>'required|min:6|max:100');
+            'subscriberStatus'=>'required','password'=>'required|min:6|max:100','userName'=>'required');
             
             $attributes = array('subscriberName'=>'Subscriber Name','officeBelongsTo'=>'Office Belongs To','emailAddress'=>'Email Address','mobileNumber'=>'Mobile Number',
             'addressLine1'=>'Address Line1','postalCode'=>'Postal Code','subscriberImage'=>'Subscriber Image','subscriberStatus'=>'Status','politicalParty'=>'Political Party',
             'politicalParty'=>'Political Party','subscriberGender'=>'Gender','subscriberDOB'=>'DOB','politicalPartyOfficialPosition'=>'Political Party Official Position',
-            'repAreaOfficialPartyPosition'=>'Official Position','electedOfficialPositionName'=>'Position Name','repAreaElectedOfficialPosition'=>'Official Position',
+            'repAreaOfficialPartyPosition'=>'Official Position','electedOfficialPositionName'=>'Position Name','repAreaElectedOfficialPosition'=>'Official Position','userName'=>'Username',
             'keyIdentity2'=>'Key Identity','organizationName'=>'Organization Name','authorizedPersonName'=>'Authorized Person Name','authorizedPersonDesignation'=>'Authorized Person Designation');
             
             $fields = ['country'=>'Country','state'=>'State','district'=>'District','LAC'=>'Legislative Assembly Constituency','PC'=>'Parliamentary Constituency',
@@ -142,10 +142,15 @@ class SubscriberController extends Controller
                 return response(array('httpStatus'=>200, "dateTime"=>time(), 'status'=>'fail', 'message'=>'Subscriber already exists with this Email Address', 'errors' => 'Subscriber already exists with this Email Address'));
             }
             
+            $sub_exists = User::where('user_name',trim($data['userName']))->where('is_deleted',0)->first();
+            if(!empty($sub_exists)){
+                return response(array('httpStatus'=>200, "dateTime"=>time(), 'status'=>'fail', 'message'=>'Subscriber already exists with this Username', 'errors' => 'Subscriber already exists with this Username'));
+            }
+            
             $image_name = CommonHelper::uploadImage($request,$request->file('subscriberImage'),'images/user_images');
             
             $insertArray = array('name'=>trim($data['subscriberName']),'email'=>trim($data['emailAddress']),'mobile_no'=>trim($data['mobileNumber']),'address_line1'=>trim($data['addressLine1']),
-            'postal_code'=>trim($data['postalCode']),'user_role'=>2,'country'=>trim($data['country']),'state'=>trim($data['state']),'district'=>trim($data['district']),
+            'postal_code'=>trim($data['postalCode']),'user_role'=>2,'country'=>trim($data['country']),'state'=>trim($data['state']),'district'=>trim($data['district']),'user_name'=>trim($data['userName']),
             'sub_district'=>trim($data['subDistrict']),'village'=>trim($data['village']),'sub_district'=>trim($data['subDistrict']),'image'=>$image_name,'password'=>Hash::make($data['password']));
                 
             $user_data = User::create($insertArray);
@@ -177,16 +182,16 @@ class SubscriberController extends Controller
             return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'success','message' => 'Subscriber added successfully'),200);
             
         }catch (\Exception $e){
-            return response(array("httpStatus"=>500,"dateTime"=>time(),'status' => 'fail','message' =>$e->getMessage()),500);
+            return response(array("httpStatus"=>500,"dateTime"=>time(),'status' => 'fail','message' =>$e->getMessage().', '.$e->getLine()),500);
         }  
     }
     
     function getLocList(){
         $loc_list = [];
-        $loc_list['country'] = 'country'; $loc_list['state'] = 'country,state'; $loc_list['district'] = 'country,state,district';  $loc_list['sub_district'] = 'country,state,district,subDistrict';
-        $loc_list['legislative_assembly_constituency'] = 'country,state,district,LAC';$loc_list['parliamentary_constituency'] = 'country,state,district,PC';
-        $loc_list['municipal_corporation'] = 'country,state,MC1';$loc_list['municipality'] = 'country,state,district,MC2';$loc_list['city_council'] = 'country,state,district,CC';
-        $loc_list['block'] = 'country,state,district,block';$loc_list['ward'] = 'country,state,district,CC,ward';$loc_list['village'] = 'country,state,district,subDistrict,village';
+        $loc_list['1'] = 'country'; $loc_list['2'] = 'country,state'; $loc_list['3'] = 'country,state,district';  $loc_list['11'] = 'country,state,district,subDistrict';
+        $loc_list['4'] = 'country,state,district,LAC';$loc_list['5'] = 'country,state,district,PC';
+        $loc_list['6'] = 'country,state,MC1';$loc_list['7'] = 'country,state,district,MC2';$loc_list['8'] = 'country,state,district,CC';
+        $loc_list['9'] = 'country,state,district,block';$loc_list['10'] = 'country,state,district,CC,ward';$loc_list['11'] = 'country,state,district,subDistrict,village';
 
         return $loc_list;
     }
@@ -649,8 +654,8 @@ class SubscriberController extends Controller
             $user = Auth::user();
             $user_data = [];
             
-            $validationRules = array('emailAddress'=>'required','subscriber_review_id'=>'required','reviewOfficialStatus'=>'required');
-            $attributes = array('emailAddress'=>'Email Address','subscriber_review_id'=>'Designation','reviewOfficialStatus'=>'Member Status','userName'=>'Name','mobileNumber'=>'Mobile Number','DOB'=>'DOB');
+            $validationRules = array('emailAddress'=>'required','subscriber_review_id'=>'required','reviewOfficialStatus'=>'required','userName'=>'required','user_Name'=>'required');
+            $attributes = array('emailAddress'=>'Email Address','subscriber_review_id'=>'Designation','reviewOfficialStatus'=>'Member Status','userName'=>'Name','mobileNumber'=>'Mobile Number','DOB'=>'DOB','user_Name'=>'Username');
             
             $fields = ['country'=>'Country','state'=>'State','district'=>'District','LAC'=>'Legislative Assembly Constituency','PC'=>'Parliamentary Constituency',
             'MC1'=>'Municipal Corporation','MC2'=>'Municipality','CC'=>'City Council','block'=>'Block','ward'=>'Ward','subDistrict'=>'Sub District','village'=>'Village'];
@@ -708,11 +713,16 @@ class SubscriberController extends Controller
             
             if(empty($user_data)){
                 $insertArray = array('name'=>trim($data['userName']),'email'=>trim($data['emailAddress']),'mobile_no'=>trim($data['mobileNumber']),'gender'=>trim($data['gender']),
-                'dob'=>trim($data['DOB']),'user_role'=>3,'password'=>Hash::make('12345678'));
+                'dob'=>trim($data['DOB']),'user_role'=>3,'password'=>Hash::make('12345678'),'user_name'=>trim($data['user_Name']));
                 
                 $user_exists = User::where('email',trim($data['emailAddress']))->where('is_deleted',0)->first();
                 if(!empty($user_exists)){
                     return response(array('httpStatus'=>200, "dateTime"=>time(), 'status'=>'fail', 'message'=>'User already exists with Email Address', 'errors' => 'User already exists with Email Address'));
+                }
+                
+                $user_exists = User::where('user_name',trim($data['user_Name']))->where('is_deleted',0)->first();
+                if(!empty($user_exists)){
+                    return response(array('httpStatus'=>200, "dateTime"=>time(), 'status'=>'fail', 'message'=>'User already exists with Username', 'errors' => 'User already exists with Username'));
                 }
 
                 $user_data = User::create($insertArray);

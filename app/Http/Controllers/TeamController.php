@@ -239,8 +239,8 @@ class TeamController extends Controller
             $user = Auth::user();
             $user_data = [];
             
-            $validationRules = array('emailAddress'=>'required','designation'=>'required','memberStatus'=>'required');
-            $attributes = array('emailAddress'=>'Email Address','designation'=>'Designation','memberStatus'=>'Member Status','userName'=>'Name','mobileNumber'=>'Mobile Number','DOB'=>'DOB');
+            $validationRules = array('emailAddress'=>'required','designation'=>'required','memberStatus'=>'required','user_Name'=>'required');
+            $attributes = array('emailAddress'=>'Email Address','designation'=>'Designation','memberStatus'=>'Member Status','userName'=>'Name','mobileNumber'=>'Mobile Number','DOB'=>'DOB','user_Name'=>'Username');
             
             $fields = ['country'=>'Country','state'=>'State','district'=>'District','LAC'=>'Legislative Assembly Constituency','PC'=>'Parliamentary Constituency',
             'MC1'=>'Municipal Corporation','MC2'=>'Municipality','CC'=>'City Council','block'=>'Block','ward'=>'Ward','subDistrict'=>'Sub District','village'=>'Village'];
@@ -281,11 +281,16 @@ class TeamController extends Controller
             
             if(empty($user_data)){
                 $insertArray = array('name'=>trim($data['userName']),'email'=>trim($data['emailAddress']),'mobile_no'=>trim($data['mobileNumber']),'gender'=>trim($data['gender']),
-                'dob'=>trim($data['DOB']),'user_role'=>3,'password'=>Hash::make('12345678'));
+                'dob'=>trim($data['DOB']),'user_role'=>3,'password'=>Hash::make('12345678'),'user_name'=>trim($data['user_Name']));
                 
                 $user_exists = User::where('email',trim($data['emailAddress']))->where('is_deleted',0)->first();
                 if(!empty($user_exists)){
                     return response(array('httpStatus'=>200, "dateTime"=>time(), 'status'=>'fail', 'message'=>'User already exists with Email Address', 'errors' => 'User already exists with Email Address'));
+                }
+                
+                $user_exists = User::where('user_name',trim($data['user_Name']))->where('is_deleted',0)->first();
+                if(!empty($user_exists)){
+                    return response(array('httpStatus'=>200, "dateTime"=>time(), 'status'=>'fail', 'message'=>'User already exists with Username', 'errors' => 'User already exists with Username'));
                 }
 
                 $user_data = User::create($insertArray);

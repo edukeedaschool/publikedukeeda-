@@ -36,11 +36,21 @@
                         </div>
                     </div>  
                     
+                    
+                    
                     <div class="form-row">
                         <div class="form-group col-md-6" >
                             <label>Confirm Password</label>
                             <input id="password_confirmation" type="password" class="form-control" name="password_confirmation" value="" >
                             <div class="invalid-feedback" id="error_validation_password_confirmation"></div>
+                        </div>
+                    </div>  
+                    
+                    <div class="form-row">
+                        <div class="form-group col-md-6" >
+                            <label>Username</label>
+                            <input id="user_Name" type="text" class="form-control" name="user_Name" value="" maxlength="100">
+                            <div class="invalid-feedback" id="error_validation_user_Name"></div>
                         </div>
                     </div>  
                     

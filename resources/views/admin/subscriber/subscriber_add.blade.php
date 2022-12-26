@@ -86,9 +86,9 @@
                             <label>Representation Area (of official party position)</label>
                             <select id="repAreaOfficialPartyPosition" class="form-control" name="repAreaOfficialPartyPosition" onchange="toggleRepAreaFields(this.value,'pp');">
                                 <option value="">Representation Area</option>
-                                @foreach($rep_area as $key=>$value)
-                                    <option value="{{$key}}">{{$value}}</option>
-                                @endforeach    
+                                @for($i=0;$i<count($rep_area);$i++ )
+                                    <option value="{{$rep_area[$i]['id']}}">{{$rep_area[$i]['representation_area']}}</option>
+                                @endfor  
                             </select>    
                             <div class="invalid-feedback" id="error_validation_repAreaOfficialPartyPosition"></div>
                         </div>
@@ -239,9 +239,9 @@
                             <label>Representation Area (of Elected official position)</label>
                             <select id="repAreaElectedOfficialPosition" class="form-control" name="repAreaElectedOfficialPosition" onchange="toggleRepAreaFields(this.value,'eo');">
                                 <option value="">Representation Area</option>
-                                @foreach($rep_area as $key=>$value)
-                                    <option value="{{$key}}">{{$value}}</option>
-                                @endforeach    
+                                @for($i=0;$i<count($rep_area);$i++ )
+                                    <option value="{{$rep_area[$i]['id']}}">{{$rep_area[$i]['representation_area']}}</option>
+                                @endfor  
                             </select>    
                             <div class="invalid-feedback" id="error_validation_repAreaElectedOfficialPosition"></div>
                         </div>
@@ -433,6 +433,14 @@
                             <label>Password</label>
                             <input id="password" type="password" class="form-control" name="password" value="" >
                             <div class="invalid-feedback" id="error_validation_password"></div>
+                        </div>
+                    </div>  
+                    
+                    <div class="form-row">
+                        <div class="form-group col-md-6" >
+                            <label>Username</label>
+                            <input id="userName" type="text" class="form-control" name="userName" value="" maxlength="100">
+                            <div class="invalid-feedback" id="error_validation_userName"></div>
                         </div>
                     </div>  
                     

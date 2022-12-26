@@ -90,10 +90,10 @@
                             <label>Representation Area (of official party position)</label>
                             <select id="repAreaOfficialPartyPosition" class="form-control" name="repAreaOfficialPartyPosition" onchange="toggleRepAreaFields(this.value,'pp');">
                                 <option value="">Representation Area</option>
-                                @foreach($rep_area as $key=>$value)
-                                    <?php $sel = ($key == $subscriber_data->rep_area_off_party_pos)?'selected':''; ?>    
-                                    <option {{$sel}} value="{{$key}}">{{$value}}</option>
-                                @endforeach    
+                                @for($i=0;$i<count($rep_area);$i++ )
+                                    <?php $sel = ($rep_area[$i]['id'] == $subscriber_data->rep_area_off_party_pos)?'selected':''; ?>    
+                                    <option {{$sel}} value="{{$rep_area[$i]['id']}}">{{$rep_area[$i]['representation_area']}}</option>
+                                @endfor  
                             </select>    
                             <div class="invalid-feedback" id="error_validation_repAreaOfficialPartyPosition"></div>
                         </div>
@@ -247,10 +247,11 @@
                             <label>Representation Area (of Elected official position)</label>
                             <select id="repAreaElectedOfficialPosition" class="form-control" name="repAreaElectedOfficialPosition" onchange="toggleRepAreaFields(this.value,'eo');">
                                 <option value="">Representation Area</option>
-                                @foreach($rep_area as $key=>$value)
-                                    <?php $sel = ($key == $subscriber_data->rep_area_elec_off_pos)?'selected':''; ?> 
-                                    <option {{$sel}} value="{{$key}}">{{$value}}</option>
-                                @endforeach    
+                                
+                                @for($i=0;$i<count($rep_area);$i++ )
+                                    <?php $sel = ($rep_area[$i]['id'] == $subscriber_data->rep_area_elec_off_pos)?'selected':''; ?>    
+                                    <option {{$sel}} value="{{$rep_area[$i]['id']}}">{{$rep_area[$i]['representation_area']}}</option>
+                                @endfor  
                             </select>    
                             <div class="invalid-feedback" id="error_validation_repAreaElectedOfficialPosition"></div>
                         </div>
@@ -446,6 +447,14 @@
                             <div class="invalid-feedback" id="error_validation_password"></div>
                         </div>
                     </div>  <?php */ ?>
+                    
+                    <div class="form-row">
+                        <div class="form-group col-md-6" >
+                            <label>Username</label>
+                            <input id="userName" type="text" class="form-control" name="userName" value="{{$user_data->user_name}}" readonly="true" >
+                            <div class="invalid-feedback" id="error_validation_userName"></div>
+                        </div>
+                    </div>  
                     
                     <div class="form-row">
                         <div class="form-group col-md-6" >
