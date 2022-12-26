@@ -202,5 +202,13 @@ Route::get('/team-member/edit/{Id}', [App\Http\Controllers\TeamController::class
 Route::post('/team-member/edit/{Id}', [App\Http\Controllers\TeamController::class, 'submitEditTeamMember'])->name('submiteditteammember');
 Route::post('/team-member/update', [App\Http\Controllers\TeamController::class, 'updateTeamMember'])->name('updateteammember');
 
+Route::get('/review-official/list', [App\Http\Controllers\SubscriberController::class, 'listReviewOfficial'])->name('reviewofficiallisting');
+Route::get('/review-official/add', [App\Http\Controllers\SubscriberController::class, 'addReviewOfficial'])->name('addreviewofficial');
+Route::post('/review-official/add', [App\Http\Controllers\SubscriberController::class, 'submitAddReviewOfficial'])->name('submitaddreviewofficial');
+Route::get('/review-official/edit/{Id}', [App\Http\Controllers\SubscriberController::class, 'editReviewOfficial'])->name('editreviewofficial');
+Route::post('/review-official/edit/{Id}', [App\Http\Controllers\SubscriberController::class, 'submitEditReviewOfficial'])->name('submiteditreviewofficial');
+Route::post('/review-official/update', [App\Http\Controllers\SubscriberController::class, 'updateReviewOfficial'])->name('updatereviewofficial');
+
+Route::get('/subscriber-review/data/{Id}', [App\Http\Controllers\SubscriberController::class, 'getSubscriberReviewData'])->name('getsubscriberreviewdata');
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');

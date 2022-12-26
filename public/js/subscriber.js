@@ -423,3 +423,148 @@ function submitEditSubscriberReviewData(){
         }
     });
 }
+
+function getReviewOfficialRangeData(val){
+    if(val == '') return false;
+        
+    $.ajax({
+        url:ROOT_PATH+"/subscriber-review/data/"+val,
+        method:"GET",
+        data:'',
+        success:function(msg){
+            if(objectPropertyExists(msg,'status')){
+                if(msg.status == 'fail'){
+                    var errors = getResponseErrors(msg,'<br/>','error_validation_');
+                    if(errors != ''){
+                        $("#addReviewOfficialErrorMessage").html(errors).show();
+                    } 
+                }else{ 
+                    var rep_area= msg.rep_area, field = '';
+                    if(rep_area != null && rep_area != ''){
+                        var fields = rep_area.rep_area_fields;//alert(fields);
+                        
+                        fields = fields.split(',');
+                        for(var i=0;i<fields.length;i++){
+                            field = fields[i];
+                            $("#"+field+"_div").show();
+                        }
+                        
+                    }
+                }
+            }else{
+                displayResponseError(msg,'addReviewOfficialErrorMessage');
+            }
+        },error:function(obj,status,error){
+            $("#addReviewOfficialErrorMessage").html('Error in processing request').show();
+        }
+    });
+}
+
+function submitAddReviewOfficial(){
+    $("#addReviewOfficialErrorMessage,#addReviewOfficialSuccessMessage,.invalid-feedback").html('').hide();
+    var form_data = $("#addReviewOfficialFrm").serialize();
+    ajaxSetup();
+
+    $.ajax({
+        url:ROOT_PATH+"/review-official/add",
+        method:"POST",
+        data:form_data,
+        success:function(msg){
+            if(objectPropertyExists(msg,'status')){
+                if(msg.status == 'fail'){
+                    var errors = getResponseErrors(msg,'<br/>','error_validation_');
+                    if(errors != ''){
+                        $("#addReviewOfficialErrorMessage").html(errors).show();
+                    } 
+                }else{ 
+                    $("#addReviewOfficialSuccessMessage").html(msg.message).show();
+                    $("#addReviewOfficialErrorMessage,.invalid-feedback").html('').hide();
+                    document.getElementById("addReviewOfficialSuccessMessage").scrollIntoView();
+                    var url = ROOT_PATH+"/review-official/list";
+                    setTimeout(function(){  window.location.href = url; }, 1000);
+                }
+            }else{
+                displayResponseError(msg,'addReviewOfficialErrorMessage');
+            }
+        },error:function(obj,status,error){
+            $("#addReviewOfficialErrorMessage").html('Error in processing request').show();
+        }
+    });
+}
+
+function submitEditReviewOfficial(){
+    $("#addReviewOfficialErrorMessage,#addReviewOfficialSuccessMessage,.invalid-feedback").html('').hide();
+    var form_data = $("#editReviewOfficialFrm").serialize();
+    var ro_id = $("#ro_id").val();
+    ajaxSetup();
+
+    $.ajax({
+        url:ROOT_PATH+"/review-official/edit/"+ro_id,
+        method:"POST",
+        data:form_data,
+        success:function(msg){
+            if(objectPropertyExists(msg,'status')){
+                if(msg.status == 'fail'){
+                    var errors = getResponseErrors(msg,'<br/>','error_validation_');
+                    if(errors != ''){
+                        $("#addReviewOfficialErrorMessage").html(errors).show();
+                    } 
+                }else{ 
+                    $("#addReviewOfficialSuccessMessage").html(msg.message).show();
+                    $("#addReviewOfficialErrorMessage,.invalid-feedback").html('').hide();
+                    document.getElementById("addReviewOfficialSuccessMessage").scrollIntoView();
+                    var url = ROOT_PATH+"/review-official/list";
+                    setTimeout(function(){  window.location.href = url; }, 1000);
+                }
+            }else{
+                displayResponseError(msg,'addReviewOfficialErrorMessage');
+            }
+        },error:function(obj,status,error){
+            $("#addReviewOfficialErrorMessage").html('Error in processing request').show();
+        }
+    });
+}
+
+function updateReviewOfficial(action){
+    var chk_vals = [];
+    
+    $(".ro-id-chk").each(function (){
+        if($(this).is(":checked")){
+            chk_vals.push($(this).val());
+        }
+    });
+    
+    if(chk_vals.length == 0){
+        alert('Please select Review Officials');
+        return false;
+    }
+    
+    chk_vals = chk_vals.join(',');
+    
+    ajaxSetup();
+
+    $.ajax({
+        url:ROOT_PATH+"/review-official/update",
+        method:"POST",
+        data:{ids:chk_vals,action:action},
+        success:function(msg){
+            if(objectPropertyExists(msg,'status')){
+                if(msg.status == 'fail'){
+                    var errors = getResponseErrors(msg,'<br/>','error_validation_');
+                    if(errors != ''){
+                        $("#roErrorMessage").html(errors).show();
+                    } 
+                }else{ 
+                    $("#roSuccessMessage").html(msg.message).show();
+                    $("#roErrorMessage,.invalid-feedback").html('').hide();
+                    document.getElementById("roSuccessMessage").scrollIntoView();
+                    setTimeout(function(){  window.location.reload(); }, 1000);
+                }
+            }else{
+                displayResponseError(msg,'roErrorMessage');
+            }
+        },error:function(obj,status,error){
+            $("#roErrorMessage").html('Error in processing request').show();
+        }
+    });
+}

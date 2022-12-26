@@ -18,6 +18,8 @@ use App\Models\SubscriberReview;
 use App\Models\ReviewLevel;
 use App\Models\ReviewRange;
 use App\Models\User;
+use App\Models\RepresentationAreaList;
+use App\Models\ReviewOfficial;
 use App\Helpers\CommonHelper;
 use Validator;
 use Illuminate\Support\Facades\DB;
@@ -584,4 +586,358 @@ class SubscriberController extends Controller
         }  
     }
     
+    public function getSubscriberReviewData(Request $request,$Id){
+        try{
+            $data = $request->all();
+            $user = Auth::user();
+            
+            $subscriber_review_data = SubscriberReview::join('review_level as rl', 'rl.id', '=', 'subscriber_review.review_level_id')
+            ->join('review_range as rr', 'rr.id', '=', 'subscriber_review.review_range_id')        
+            ->where('subscriber_review.subscriber_id',$user->id)
+            ->where('subscriber_review.id',$Id)        
+            ->where('subscriber_review.is_deleted',0)        
+            ->where('rl.is_deleted',0)                
+            ->where('rr.is_deleted',0)                      
+            ->where('subscriber_review.status',1)                        
+            ->where('rl.status',1)                          
+            ->select('subscriber_review.*','rl.review_level','rl.designation','rl.position','rr.review_range')         
+            ->first();
+            
+            if(!empty($subscriber_review_data)){
+                $rep_area = RepresentationAreaList::where('rep_area_key',$subscriber_review_data->review_range)->where('is_deleted',0)->first();
+            }
+            
+            return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'success','message' => 'Subscriber Review Data','subscriber_review_data'=>$subscriber_review_data,'rep_area'=>$rep_area),200);
+            
+        }catch (\Exception $e){
+            \DB::rollBack();
+            return response(array("httpStatus"=>500,"dateTime"=>time(),'status' => 'fail','message' =>$e->getMessage()),500);
+        }  
+    }
+    
+    public function addReviewOfficial(Request $request){
+        try{
+            $data = $request->all();
+            $user = Auth::user();
+            
+            $subscriber_reviews = SubscriberReview::join('review_level as rl', 'rl.id', '=', 'subscriber_review.review_level_id')
+            ->join('review_range as rr', 'rr.id', '=', 'subscriber_review.review_range_id')        
+            ->where('subscriber_review.subscriber_id',$user->id)
+            ->where('subscriber_review.is_deleted',0)        
+            ->where('rl.is_deleted',0)                
+            ->where('subscriber_review.status',1)                        
+            ->where('rl.status',1)                          
+            ->select('subscriber_review.*','rl.review_level','rl.designation','rl.position','rr.review_range')        
+            ->orderBy('rr.id')        
+            ->get()->toArray();
+            
+            $country_list = CountryList::where('is_deleted',0)->get()->toArray();
+            $states_list = StateList::where('is_deleted',0)->get()->toArray();
+            
+            $params = ['country_list'=>$country_list,'states_list'=>$states_list,'subscriber_reviews'=>$subscriber_reviews,'title'=>'Add Review Official'];
+            
+            return view('admin/subscriber/review_official_add',$params);
+            
+        }catch (\Exception $e){
+            return view('admin/page_error',array('message' =>$e->getMessage()));
+        }
+    }
+    
+    public function submitAddReviewOfficial(Request $request){
+        try{
+            $data = $request->all();
+            $user = Auth::user();
+            $user_data = [];
+            
+            $validationRules = array('emailAddress'=>'required','subscriber_review_id'=>'required','reviewOfficialStatus'=>'required');
+            $attributes = array('emailAddress'=>'Email Address','subscriber_review_id'=>'Designation','reviewOfficialStatus'=>'Member Status','userName'=>'Name','mobileNumber'=>'Mobile Number','DOB'=>'DOB');
+            
+            $fields = ['country'=>'Country','state'=>'State','district'=>'District','LAC'=>'Legislative Assembly Constituency','PC'=>'Parliamentary Constituency',
+            'MC1'=>'Municipal Corporation','MC2'=>'Municipality','CC'=>'City Council','block'=>'Block','ward'=>'Ward','subDistrict'=>'Sub District','village'=>'Village'];
+            
+            foreach($fields as $key=>$value){
+                $attributes[$key.'_ro'] = $value;
+            }
+            
+            if(!empty($data['emailAddress'])){
+                $user_data = User::where('email',trim($data['emailAddress']))->where('is_deleted',0)->first();
+                if(empty($user_data)){
+                    $validationRules['userName'] = $validationRules['mobileNumber'] = $validationRules['gender'] = $validationRules['DOB'] = 'required';
+                }
+            }else{
+                $validationRules['userName'] = $validationRules['mobileNumber'] = $validationRules['gender'] = $validationRules['DOB'] = 'required';
+            }
+            
+            if(!empty($data['subscriber_review_id'])){
+                $subscriber_review_data = SubscriberReview::join('review_level as rl', 'rl.id', '=', 'subscriber_review.review_level_id')
+                ->join('review_range as rr', 'rr.id', '=', 'subscriber_review.review_range_id')        
+                ->where('subscriber_review.subscriber_id',$user->id)
+                ->where('subscriber_review.id',$data['subscriber_review_id'])        
+                ->where('subscriber_review.is_deleted',0)        
+                ->where('rl.is_deleted',0)                
+                ->where('rr.is_deleted',0)                      
+                ->where('subscriber_review.status',1)                        
+                ->where('rl.status',1)                          
+                ->select('subscriber_review.*','rl.review_level','rl.designation','rl.position','rr.review_range')         
+                ->first();
+                
+                if(empty($subscriber_review_data)){
+                    return response(array('httpStatus'=>200, "dateTime"=>time(), 'status'=>'fail', 'message'=>'Subscriber Review Data is empty', 'errors' => 'Subscriber Review Data is empty'));
+                }
+
+                $review_range = str_replace(' ','_',$subscriber_review_data->review_range);
+                
+                $rep_area = RepresentationAreaList::where('rep_area_key',$review_range)->where('is_deleted',0)->first();
+                
+                if(empty($rep_area)){
+                    return response(array('httpStatus'=>200, "dateTime"=>time(), 'status'=>'fail', 'message'=>'Representation Area Data is empty', 'errors' => 'Representation Area Data is empty'));
+                }
+                
+                $req_fields = explode(',',$rep_area->rep_area_fields);
+                        
+                for($i=0;$i<count($req_fields);$i++){
+                    $field = $req_fields[$i].'_ro';
+                    $validationRules[$field] = 'required';
+                }
+            }
+            
+            $validator = Validator::make($data,$validationRules,array(),$attributes);
+            if ($validator->fails()){ 
+                return response(array('httpStatus'=>200, "dateTime"=>time(), 'status'=>'fail', 'message'=>'Validation error', 'errors' => $validator->errors()));
+            }	
+            
+            if(empty($user_data)){
+                $insertArray = array('name'=>trim($data['userName']),'email'=>trim($data['emailAddress']),'mobile_no'=>trim($data['mobileNumber']),'gender'=>trim($data['gender']),
+                'dob'=>trim($data['DOB']),'user_role'=>3,'password'=>Hash::make('12345678'));
+                
+                $user_exists = User::where('email',trim($data['emailAddress']))->where('is_deleted',0)->first();
+                if(!empty($user_exists)){
+                    return response(array('httpStatus'=>200, "dateTime"=>time(), 'status'=>'fail', 'message'=>'User already exists with Email Address', 'errors' => 'User already exists with Email Address'));
+                }
+
+                $user_data = User::create($insertArray);
+            }
+            
+            $review_official_exists = ReviewOfficial::where('user_id',$user_data->id)->where('is_deleted',0)->first();
+            if(!empty($review_official_exists)){
+                return response(array('httpStatus'=>200, "dateTime"=>time(), 'status'=>'fail', 'message'=>'User already added as Review Official', 'errors' => 'User already added as Review Official'));
+            }
+            
+            if($user_data->user_role != 3){
+                return response(array('httpStatus'=>200, "dateTime"=>time(), 'status'=>'fail', 'message'=>'User Type is not General User', 'errors' => 'User Type is not General User'));
+            }
+            
+            $insertArray = array('user_id'=>$user_data->id,'subscriber_review_id'=>trim($data['subscriber_review_id']),'subscriber_id'=>$user->id,'status'=>$data['reviewOfficialStatus']);
+            
+            $fieldsArray = ['country_ro'=>'country_ro','state_ro'=>'state_ro','district_ro'=>'district_ro','lac_ro'=>'LAC_ro','pc_ro'=>'PC_ro','mc1_ro'=>'MC1_ro','mc2_ro'=>'MC2_ro',
+            'cc_ro'=>'CC_ro','block_ro'=>'block_ro','ward_ro'=>'ward_ro','sub_district_ro'=>'subDistrict_ro','village_ro'=>'village_ro'];
+            
+            foreach($fieldsArray as $key=>$value){
+                $insertArray[$key] = (isset($data[$value]) && !empty($data[$value]))?trim($data[$value]):null;
+            }
+            
+            $reviewOfficial = ReviewOfficial::create($insertArray);
+          
+            return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'success','message' => 'Review Official added successfully'),200);
+            
+        }catch (\Exception $e){
+            return response(array("httpStatus"=>500,"dateTime"=>time(),'status' => 'fail','message' =>$e->getMessage()),500);
+        }  
+    }
+    
+    public function editReviewOfficial(Request $request,$id){
+        try{
+            $data = $request->all();
+            $user = Auth::user();
+            
+            $review_official_id = $id;
+            
+            $subscriber_reviews = SubscriberReview::join('review_level as rl', 'rl.id', '=', 'subscriber_review.review_level_id')
+            ->join('review_range as rr', 'rr.id', '=', 'subscriber_review.review_range_id')        
+            ->where('subscriber_review.subscriber_id',$user->id)
+            ->where('subscriber_review.is_deleted',0)        
+            ->where('rl.is_deleted',0)                
+            ->where('subscriber_review.status',1)                        
+            ->where('rl.status',1)                          
+            ->select('subscriber_review.*','rl.review_level','rl.designation','rl.position','rr.review_range')        
+            ->orderBy('rr.id')        
+            ->get()->toArray();
+            
+            $country_list = CountryList::where('is_deleted',0)->get()->toArray();
+            $states_list = StateList::where('is_deleted',0)->get()->toArray();
+            $ro_data = ReviewOfficial::where('id',$review_official_id)->where('is_deleted',0)->first();
+            $user_data = User::where('id',$ro_data->user_id)->where('is_deleted',0)->first();
+            
+            $params = ['country_list'=>$country_list,'states_list'=>$states_list,'subscriber_reviews'=>$subscriber_reviews,'title'=>'Edit Review Official','ro_data'=>$ro_data,'user_data'=>$user_data];
+            
+            return view('admin/subscriber/review_official_edit',$params);
+            
+        }catch (\Exception $e){
+            return view('admin/page_error',array('message' =>$e->getMessage().', '.$e->getLine()));
+        }
+    }
+    
+    public function submitEditReviewOfficial(Request $request,$id){
+        try{
+            $data = $request->all();
+            $user = Auth::user();
+            $user_data = [];
+            
+            $review_official_id = $id;
+            $ro_data = ReviewOfficial::where('id',$review_official_id)->where('is_deleted',0)->first();
+            
+            $validationRules = array('emailAddress'=>'required','subscriber_review_id'=>'required','reviewOfficialStatus'=>'required');
+            $attributes = array('emailAddress'=>'Email Address','subscriber_review_id'=>'Designation','reviewOfficialStatus'=>'Member Status','userName'=>'Name','mobileNumber'=>'Mobile Number','DOB'=>'DOB');
+            
+            $fields = ['country'=>'Country','state'=>'State','district'=>'District','LAC'=>'Legislative Assembly Constituency','PC'=>'Parliamentary Constituency',
+            'MC1'=>'Municipal Corporation','MC2'=>'Municipality','CC'=>'City Council','block'=>'Block','ward'=>'Ward','subDistrict'=>'Sub District','village'=>'Village'];
+            
+            foreach($fields as $key=>$value){
+                $attributes[$key.'_ro'] = $value;
+            }
+            
+            if(!empty($data['emailAddress'])){
+                $user_data = User::where('email',trim($data['emailAddress']))->where('is_deleted',0)->first();
+                if(empty($user_data)){
+                    $validationRules['userName'] = $validationRules['mobileNumber'] = $validationRules['gender'] = $validationRules['DOB'] = 'required';
+                }
+            }else{
+                $validationRules['userName'] = $validationRules['mobileNumber'] = $validationRules['gender'] = $validationRules['DOB'] = 'required';
+            }
+            
+            if(!empty($data['subscriber_review_id'])){
+                $subscriber_review_data = SubscriberReview::join('review_level as rl', 'rl.id', '=', 'subscriber_review.review_level_id')
+                ->join('review_range as rr', 'rr.id', '=', 'subscriber_review.review_range_id')        
+                ->where('subscriber_review.subscriber_id',$user->id)
+                ->where('subscriber_review.id',$data['subscriber_review_id'])        
+                ->where('subscriber_review.is_deleted',0)        
+                ->where('rl.is_deleted',0)                
+                ->where('rr.is_deleted',0)                      
+                ->where('subscriber_review.status',1)                        
+                ->where('rl.status',1)                          
+                ->select('subscriber_review.*','rl.review_level','rl.designation','rl.position','rr.review_range')         
+                ->first();
+                
+                if(empty($subscriber_review_data)){
+                    return response(array('httpStatus'=>200, "dateTime"=>time(), 'status'=>'fail', 'message'=>'Subscriber Review Data is empty', 'errors' => 'Subscriber Review Data is empty'));
+                }
+
+                $review_range = str_replace(' ','_',$subscriber_review_data->review_range);
+                
+                $rep_area = RepresentationAreaList::where('rep_area_key',$review_range)->where('is_deleted',0)->first();
+                
+                if(empty($rep_area)){
+                    return response(array('httpStatus'=>200, "dateTime"=>time(), 'status'=>'fail', 'message'=>'Representation Area Data is empty', 'errors' => 'Representation Area Data is empty'));
+                }
+                
+                $req_fields = explode(',',$rep_area->rep_area_fields);
+                        
+                for($i=0;$i<count($req_fields);$i++){
+                    $field = $req_fields[$i].'_ro';
+                    $validationRules[$field] = 'required';
+                }
+            }
+            
+            $validator = Validator::make($data,$validationRules,array(),$attributes);
+            if ($validator->fails()){ 
+                return response(array('httpStatus'=>200, "dateTime"=>time(), 'status'=>'fail', 'message'=>'Validation error', 'errors' => $validator->errors()));
+            }	
+            
+            if(empty($user_data)){
+                $insertArray = array('name'=>trim($data['userName']),'email'=>trim($data['emailAddress']),'mobile_no'=>trim($data['mobileNumber']),'gender'=>trim($data['gender']),
+                'dob'=>trim($data['DOB']),'user_role'=>3,'password'=>Hash::make('12345678'));
+                
+                $user_exists = User::where('email',trim($data['emailAddress']))->where('is_deleted',0)->first();
+                if(!empty($user_exists)){
+                    return response(array('httpStatus'=>200, "dateTime"=>time(), 'status'=>'fail', 'message'=>'User already exists with Email Address', 'errors' => 'User already exists with Email Address'));
+                }
+
+                $user_data = User::create($insertArray);
+            }
+            
+            $review_official_exists = ReviewOfficial::where('user_id',$user_data->id)->where('id','!=',$review_official_id)->where('is_deleted',0)->first();
+            if(!empty($review_official_exists)){
+                return response(array('httpStatus'=>200, "dateTime"=>time(), 'status'=>'fail', 'message'=>'User already added as Review Official', 'errors' => 'User already added as Review Official'));
+            }
+            
+            if($user_data->user_role != 3){
+                return response(array('httpStatus'=>200, "dateTime"=>time(), 'status'=>'fail', 'message'=>'User Type is not General User', 'errors' => 'User Type is not General User'));
+            }
+            
+            $updateArray = array('user_id'=>$user_data->id,'subscriber_review_id'=>trim($data['subscriber_review_id']),'status'=>$data['reviewOfficialStatus']);
+            
+            $fieldsArray = ['country_ro'=>'country_ro','state_ro'=>'state_ro','district_ro'=>'district_ro','lac_ro'=>'LAC_ro','pc_ro'=>'PC_ro','mc1_ro'=>'MC1_ro','mc2_ro'=>'MC2_ro',
+            'cc_ro'=>'CC_ro','block_ro'=>'block_ro','ward_ro'=>'ward_ro','sub_district_ro'=>'subDistrict_ro','village_ro'=>'village_ro'];
+            
+            foreach($fieldsArray as $key=>$value){
+                $updateArray[$key] = (isset($data[$value]) && !empty($data[$value]))?trim($data[$value]):null;
+            }
+            
+            ReviewOfficial::where('id',$review_official_id)->update($updateArray);
+          
+            return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'success','message' => 'Review Official updated successfully'),200);
+            
+        }catch (\Exception $e){
+            return response(array("httpStatus"=>500,"dateTime"=>time(),'status' => 'fail','message' =>$e->getMessage()),500);
+        }  
+    }
+    
+    function listReviewOfficial(Request $request){
+        try{
+            $data = $request->all();
+            
+            $ro_list = ReviewOfficial::join('subscriber_review as sr', 'sr.id', '=', 'review_official.subscriber_review_id')
+            ->join('review_level as rl', 'rl.id', '=', 'sr.review_level_id')           
+            ->join('users as u1', 'u1.id', '=', 'review_official.user_id')        
+            ->join('users as u2', 'u2.id', '=', 'review_official.subscriber_id')        
+            ->where('review_official.is_deleted',0)        
+            ->where('sr.is_deleted',0)                
+            ->where('u1.is_deleted',0)                
+            ->where('u2.is_deleted',0);
+            
+            if(isset($data['ro_name']) && !empty($data['ro_name'])){
+                $ro_list = $ro_list->where('u1.name','LIKE','%'.trim($data['ro_name']).'%');
+            }
+            
+            $ro_list = $ro_list->select('review_official.*','u1.name as ro_name','u2.name as subscriber_name','rl.designation')        
+            ->orderBy('review_official.id','ASC')
+            ->paginate(50);
+            
+            return view('admin/subscriber/review_official_list',array('title'=>'Review Official List','ro_list'=>$ro_list));
+         
+        }catch (\Exception $e){
+            return view('admin/page_error',array('message' =>$e->getMessage()));
+        }
+    }
+    
+    public function updateReviewOfficial(Request $request){
+        try{
+            $data = $request->all();
+            $user = Auth::user();
+            
+            $ids = explode(',',trim($data['ids']));
+            
+            if(empty($data['ids'])){
+                return response(array('httpStatus'=>200, "dateTime"=>time(), 'status'=>'fail', 'message'=>'Please select Review Official', 'errors' => 'Please select Review Official'));
+            }
+            
+            if($data['action'] == 'delete'){
+                ReviewOfficial::wherein('id',$ids)->update(['is_deleted'=>1]);
+            }
+            
+            if($data['action'] == 'disable'){
+                ReviewOfficial::wherein('id',$ids)->update(['status'=>0]);
+            }
+            
+            if($data['action'] == 'enable'){
+                ReviewOfficial::wherein('id',$ids)->update(['status'=>1]);
+            }
+            
+            return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'success','message' => 'Review Official updated successfully'),200);
+            
+        }catch (\Exception $e){
+            \DB::rollBack();
+            return response(array("httpStatus"=>500,"dateTime"=>time(),'status' => 'fail','message' =>$e->getMessage()),500);
+        }  
+    }
 }
