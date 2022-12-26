@@ -654,7 +654,7 @@ class SubscriberController extends Controller
             $user = Auth::user();
             $user_data = [];
             
-            $validationRules = array('emailAddress'=>'required','subscriber_review_id'=>'required','reviewOfficialStatus'=>'required','userName'=>'required','user_Name'=>'required');
+            $validationRules = array('emailAddress'=>'required|email','subscriber_review_id'=>'required','reviewOfficialStatus'=>'required','userName'=>'required','user_Name'=>'required');
             $attributes = array('emailAddress'=>'Email Address','subscriber_review_id'=>'Designation','reviewOfficialStatus'=>'Member Status','userName'=>'Name','mobileNumber'=>'Mobile Number','DOB'=>'DOB','user_Name'=>'Username');
             
             $fields = ['country'=>'Country','state'=>'State','district'=>'District','LAC'=>'Legislative Assembly Constituency','PC'=>'Parliamentary Constituency',
@@ -796,7 +796,7 @@ class SubscriberController extends Controller
             $review_official_id = $id;
             $ro_data = ReviewOfficial::where('id',$review_official_id)->where('is_deleted',0)->first();
             
-            $validationRules = array('emailAddress'=>'required','subscriber_review_id'=>'required','reviewOfficialStatus'=>'required');
+            $validationRules = array('emailAddress'=>'required|email','subscriber_review_id'=>'required','reviewOfficialStatus'=>'required');
             $attributes = array('emailAddress'=>'Email Address','subscriber_review_id'=>'Designation','reviewOfficialStatus'=>'Member Status','userName'=>'Name','mobileNumber'=>'Mobile Number','DOB'=>'DOB');
             
             $fields = ['country'=>'Country','state'=>'State','district'=>'District','LAC'=>'Legislative Assembly Constituency','PC'=>'Parliamentary Constituency',

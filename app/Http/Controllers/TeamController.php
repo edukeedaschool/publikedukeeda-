@@ -239,7 +239,7 @@ class TeamController extends Controller
             $user = Auth::user();
             $user_data = [];
             
-            $validationRules = array('emailAddress'=>'required','designation'=>'required','memberStatus'=>'required','user_Name'=>'required');
+            $validationRules = array('emailAddress'=>'required|email','designation'=>'required','memberStatus'=>'required','user_Name'=>'required');
             $attributes = array('emailAddress'=>'Email Address','designation'=>'Designation','memberStatus'=>'Member Status','userName'=>'Name','mobileNumber'=>'Mobile Number','DOB'=>'DOB','user_Name'=>'Username');
             
             $fields = ['country'=>'Country','state'=>'State','district'=>'District','LAC'=>'Legislative Assembly Constituency','PC'=>'Parliamentary Constituency',
@@ -354,7 +354,7 @@ class TeamController extends Controller
             $tm_id = $id;
             $tm_data = TeamMembers::where('id',$tm_id)->first();
             
-            $validationRules = array('emailAddress'=>'required','designation'=>'required','memberStatus'=>'required');
+            $validationRules = array('emailAddress'=>'required|email','designation'=>'required','memberStatus'=>'required');
             $attributes = array('emailAddress'=>'Email Address','designation'=>'Designation','memberStatus'=>'Member Status','userName'=>'Name','mobileNumber'=>'Mobile Number','DOB'=>'DOB');
             
             $fields = ['country'=>'Country','state'=>'State','district'=>'District','LAC'=>'Legislative Assembly Constituency','PC'=>'Parliamentary Constituency',
