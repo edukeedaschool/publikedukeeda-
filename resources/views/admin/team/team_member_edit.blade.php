@@ -16,7 +16,7 @@
                     <div class="form-row">
                         <div class="form-group col-md-6" >
                             <label>Email Address</label>
-                            <input id="emailAddress" type="text" class="form-control" name="emailAddress" value="{{$user_data->email}}" onblur="getTeamMemberData(this.value);">
+                            <input id="emailAddress" type="text" class="form-control" name="emailAddress" value="{{$user_data->email}}" onblur="getTeamMemberData(this.value);" readonly="true">
                             <input type="hidden" name="tm_id" id="tm_id" value="{{$tm_data->id}}">
                             <div class="invalid-feedback" id="error_validation_emailAddress"></div>
                         </div>
@@ -32,9 +32,9 @@
                     
                     <div class="form-row">
                         <div class="form-group col-md-6" >
-                            <label>Name</label>
-                            <input id="userName" type="text" class="form-control" name="userName" value="{{$user_data->name}}" >
-                            <div class="invalid-feedback" id="error_validation_userName"></div>
+                            <label>Official Name</label>
+                            <input id="officialName" type="text" class="form-control" name="officialName" value="{{$user_data->official_name}}" >
+                            <div class="invalid-feedback" id="error_validation_officialName"></div>
                         </div>
                     </div>
                     

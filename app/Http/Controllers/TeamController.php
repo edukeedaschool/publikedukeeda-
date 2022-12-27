@@ -233,14 +233,14 @@ class TeamController extends Controller
         }
     }
     
-    public function submitAddTeamMember(Request $request){
+    public function submitAddTeamMember(Request $request){ 
         try{
             $data = $request->all();
             $user = Auth::user();
             $user_data = [];
             
-            $validationRules = array('emailAddress'=>'required|email','designation'=>'required','memberStatus'=>'required','user_Name'=>'required');
-            $attributes = array('emailAddress'=>'Email Address','designation'=>'Designation','memberStatus'=>'Member Status','userName'=>'Name','mobileNumber'=>'Mobile Number','DOB'=>'DOB','user_Name'=>'Username');
+            $validationRules = array('emailAddress'=>'required|email','designation'=>'required','memberStatus'=>'required','user_Name'=>'required','officialName'=>'required');
+            $attributes = array('emailAddress'=>'Email Address','designation'=>'Designation','memberStatus'=>'Member Status','officialName'=>'Official Name','mobileNumber'=>'Mobile Number','DOB'=>'DOB','user_Name'=>'Username');
             
             $fields = ['country'=>'Country','state'=>'State','district'=>'District','LAC'=>'Legislative Assembly Constituency','PC'=>'Parliamentary Constituency',
             'MC1'=>'Municipal Corporation','MC2'=>'Municipality','CC'=>'City Council','block'=>'Block','ward'=>'Ward','subDistrict'=>'Sub District','village'=>'Village'];
@@ -252,10 +252,10 @@ class TeamController extends Controller
             if(!empty($data['emailAddress'])){
                 $user_data = User::where('email',trim($data['emailAddress']))->where('is_deleted',0)->first();
                 if(empty($user_data)){
-                    $validationRules['userName'] = $validationRules['mobileNumber'] = $validationRules['gender'] = $validationRules['DOB'] = 'required';
+                    $validationRules['user_Name'] = $validationRules['officialName'] = $validationRules['mobileNumber'] = $validationRules['gender'] = $validationRules['DOB'] = 'required';
                 }
             }else{
-                $validationRules['userName'] = $validationRules['mobileNumber'] = $validationRules['gender'] = $validationRules['DOB'] = 'required';
+                $validationRules['user_Name'] = $validationRules['officialName'] = $validationRules['mobileNumber'] = $validationRules['gender'] = $validationRules['DOB'] = 'required';
             }
             
             if(!empty($data['designation'])){
@@ -280,8 +280,8 @@ class TeamController extends Controller
             }	
             
             if(empty($user_data)){
-                $insertArray = array('name'=>trim($data['userName']),'email'=>trim($data['emailAddress']),'mobile_no'=>trim($data['mobileNumber']),'gender'=>trim($data['gender']),
-                'dob'=>trim($data['DOB']),'user_role'=>3,'password'=>Hash::make('12345678'),'user_name'=>trim($data['user_Name']));
+                $insertArray = array('official_name'=>trim($data['officialName']),'email'=>trim($data['emailAddress']),'mobile_no'=>trim($data['mobileNumber']),'gender'=>trim($data['gender']),
+                'dob'=>trim($data['DOB']),'user_role'=>3,'password'=>Hash::make('12345678'),'user_name'=>trim($data['user_Name']),'name'=>trim($data['officialName']));
                 
                 $user_exists = User::where('email',trim($data['emailAddress']))->where('is_deleted',0)->first();
                 if(!empty($user_exists)){
@@ -354,8 +354,8 @@ class TeamController extends Controller
             $tm_id = $id;
             $tm_data = TeamMembers::where('id',$tm_id)->first();
             
-            $validationRules = array('emailAddress'=>'required|email','designation'=>'required','memberStatus'=>'required');
-            $attributes = array('emailAddress'=>'Email Address','designation'=>'Designation','memberStatus'=>'Member Status','userName'=>'Name','mobileNumber'=>'Mobile Number','DOB'=>'DOB');
+            $validationRules = array('emailAddress'=>'required|email','designation'=>'required','memberStatus'=>'required','officialName'=>'required');
+            $attributes = array('emailAddress'=>'Email Address','designation'=>'Designation','memberStatus'=>'Member Status','userName'=>'Name','mobileNumber'=>'Mobile Number','DOB'=>'DOB','officialName'=>'Official Name');
             
             $fields = ['country'=>'Country','state'=>'State','district'=>'District','LAC'=>'Legislative Assembly Constituency','PC'=>'Parliamentary Constituency',
             'MC1'=>'Municipal Corporation','MC2'=>'Municipality','CC'=>'City Council','block'=>'Block','ward'=>'Ward','subDistrict'=>'Sub District','village'=>'Village'];
@@ -367,10 +367,10 @@ class TeamController extends Controller
             if(!empty($data['emailAddress'])){
                 $user_data = User::where('email',trim($data['emailAddress']))->where('is_deleted',0)->first();
                 if(empty($user_data)){
-                    $validationRules['userName'] = $validationRules['mobileNumber'] = $validationRules['gender'] = $validationRules['DOB'] = 'required';
+                    $validationRules['user_Name'] = $validationRules['officialName'] = $validationRules['mobileNumber'] = $validationRules['gender'] = $validationRules['DOB'] = 'required';
                 }
             }else{
-                $validationRules['userName'] = $validationRules['mobileNumber'] = $validationRules['gender'] = $validationRules['DOB'] = 'required';
+                $validationRules['user_Name'] = $validationRules['officialName'] = $validationRules['mobileNumber'] = $validationRules['gender'] = $validationRules['DOB'] = 'required';
             }
             
             if(!empty($data['designation'])){
@@ -395,7 +395,7 @@ class TeamController extends Controller
             }	
             
             if(empty($user_data)){
-                $insertArray = array('name'=>trim($data['userName']),'email'=>trim($data['emailAddress']),'mobile_no'=>trim($data['mobileNumber']),'gender'=>trim($data['gender']),
+                $insertArray = array('official_name'=>trim($data['officialName']),'email'=>trim($data['emailAddress']),'mobile_no'=>trim($data['mobileNumber']),'gender'=>trim($data['gender']),
                 'dob'=>trim($data['DOB']),'user_role'=>3,'password'=>Hash::make('12345678'));
                 
                 $user_exists = User::where('email',trim($data['emailAddress']))->where('is_deleted',0)->first();

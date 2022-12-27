@@ -171,9 +171,9 @@ function getTeamMemberData(email){
                         $("#mobileNumber").val(user_data.mobile_no);
                         $("#gender").val(user_data.gender);
                         $("#DOB").val(user_data.dob);
-                        $("#userName,#mobileNumber,#gender,#DOB").attr('readonly',true);
+                        $("#userName,#mobileNumber,#gender,#DOB,#officialName").attr('readonly',true);
                     }else{
-                        $("#userName,#mobileNumber,#gender,#DOB").val('').attr('readonly',false);
+                        $("#userName,#mobileNumber,#gender,#DOB,#officialName").val('').attr('readonly',false);
                     }
                 }
             }else{

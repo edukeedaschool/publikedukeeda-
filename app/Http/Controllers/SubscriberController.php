@@ -169,7 +169,7 @@ class SubscriberController extends Controller
             'country_pp'=>'country_pp','state_pp'=>'state_pp','district_pp'=>'district_pp','lac_pp'=>'LAC_pp','pc_pp'=>'PC_pp','mc1_pp'=>'MC1_pp','mc2_pp'=>'MC2_pp',
             'cc_pp'=>'CC_pp','block_pp'=>'block_pp','ward_pp'=>'ward_pp','sub_district_pp'=>'subDistrict_pp','village_pp'=>'village_pp',
             'country_eo'=>'country_eo','state_eo'=>'state_eo','district_eo'=>'district_eo','lac_eo'=>'LAC_eo','pc_eo'=>'PC_eo','mc1_eo'=>'MC1_eo','mc2_eo'=>'MC2_eo',
-            'cc_eo'=>'CC_eo','block_eo'=>'block_eo','ward_eo'=>'ward_eo','sub_district_eo'=>'subDistrict_eo','village_eo'=>'village_eo','status'=>'subscriberStatus'];
+            'cc_eo'=>'CC_eo','block_eo'=>'block_eo','ward_eo'=>'ward_eo','sub_district_eo'=>'subDistrict_eo','village_eo'=>'village_eo','status'=>'subscriberStatus','bio'=>'subscriberBio'];
             
             foreach($fieldsArray as $key=>$value){
                 $insertArray[$key] = (isset($data[$value]) && !empty($data[$value]))?trim($data[$value]):null;
@@ -392,7 +392,7 @@ class SubscriberController extends Controller
             'country_pp'=>'country_pp','state_pp'=>'state_pp','district_pp'=>'district_pp','lac_pp'=>'LAC_pp','pc_pp'=>'PC_pp','mc1_pp'=>'MC1_pp','mc2_pp'=>'MC2_pp',
             'cc_pp'=>'CC_pp','block_pp'=>'block_pp','ward_pp'=>'ward_pp','sub_district_pp'=>'subDistrict_pp','village_pp'=>'village_pp',
             'country_eo'=>'country_eo','state_eo'=>'state_eo','district_eo'=>'district_eo','lac_eo'=>'LAC_eo','pc_eo'=>'PC_eo','mc1_eo'=>'MC1_eo','mc2_eo'=>'MC2_eo',
-            'cc_eo'=>'CC_eo','block_eo'=>'block_eo','ward_eo'=>'ward_eo','sub_district_eo'=>'subDistrict_eo','village_eo'=>'village_eo','status'=>'subscriberStatus'];
+            'cc_eo'=>'CC_eo','block_eo'=>'block_eo','ward_eo'=>'ward_eo','sub_district_eo'=>'subDistrict_eo','village_eo'=>'village_eo','status'=>'subscriberStatus','bio'=>'subscriberBio'];
             
             foreach($fieldsArray as $key=>$value){
                 $updateArray[$key] = (isset($data[$value]) && !empty($data[$value]))?trim($data[$value]):null;
@@ -654,8 +654,8 @@ class SubscriberController extends Controller
             $user = Auth::user();
             $user_data = [];
             
-            $validationRules = array('emailAddress'=>'required|email','subscriber_review_id'=>'required','reviewOfficialStatus'=>'required','userName'=>'required','user_Name'=>'required');
-            $attributes = array('emailAddress'=>'Email Address','subscriber_review_id'=>'Designation','reviewOfficialStatus'=>'Member Status','userName'=>'Name','mobileNumber'=>'Mobile Number','DOB'=>'DOB','user_Name'=>'Username');
+            $validationRules = array('emailAddress'=>'required|email','subscriber_review_id'=>'required','reviewOfficialStatus'=>'required','officialName'=>'required','user_Name'=>'required');
+            $attributes = array('emailAddress'=>'Email Address','subscriber_review_id'=>'Designation','reviewOfficialStatus'=>'Member Status','officialName'=>'Official Name','mobileNumber'=>'Mobile Number','DOB'=>'DOB','user_Name'=>'Username');
             
             $fields = ['country'=>'Country','state'=>'State','district'=>'District','LAC'=>'Legislative Assembly Constituency','PC'=>'Parliamentary Constituency',
             'MC1'=>'Municipal Corporation','MC2'=>'Municipality','CC'=>'City Council','block'=>'Block','ward'=>'Ward','subDistrict'=>'Sub District','village'=>'Village'];
@@ -667,10 +667,10 @@ class SubscriberController extends Controller
             if(!empty($data['emailAddress'])){
                 $user_data = User::where('email',trim($data['emailAddress']))->where('is_deleted',0)->first();
                 if(empty($user_data)){
-                    $validationRules['userName'] = $validationRules['mobileNumber'] = $validationRules['gender'] = $validationRules['DOB'] = 'required';
+                    $validationRules['officialName'] = $validationRules['user_Name'] = $validationRules['mobileNumber'] = $validationRules['gender'] = $validationRules['DOB'] = 'required';
                 }
             }else{
-                $validationRules['userName'] = $validationRules['mobileNumber'] = $validationRules['gender'] = $validationRules['DOB'] = 'required';
+                $validationRules['officialName'] = $validationRules['user_Name'] = $validationRules['mobileNumber'] = $validationRules['gender'] = $validationRules['DOB'] = 'required';
             }
             
             if(!empty($data['subscriber_review_id'])){
@@ -712,8 +712,8 @@ class SubscriberController extends Controller
             }	
             
             if(empty($user_data)){
-                $insertArray = array('name'=>trim($data['userName']),'email'=>trim($data['emailAddress']),'mobile_no'=>trim($data['mobileNumber']),'gender'=>trim($data['gender']),
-                'dob'=>trim($data['DOB']),'user_role'=>3,'password'=>Hash::make('12345678'),'user_name'=>trim($data['user_Name']));
+                $insertArray = array('name'=>trim($data['officialName']),'email'=>trim($data['emailAddress']),'mobile_no'=>trim($data['mobileNumber']),'gender'=>trim($data['gender']),
+                'dob'=>trim($data['DOB']),'user_role'=>3,'password'=>Hash::make('12345678'),'user_name'=>trim($data['user_Name']),'official_name'=>trim($data['officialName']));
                 
                 $user_exists = User::where('email',trim($data['emailAddress']))->where('is_deleted',0)->first();
                 if(!empty($user_exists)){
@@ -796,8 +796,8 @@ class SubscriberController extends Controller
             $review_official_id = $id;
             $ro_data = ReviewOfficial::where('id',$review_official_id)->where('is_deleted',0)->first();
             
-            $validationRules = array('emailAddress'=>'required|email','subscriber_review_id'=>'required','reviewOfficialStatus'=>'required');
-            $attributes = array('emailAddress'=>'Email Address','subscriber_review_id'=>'Designation','reviewOfficialStatus'=>'Member Status','userName'=>'Name','mobileNumber'=>'Mobile Number','DOB'=>'DOB');
+            $validationRules = array('emailAddress'=>'required|email','subscriber_review_id'=>'required','reviewOfficialStatus'=>'required','officialName'=>'required');
+            $attributes = array('emailAddress'=>'Email Address','subscriber_review_id'=>'Designation','reviewOfficialStatus'=>'Member Status','userName'=>'Name','mobileNumber'=>'Mobile Number','DOB'=>'DOB','officialName'=>'Official Name');
             
             $fields = ['country'=>'Country','state'=>'State','district'=>'District','LAC'=>'Legislative Assembly Constituency','PC'=>'Parliamentary Constituency',
             'MC1'=>'Municipal Corporation','MC2'=>'Municipality','CC'=>'City Council','block'=>'Block','ward'=>'Ward','subDistrict'=>'Sub District','village'=>'Village'];
@@ -809,10 +809,10 @@ class SubscriberController extends Controller
             if(!empty($data['emailAddress'])){
                 $user_data = User::where('email',trim($data['emailAddress']))->where('is_deleted',0)->first();
                 if(empty($user_data)){
-                    $validationRules['userName'] = $validationRules['mobileNumber'] = $validationRules['gender'] = $validationRules['DOB'] = 'required';
+                    $validationRules['officialName'] = $validationRules['user_Name'] = $validationRules['mobileNumber'] = $validationRules['gender'] = $validationRules['DOB'] = 'required';
                 }
             }else{
-                $validationRules['userName'] = $validationRules['mobileNumber'] = $validationRules['gender'] = $validationRules['DOB'] = 'required';
+                $validationRules['officialName'] = $validationRules['user_Name'] = $validationRules['mobileNumber'] = $validationRules['gender'] = $validationRules['DOB'] = 'required';
             }
             
             if(!empty($data['subscriber_review_id'])){
@@ -854,8 +854,8 @@ class SubscriberController extends Controller
             }	
             
             if(empty($user_data)){
-                $insertArray = array('name'=>trim($data['userName']),'email'=>trim($data['emailAddress']),'mobile_no'=>trim($data['mobileNumber']),'gender'=>trim($data['gender']),
-                'dob'=>trim($data['DOB']),'user_role'=>3,'password'=>Hash::make('12345678'));
+                $insertArray = array('name'=>trim($data['officialName']),'email'=>trim($data['emailAddress']),'mobile_no'=>trim($data['mobileNumber']),'gender'=>trim($data['gender']),
+                'dob'=>trim($data['DOB']),'user_role'=>3,'password'=>Hash::make('12345678'),'official_name'=>trim($data['officialName']));
                 
                 $user_exists = User::where('email',trim($data['emailAddress']))->where('is_deleted',0)->first();
                 if(!empty($user_exists)){

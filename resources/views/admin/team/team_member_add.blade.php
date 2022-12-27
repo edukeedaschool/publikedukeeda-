@@ -31,9 +31,9 @@
                     
                     <div class="form-row">
                         <div class="form-group col-md-6" >
-                            <label>Name</label>
-                            <input id="userName" type="text" class="form-control" name="userName" value="" >
-                            <div class="invalid-feedback" id="error_validation_userName"></div>
+                            <label>Official Name</label>
+                            <input id="officialName" type="text" class="form-control" name="officialName" value="" >
+                            <div class="invalid-feedback" id="error_validation_officialName"></div>
                         </div>
                     </div>
                     

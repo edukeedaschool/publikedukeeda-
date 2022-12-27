@@ -28,11 +28,11 @@ function getOfficeBelongsToData(val){
                     }
                     
                     if(group_data.group_type == 'political' && group_data.group_sub_type == 'person'){
-                        $("#gender_div,#DOB_div,#politicalParty_div,#politicalPartyOfficialPosition_div,#repAreaOfficialPartyPosition_div,#electedOfficialPositionName_div,#repAreaElectedOfficialPosition_div").show();
+                        $("#gender_div,#DOB_div,#bio_div,#politicalParty_div,#politicalPartyOfficialPosition_div,#repAreaOfficialPartyPosition_div,#electedOfficialPositionName_div,#repAreaElectedOfficialPosition_div").show();
                     }
                     
                     if(group_data.group_type == 'non_political' && group_data.group_sub_type == 'person'){
-                        $("#gender_div,#DOB_div,#keyIdentity2_div,#organizationName_div").show();
+                        $("#gender_div,#DOB_div,#bio_div,#keyIdentity2_div,#organizationName_div").show();
                     }
                     
                     if(group_data.group_sub_type == 'government_department' || group_data.group_sub_type =='nonprofit_organization'){

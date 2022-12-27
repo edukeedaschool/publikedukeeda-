@@ -54,6 +54,14 @@
                         </div>
                     </div>    
                     
+                    <div class="form-row toggle-div" id="bio_div">
+                        <div class="form-group col-md-6" >
+                            <label>Bio</label>
+                            <input id="subscriberBio" type="text" class="form-control" name="subscriberBio" value="" maxlength="250">
+                            <div class="invalid-feedback" id="error_validation_subscriberBio"></div>
+                        </div>
+                    </div>  
+                    
                     <div class="form-row toggle-div" id="politicalParty_div">
                         <div class="form-group col-md-6" >
                             <label>Political Party</label>
@@ -451,6 +459,19 @@
                             <div class="invalid-feedback" id="error_validation_mobileNumber"></div>
                         </div>
                     </div>  
+                    
+                    <div class="form-row">
+                        <div class="form-group col-md-6" >
+                            <label>Allowed Submission</label>
+                            <select id="allowedSubmission" class="form-control" name="allowedSubmission" >
+                                <option value="">Allowed Submission</option>
+                                <option value="district">Within District</option>
+                                <option value="state">Within State</option>
+                                <option value="country">Within Country</option>
+                            </select>    
+                            <div class="invalid-feedback" id="error_validation_allowedSubmission"></div>
+                        </div>
+                    </div>    
                     
                     <div class="form-row">
                         <div class="form-group col-md-6" >
