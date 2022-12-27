@@ -212,6 +212,7 @@ Route::get('/review-official/edit/{Id}', [App\Http\Controllers\SubscriberControl
 Route::post('/review-official/edit/{Id}', [App\Http\Controllers\SubscriberController::class, 'submitEditReviewOfficial'])->name('submiteditreviewofficial');
 Route::post('/review-official/update', [App\Http\Controllers\SubscriberController::class, 'updateReviewOfficial'])->name('updatereviewofficial');
 Route::get('/subscriber-review/data/{Id}', [App\Http\Controllers\SubscriberController::class, 'getSubscriberReviewData'])->name('getsubscriberreviewdata');
+Route::get('/user/data/{email}', [App\Http\Controllers\UserController::class, 'getUserData'])->name('getuserdata');
 });
 
 Route::group(['middleware' => ['auth']], function () {
