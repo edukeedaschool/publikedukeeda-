@@ -13,14 +13,15 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    //return view('welcome');
-    return redirect('/login');
-});
+/*Route::get('/', function () {
+    return view('welcome');
+    //return redirect('/login');
+});*/
 
 
 Auth::routes();  
 
+Route::group(['middleware' => ['auth','superadmin']], function () {
 Route::get('/states/list', [App\Http\Controllers\MasterDataController::class, 'listStates'])->name('stateslisting');
 Route::get('/state/add', [App\Http\Controllers\MasterDataController::class, 'addState'])->name('addstate');
 Route::post('/state/add', [App\Http\Controllers\MasterDataController::class, 'submitAddState'])->name('submitaddstate');
@@ -174,11 +175,6 @@ Route::get('/subscriber/edit/{Id}', [App\Http\Controllers\SubscriberController::
 Route::post('/subscriber/edit/{Id}', [App\Http\Controllers\SubscriberController::class, 'submitEditSubscriber'])->name('submiteditsubscriber');
 Route::post('/subscriber/update', [App\Http\Controllers\SubscriberController::class, 'updateSubscriber'])->name('updatesubscriber');
 
-Route::get('/subscriber/review-data/view', [App\Http\Controllers\SubscriberController::class, 'viewSubscriberReviewData'])->name('viewreviewdata');
-Route::get('/subscriber/review-data/edit', [App\Http\Controllers\SubscriberController::class, 'editSubscriberReviewData'])->name('editreviewdata');
-Route::post('/subscriber/review-data/edit', [App\Http\Controllers\SubscriberController::class, 'submitEditSubscriberReviewData'])->name('submiteditreviewdata');
-Route::get('/subscriber/review-range/data/{Id}', [App\Http\Controllers\SubscriberController::class, 'getReviewRangeData'])->name('getreviewrangedata');
-
 Route::get('/user/list', [App\Http\Controllers\UserController::class, 'listUser'])->name('userlisting');
 Route::get('/user/add', [App\Http\Controllers\UserController::class, 'addUser'])->name('adduser');
 Route::post('/user/add', [App\Http\Controllers\UserController::class, 'submitAddUser'])->name('submitadduser');
@@ -186,6 +182,13 @@ Route::get('/user/edit/{Id}', [App\Http\Controllers\UserController::class, 'edit
 Route::post('/user/edit/{Id}', [App\Http\Controllers\UserController::class, 'submitEditUser'])->name('submitedituser');
 Route::post('/user/update', [App\Http\Controllers\UserController::class, 'updateUser'])->name('updateuser');
 Route::get('/user/data/{email}', [App\Http\Controllers\UserController::class, 'getUserData'])->name('getuserdata');
+});
+
+Route::group(['middleware' => ['auth','subscriber']], function () {
+Route::get('/subscriber/review-data/view', [App\Http\Controllers\SubscriberController::class, 'viewSubscriberReviewData'])->name('viewreviewdata');
+Route::get('/subscriber/review-data/edit', [App\Http\Controllers\SubscriberController::class, 'editSubscriberReviewData'])->name('editreviewdata');
+Route::post('/subscriber/review-data/edit', [App\Http\Controllers\SubscriberController::class, 'submitEditSubscriberReviewData'])->name('submiteditreviewdata');
+Route::get('/subscriber/review-range/data/{Id}', [App\Http\Controllers\SubscriberController::class, 'getReviewRangeData'])->name('getreviewrangedata');
 
 Route::get('/team-designation/list', [App\Http\Controllers\TeamController::class, 'listTeamDesignation'])->name('teamdesignationlisting');
 Route::get('/team-designation/add', [App\Http\Controllers\TeamController::class, 'addTeamDesignation'])->name('addteamdesignation');
@@ -208,7 +211,18 @@ Route::post('/review-official/add', [App\Http\Controllers\SubscriberController::
 Route::get('/review-official/edit/{Id}', [App\Http\Controllers\SubscriberController::class, 'editReviewOfficial'])->name('editreviewofficial');
 Route::post('/review-official/edit/{Id}', [App\Http\Controllers\SubscriberController::class, 'submitEditReviewOfficial'])->name('submiteditreviewofficial');
 Route::post('/review-official/update', [App\Http\Controllers\SubscriberController::class, 'updateReviewOfficial'])->name('updatereviewofficial');
-
 Route::get('/subscriber-review/data/{Id}', [App\Http\Controllers\SubscriberController::class, 'getSubscriberReviewData'])->name('getsubscriberreviewdata');
+});
 
-Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+Route::group(['middleware' => ['auth']], function () {
+    Route::get('/user/change-password', [App\Http\Controllers\UserController::class, 'changePassword'])->name('changepassword');
+    Route::post('/user/change-password', [App\Http\Controllers\UserController::class, 'submitChangePassword'])->name('submitchangepassword');
+});
+
+
+Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+Route::get('/user/login', [App\Http\Controllers\UserController::class, 'login'])->name('login');
+Route::post('/user/login', [App\Http\Controllers\UserController::class, 'submitLogin'])->name('loginsubmit');
+Route::get('/user/signup', [App\Http\Controllers\UserController::class, 'signup'])->name('signup');
+Route::post('/user/signup', [App\Http\Controllers\UserController::class, 'submitSignup'])->name('submitsignup');
+Route::get('/access-denied', [App\Http\Controllers\HomeController::class, 'accessDenied'])->name('accessdenied');

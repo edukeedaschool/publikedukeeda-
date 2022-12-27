@@ -15,7 +15,7 @@ class HomeController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('auth');
+        //$this->middleware('auth');
     }
 
     /**
@@ -30,19 +30,23 @@ class HomeController extends Controller
             $states_list = [];
             $user = Auth::user();
             
-            if(! ($user->status == 1 && $user->is_deleted == 0)){
+            /*if(! ($user->status == 1 && $user->is_deleted == 0)){
                 
                 Session::flush();
         
                 Auth::logout();
         
                 return redirect('/login');
-            }
+            }*/
             
-            return view('home',array('user'=>$user,'title'=>'Dashboard'));
+            return view('home',array('user'=>$user,'title'=>'Home Page'));
          
         }catch (\Exception $e){
             return view('admin/page_error',array('message' =>$e->getMessage()));
         }
+    }
+    
+    public function accessDenied(Request $request){
+        return view('access_denied',array('title'=>'Access Denied'));
     }
 }

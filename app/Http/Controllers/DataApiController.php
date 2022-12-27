@@ -32,6 +32,7 @@ use App\Models\RepresentationAreaList;
 use App\Helpers\CommonHelper;
 use Validator;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Hash;
 
 class DataApiController extends Controller
 {
@@ -50,7 +51,7 @@ class DataApiController extends Controller
         try{ 
             $data = $request->all();
             
-            $content_type_header = $request->header('Content-Type');
+            $content_type_header = $request->header('Content-Type');//print_r($content_type_header);exit;
             if(empty($content_type_header) || strtolower($content_type_header) != 'application/json' ){
                 return response(array('httpStatus'=>200, "dateTime"=>time(), 'status'=>'fail', 'message'=>'Invalid Content-Type Header', 'errors' => 'Invalid Content-Type Header'),200);
             }
@@ -63,25 +64,90 @@ class DataApiController extends Controller
                 return response(array('httpStatus'=>200, "dateTime"=>time(), 'status'=>'fail', 'message'=>'Email and Password are Required Fields', 'errors' => $validator->errors()),200);
             }	
             
-            $credentials = $request->only('email', 'password');
-
-            if(Auth::attempt(['email' =>$data['email'], 'password' =>$data['password'],'user_role'=>[4], 'status'=>1,'is_deleted'=>0])) {
+            if(Auth::attempt(['email' =>$data['email'], 'password' =>$data['password'],'status'=>1,'is_deleted'=>0])) {
                 // Fetch user details from email
-                $user_data = User::where('email',trim($data['email']))->wherein('user_role',[4])->where('is_deleted',0)->where('status',1)->select('id','name','api_token','api_token_created_at')->first();
+                $user_data = User::where('email',trim($data['email']))->wherein('user_role',[1,2,3,4])->where('is_deleted',0)->where('status',1)->select('id','name','api_token','api_token_created_at','email','user_name','user_role')->first();
                 
-                if(!empty($user_data->api_token) && (time()-strtotime($user_data->api_token_created_at))/3600 <= 240){
-                    $api_token = $user_data->api_token;
+                if($user_data->user_role == 4){
+                    if(!empty($user_data->api_token) && (time()-strtotime($user_data->api_token_created_at))/3600 <= 240){
+                        $api_token = $user_data->api_token;
+                    }else{
+                        $api_token = md5(uniqid($user_data->id, true));
+                        $updateArray = array('api_token'=>$api_token,'api_token_created_at'=>date('Y/m/d H:i:s'));
+                        User::where('id',$user_data->id)->update($updateArray);
+                        $user_data = User::where('id',$user_data->id)->select('id','name','api_token','api_token_created_at','email','user_name','user_role')->first();
+                    }
                 }else{
-                    $api_token = md5(uniqid($user_data->id, true));
-                    $updateArray = array('api_token'=>$api_token,'api_token_created_at'=>date('Y/m/d H:i:s'));
-                    User::where('id',$user_data->id)->update($updateArray);
-                    $user_data = User::where('id',$user_data->id)->select('id','name','api_token','api_token_created_at')->first();
+                    unset($user_data->api_token);
+                    unset($user_data->api_token_created_at);
                 }
+                
+                unset($user_data->user_role);
                 
                 return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'success','message' => 'Authenticated','user_data'=>$user_data),200);
             }else{
                 return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'fail','message' => 'Incorrect login credentials'),200);
             }
+            
+        }catch (\Exception $e){
+            CommonHelper::saveException($e,'STORE',__FUNCTION__,__FILE__);
+            return response(array('httpStatus'=>200,"dateTime"=>time(),'status' => 'fail','error_message'=>$e->getMessage().', '.$e->getLine(),'message'=>'Error in Processing Request'),200);
+        }
+    }
+    
+    function signup(Request $request){
+        try{ 
+            $data = $request->all();
+            
+            $validationRules = array('name'=>'required|min:2','email'=>'required|email','password'=>'required|min:6|max:100|confirmed','user_name'=>'required|min:6','password_confirmation'=>'required');
+            $attributes = array();
+            
+            $validator = Validator::make($data,$validationRules,array(),$attributes);
+            if ($validator->fails()){ 
+                return response(array('httpStatus'=>200, "dateTime"=>time(), 'status'=>'fail', 'message'=>'Name, Email, Username, Password Errors', 'errors' => $validator->errors()),200);
+            }	
+            
+            $email_exists = User::where('email',trim($data['email']))->where('is_deleted',0)->select('id')->first();
+            if(!empty($email_exists)){
+                $errors['email'] = ['User already exists with Email Address'];
+                return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'fail','message' => 'User already exists with Email Address', 'errors' =>$errors),200);
+            }
+            
+            $username_exists = User::where('user_name',trim($data['user_name']))->where('is_deleted',0)->select('id')->first();
+            if(!empty($username_exists)){
+                $errors['user_name'] = ['User already exists with Username'];
+                return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'fail','message' => 'User already exists with Username', 'errors' =>$errors),200);
+            }
+            
+            $insertArray = array('name'=>trim($data['name']),'email'=>trim($data['email']),'user_name'=>trim($data['user_name']),'user_role'=>3,'password'=>Hash::make(trim($data['password'])));
+            
+            $user_data = User::create($insertArray);
+            
+            return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'success','message' => 'User added','user_data'=>$user_data),200);
+            
+        }catch (\Exception $e){
+            CommonHelper::saveException($e,'STORE',__FUNCTION__,__FILE__);
+            return response(array('httpStatus'=>200,"dateTime"=>time(),'status' => 'fail','error_message'=>$e->getMessage().', '.$e->getLine(),'message'=>'Error in Processing Request'),200);
+        }
+    }
+    
+    function changePassword(Request $request){
+        try{ 
+            $data = $request->all();
+            
+            
+
+            $validationRules = array('name'=>'required|min:2','email'=>'required|email','password'=>'required|min:6|max:100|confirmed','user_name'=>'required|min:6','password_confirmation'=>'required');
+            $attributes = array();
+            
+            $validator = Validator::make($data,$validationRules,array(),$attributes);
+            if ($validator->fails()){ 
+                return response(array('httpStatus'=>200, "dateTime"=>time(), 'status'=>'fail', 'message'=>'Name, Email, Username, Password Errors', 'errors' => $validator->errors()),200);
+            }	
+            
+            
+            
+            return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'success','message' => 'User added'),200);
             
         }catch (\Exception $e){
             CommonHelper::saveException($e,'STORE',__FUNCTION__,__FILE__);

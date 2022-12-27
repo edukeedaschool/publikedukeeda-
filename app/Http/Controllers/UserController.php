@@ -23,7 +23,89 @@ class UserController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('auth');
+        //$this->middleware('auth');
+    }
+    
+    public function login(Request $request){
+        try{
+            $data = $request->all();
+            
+            if(isset(Auth::user()->id)){
+                return redirect('/');
+            }
+            
+            $params = ['title'=>'User Login'];
+            
+            return view('front/user/login',$params);
+            
+        }catch (\Exception $e){
+            return view('front/page_error',array('message' =>$e->getMessage()));
+        }
+    }
+    
+    public function submitLogin(Request $request){
+        try{
+            $data = $request->all();
+            
+            $url = url('/api/login');
+            $postData = json_encode(['email'=>trim($data['email']),'password'=>trim($data['password'])]);
+            $headers = CommonHelper::getAPIHeaders();//print_r($headers);exit;
+            
+            $response = CommonHelper::processCURLRequest($url,$postData,'','',$headers);
+            $response = json_decode($response,true);
+            
+            if(isset($response['user_data']['id'])){
+                Auth::loginUsingId($response['user_data']['id']);
+                return redirect('/');
+            }else{
+                return back()->withErrors([
+                'email' => 'The provided credentials do not match our records.',
+                ])->onlyInput('email');
+            }
+            
+        }catch (\Exception $e){
+            return view('front/page_error',array('message' =>$e->getMessage()));
+        }
+    }
+    
+    public function signup(Request $request){
+        try{
+            $data = $request->all();
+            
+            if(isset(Auth::user()->id)){
+                return redirect('/');
+            }
+            
+            $params = ['title'=>'User Signup'];
+            
+            return view('front/user/signup',$params);
+            
+        }catch (\Exception $e){
+            return view('front/page_error',array('message' =>$e->getMessage()));
+        }
+    }
+    
+    public function submitSignup(Request $request){
+        try{
+            $data = $request->all();
+            
+            $url = url('/api/signup');
+            $postData = json_encode(['name'=>trim($data['name']),'user_name'=>trim($data['user_name']),'email'=>trim($data['email']),'password'=>trim($data['password']),'password_confirmation'=>trim($data['password_confirmation'])]);
+            $headers = CommonHelper::getAPIHeaders();
+            
+            $response = CommonHelper::processCURLRequest($url,$postData,'','',$headers);
+            $response = json_decode($response,true);//print_r($response);exit;
+            
+            if(isset($response['user_data']['id'])){
+                
+                return redirect('user/login');
+            }else{
+                return back()->withErrors($response['errors'])->withInput($data);
+            }
+            
+        }catch (\Exception $e){
+            return view('front/page_error',array('message' =>$e->getMessage()));
+        }
     }
 
     public function addUser(Request $request){

@@ -895,11 +895,13 @@ class SubscriberController extends Controller
     function listReviewOfficial(Request $request){
         try{
             $data = $request->all();
+            $user = Auth::user();
             
             $ro_list = ReviewOfficial::join('subscriber_review as sr', 'sr.id', '=', 'review_official.subscriber_review_id')
             ->join('review_level as rl', 'rl.id', '=', 'sr.review_level_id')           
             ->join('users as u1', 'u1.id', '=', 'review_official.user_id')        
             ->join('users as u2', 'u2.id', '=', 'review_official.subscriber_id')        
+            ->where('review_official.subscriber_id',$user->id)                
             ->where('review_official.is_deleted',0)        
             ->where('sr.is_deleted',0)                
             ->where('u1.is_deleted',0)                

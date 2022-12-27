@@ -517,4 +517,22 @@ class CommonHelper
         return $rep_area_data;
     }
     
+    public static function getAPIHeaders(){
+        $headers = ['Content-Type: application/json'];
+        $email = 'apiuser@gmail.com';
+        $password = '12345678';
+        
+        $url = url('/api/login');
+        $postData = json_encode(['email'=>$email,'password'=>$password]);
+        
+
+        $response = CommonHelper::processCURLRequest($url,$postData,'','',$headers);
+        $response = json_decode($response,true);
+        
+        if(isset($response['user_data']['api_token']) && !empty($response['user_data']['api_token'])){
+            $headers[] = 'Access-Token:'.$response['user_data']['api_token'];
+        }
+        
+        return $headers;
+    }
 }

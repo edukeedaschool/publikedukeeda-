@@ -40,4 +40,8 @@ Route::group(['middleware' => ['data_api']], function () {
     Route::get('/submission-purpose/list', [App\Http\Controllers\DataApiController::class, 'getSubmissionPurposeList'])->name('getsubmissionpurposeList');
     Route::get('/submission-type/list', [App\Http\Controllers\DataApiController::class, 'getSubmissionTypeList'])->name('getsubmissiontypeList');
     Route::get('/review-level/list', [App\Http\Controllers\DataApiController::class, 'getReviewLevelList'])->name('getreviewlevelList');
+    
+    
+    Route::post('/signup', [App\Http\Controllers\DataApiController::class, 'signup'])->name('signup');
+    Route::post('/change-password', [App\Http\Controllers\UserController::class, 'changePassword'])->name('changepassword');
 });

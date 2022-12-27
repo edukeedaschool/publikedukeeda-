@@ -65,15 +65,10 @@
    
 </header>
 
-@if(isset(Auth::user()->name))
+@if(isset(Auth::user()->name) && Auth::user()->user_role == 1)
 <div class="bs-example" style="text-align: center;">
     <div class="btn-group">
-        <!--<div class="btn-group">
-            <button type="button" class="btn btn-dialog dropdown-toggle" data-toggle="dropdown">Users</button>
-            <div class="dropdown-menu">
-                <a href="{{url('user/list')}}" class="dropdown-item">User List</a>
-            </div>
-        </div>-->
+        
         <div class="btn-group">
             <button type="button" class="btn btn-dialog dropdown-toggle" data-toggle="dropdown">Master Data</button>
             <div class="dropdown-menu">
@@ -105,23 +100,44 @@
             <button type="button" class="btn btn-dialog dropdown-toggle" data-toggle="dropdown">Subscribers</button>
             <div class="dropdown-menu">
                 <a href="{{url('subscriber/list')}}" class="dropdown-item">Subscribers</a>
-                <a href="{{url('review-official/list')}}" class="dropdown-item">Review Officials</a>
+                <!--<a href="{{url('review-official/list')}}" class="dropdown-item">Review Officials</a>-->
             </div>
         </div>
         
-        <div class="btn-group" style="margin-left:0px; ">
+        <!--<div class="btn-group" style="margin-left:0px; ">
             <button type="button" class="btn btn-dialog dropdown-toggle" data-toggle="dropdown">Team</button>
             <div class="dropdown-menu">
                 <a href="{{url('team-designation/list')}}" class="dropdown-item">Team Designations</a>
                 <a href="{{url('team-member/list')}}" class="dropdown-item">Team Members</a>
             </div>
-        </div>
+        </div>-->
+        
         <div class="btn-group" style="margin-left:0px; ">
             <button type="button" class="btn btn-dialog dropdown-toggle" data-toggle="dropdown">Users</button>
             <div class="dropdown-menu">
                 <a href="{{url('user/list')}}" class="dropdown-item">Users</a>
             </div>
         </div>
+    </div>
+</div>
+@endif
+
+@if(isset(Auth::user()->name) && Auth::user()->user_role == 2)
+<div class="bs-example" style="text-align: center;">
+    <div class="btn-group">
+        
+        
+        <div class="btn-group" style="margin-left:0px; ">
+            <button type="button" class="btn btn-dialog dropdown-toggle" data-toggle="dropdown">Subscribers</button>
+            <div class="dropdown-menu">
+                <a href="{{url('subscriber/review-data/view')}}" class="dropdown-item">Review Range</a>
+                <a href="{{url('team-designation/list')}}" class="dropdown-item">Team Designations</a>
+                <a href="{{url('team-member/list')}}" class="dropdown-item">Team Members</a>
+                <a href="{{url('review-official/list')}}" class="dropdown-item">Review Officials</a>
+            </div>
+        </div>
+        
+        
     </div>
 </div>
 @endif

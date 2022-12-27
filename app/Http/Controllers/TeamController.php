@@ -130,7 +130,7 @@ class TeamController extends Controller
             
             $designation_list = TeamDesignations::join('representation_area_list as ral', 'ral.id', '=', 'team_designations.rep_area_id')
             ->join('users as u', 'u.id', '=', 'team_designations.subscriber_id')        
-            //->where('team_designations.subscriber_id',$user->id)               
+            ->where('team_designations.subscriber_id',$user->id)               
             ->where('team_designations.is_deleted',0)        
             ->where('ral.is_deleted',0)                
             ->where('u.is_deleted',0);
@@ -184,10 +184,12 @@ class TeamController extends Controller
     function listTeamMember(Request $request){
         try{
             $data = $request->all();
+            $user = Auth::user();
             
             $member_list = TeamMembers::join('team_designations as td', 'td.id', '=', 'team_members.designation_id')
             ->join('users as u1', 'u1.id', '=', 'team_members.user_id')        
-            ->join('users as u2', 'u2.id', '=', 'team_members.subscriber_id')        
+            ->join('users as u2', 'u2.id', '=', 'team_members.subscriber_id')    
+            ->where('team_members.subscriber_id',$user->id)        
             ->where('team_members.is_deleted',0)        
             ->where('td.is_deleted',0)                
             ->where('u1.is_deleted',0)                
