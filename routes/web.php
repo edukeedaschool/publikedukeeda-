@@ -218,6 +218,7 @@ Route::get('/user/data/{email}', [App\Http\Controllers\UserController::class, 'g
 Route::group(['middleware' => ['auth']], function () {
     Route::get('/user/change-password', [App\Http\Controllers\UserController::class, 'changePassword'])->name('changepassword');
     Route::post('/user/change-password', [App\Http\Controllers\UserController::class, 'submitChangePassword'])->name('submitchangepassword');
+    Route::get('/user/profile', [App\Http\Controllers\UserController::class, 'profile'])->name('profile');
 });
 
 
@@ -227,3 +228,4 @@ Route::post('/user/login', [App\Http\Controllers\UserController::class, 'submitL
 Route::get('/user/signup', [App\Http\Controllers\UserController::class, 'signup'])->name('signup');
 Route::post('/user/signup', [App\Http\Controllers\UserController::class, 'submitSignup'])->name('submitsignup');
 Route::get('/access-denied', [App\Http\Controllers\HomeController::class, 'accessDenied'])->name('accessdenied');
+Route::any('/api-data', [App\Http\Controllers\UserController::class, 'getAPIData'])->name('getapidata');

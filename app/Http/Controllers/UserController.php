@@ -98,7 +98,8 @@ class UserController extends Controller
             
             if(isset($response['user_data']['id'])){
                 
-                return redirect('user/login');
+                return redirect('user/login')->with('message', 'Signup completed successfully. Login here');;
+                //return redirect()->back()->with('message', $response['message']);
             }else{
                 return back()->withErrors($response['errors'])->withInput($data);
             }
@@ -107,7 +108,119 @@ class UserController extends Controller
             return view('front/page_error',array('message' =>$e->getMessage()));
         }
     }
-
+    
+    public function changePassword(Request $request){
+        try{
+            $data = $request->all();
+            
+           $params = ['title'=>'Change Password'];
+            
+            return view('front/user/change_password',$params);
+            
+        }catch (\Exception $e){
+            return view('front/page_error',array('message' =>$e->getMessage()));
+        }
+    }
+    
+    public function submitChangePassword(Request $request){
+        try{
+            $data = $request->all();
+            $user = Auth::user();
+            
+            $url = url('/api/change-password');
+            $postData = json_encode(['email'=>$user->email,'current_password'=>trim($data['current_password']),'new_password'=>trim($data['new_password']),'new_password_confirmation'=>trim($data['new_password_confirmation'])]);
+            $headers = CommonHelper::getAPIHeaders();//print_r($headers);exit;
+            
+            $response = CommonHelper::processCURLRequest($url,$postData,'','',$headers);
+            $response = json_decode($response,true);
+            
+            if(isset($response['status']) && $response['status'] == 'success'){
+                return redirect()->back()->with('message', $response['message']);
+            }else{
+                return back()->withErrors($response['errors'])->withInput($data);
+            }
+            
+        }catch (\Exception $e){
+            return view('front/page_error',array('message' =>$e->getMessage().$e->getLine()));
+        }
+    }
+    
+    public function profile(Request $request){
+        try{
+            $data = $request->all();
+            $user = Auth::user();
+            
+            $headers = CommonHelper::getAPIHeaders();
+            
+            $url = url('/api/country/list');
+            $response = CommonHelper::processCURLRequest($url,'','','',$headers);
+            $response = json_decode($response,true);
+            $country_list = $response['country_list'];
+            
+            $url = url('/api/state/list');
+            $response = CommonHelper::processCURLRequest($url,'','','',$headers);
+            $response = json_decode($response,true);
+            $states_list = $response['state_list'];
+            
+            $url = url('/api/profile/data/'.$user->id);
+            $postData = [];
+            $response = CommonHelper::processCURLRequest($url,$postData,'','',$headers);//print_r($response);
+            $response = json_decode($response,true);
+            $user_profile = $response['user_data'];
+            
+            $url = url('/api/qualification/list');
+            $response = CommonHelper::processCURLRequest($url,'','','',$headers);
+            $response = json_decode($response,true);
+            $qualification_list = $response['qualification_list'];
+            
+           $params = ['title'=>'User Profile','country_list'=>$country_list,'states_list'=>$states_list,'qualification_list'=>$qualification_list,'user_profile'=>$user_profile];
+            
+            return view('front/user/profile',$params);
+            
+        }catch (\Exception $e){
+            return view('front/page_error',array('message' =>$e->getMessage().', '.$e->getLine()));
+        }
+    }
+    
+    function getAPIData(Request $request){
+        try{
+            $data = $request->all();
+            $user = Auth::user();
+            $response = [];
+            
+            $headers = CommonHelper::getAPIHeaders();
+            
+            if(isset($data['action']) && $data['action'] == 'district_list'){
+                $url = url('/api/district/list/'.$data['state_id']);
+                $response = CommonHelper::processCURLRequest($url,'','','',$headers);
+                $response = json_decode($response,true);
+            }
+            
+            if(isset($data['action']) && $data['action'] == 'sub_district_list'){
+                $url = url('/api/sub-district/list/'.$data['district_id']);
+                $response = CommonHelper::processCURLRequest($url,'','','',$headers);
+                $response = json_decode($response,true);
+            }
+            
+            if(isset($data['action']) && $data['action'] == 'village_list'){
+                $url = url('/api/village/list/'.$data['sub_district_id']);
+                $response = CommonHelper::processCURLRequest($url,'','','',$headers);
+                $response = json_decode($response,true);
+            }
+            
+            if(isset($data['action']) && $data['action'] == 'update_profile'){//print_r($headers);exit;
+                $url = url('/api/profile/update');
+                $response = CommonHelper::processCURLRequest($url,$data,'','',$headers);
+                $response = json_decode($response,true);
+            }
+            
+            return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'success','message' => 'API Response','response'=>$response),200);
+            
+        }catch (\Exception $e){
+            return response(array("httpStatus"=>500,"dateTime"=>time(),'status' => 'fail','message' =>$e->getMessage()),500);
+        }
+    }
+    
     public function addUser(Request $request){
         try{
             $data = $request->all();

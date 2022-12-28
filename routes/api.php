@@ -21,13 +21,14 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::post('/login', [App\Http\Controllers\DataApiController::class, 'login'])->name('login');
 
 Route::group(['middleware' => ['data_api']], function () {
+    Route::get('/country/list', [App\Http\Controllers\DataApiController::class, 'getCountryList'])->name('getcountrylist');
     Route::get('/state/list', [App\Http\Controllers\DataApiController::class, 'getStateList'])->name('getstatelist');
-    Route::get('/district/list', [App\Http\Controllers\DataApiController::class, 'getDistrictList'])->name('getdistrictlist');
+    Route::get('/district/list/{stateId}', [App\Http\Controllers\DataApiController::class, 'getDistrictList'])->name('getdistrictlist');
     Route::get('/municipal-corporation/list', [App\Http\Controllers\DataApiController::class, 'getMunicipalCorporationList'])->name('getmunicipalcorporationlist');
     Route::get('/municipality/list', [App\Http\Controllers\DataApiController::class, 'getMunicipalityList'])->name('getmunicipalitylist');
     Route::get('/city-council/list', [App\Http\Controllers\DataApiController::class, 'getCityCouncilList'])->name('getcitycouncillist');
     Route::get('/block/list', [App\Http\Controllers\DataApiController::class, 'getBlockList'])->name('getblocklist');
-    Route::get('/sub-district/list', [App\Http\Controllers\DataApiController::class, 'getSubDistrictList'])->name('getsubdistrictlist');
+    Route::get('/sub-district/list/{districtId}', [App\Http\Controllers\DataApiController::class, 'getSubDistrictList'])->name('getsubdistrictlist');
     Route::get('/political-party/list', [App\Http\Controllers\DataApiController::class, 'getPoliticalPartyList'])->name('getpoliticalpartylist');
     Route::get('/legislative-assembly/list', [App\Http\Controllers\DataApiController::class, 'getLegislativeAssemblyList'])->name('getlegislativeassemblylist');
     Route::get('/parliamentary-assembly/list', [App\Http\Controllers\DataApiController::class, 'getParliamentaryAssemblyList'])->name('getparliamentaryassemblylist');
@@ -40,8 +41,11 @@ Route::group(['middleware' => ['data_api']], function () {
     Route::get('/submission-purpose/list', [App\Http\Controllers\DataApiController::class, 'getSubmissionPurposeList'])->name('getsubmissionpurposeList');
     Route::get('/submission-type/list', [App\Http\Controllers\DataApiController::class, 'getSubmissionTypeList'])->name('getsubmissiontypeList');
     Route::get('/review-level/list', [App\Http\Controllers\DataApiController::class, 'getReviewLevelList'])->name('getreviewlevelList');
-    
+    Route::get('/qualification/list', [App\Http\Controllers\DataApiController::class, 'getQualificationList'])->name('getqualificationlist');
+    Route::get('/village/list/{subDistrictId}', [App\Http\Controllers\DataApiController::class, 'getVillageList'])->name('getvillagelist');
     
     Route::post('/signup', [App\Http\Controllers\DataApiController::class, 'signup'])->name('signup');
-    Route::post('/change-password', [App\Http\Controllers\UserController::class, 'changePassword'])->name('changepassword');
+    Route::post('/change-password', [App\Http\Controllers\DataApiController::class, 'changePassword'])->name('changepassword');
+    Route::get('/profile/data/{userId}', [App\Http\Controllers\DataApiController::class, 'getProfileData'])->name('getprofiledata');
+    Route::post('/profile/update', [App\Http\Controllers\DataApiController::class, 'updateProfileData'])->name('updateprofiledata');
 });

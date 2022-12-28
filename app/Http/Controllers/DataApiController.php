@@ -98,6 +98,7 @@ class DataApiController extends Controller
     function signup(Request $request){
         try{ 
             $data = $request->all();
+            $errors = [];
             
             $validationRules = array('name'=>'required|min:2','email'=>'required|email','password'=>'required|min:6|max:100|confirmed','user_name'=>'required|min:6','password_confirmation'=>'required');
             $attributes = array();
@@ -134,25 +135,129 @@ class DataApiController extends Controller
     function changePassword(Request $request){
         try{ 
             $data = $request->all();
+            $errors = [];
             
-            
-
-            $validationRules = array('name'=>'required|min:2','email'=>'required|email','password'=>'required|min:6|max:100|confirmed','user_name'=>'required|min:6','password_confirmation'=>'required');
+            $validationRules = array('email'=>'required|email','current_password'=>'required|min:6|max:100','new_password'=>'required|min:6|max:100|confirmed','new_password_confirmation'=>'required');
             $attributes = array();
             
             $validator = Validator::make($data,$validationRules,array(),$attributes);
             if ($validator->fails()){ 
-                return response(array('httpStatus'=>200, "dateTime"=>time(), 'status'=>'fail', 'message'=>'Name, Email, Username, Password Errors', 'errors' => $validator->errors()),200);
+                return response(array('httpStatus'=>200, "dateTime"=>time(), 'status'=>'fail', 'message'=>'Validation Errors', 'errors' => $validator->errors()),200);
             }	
             
+            $user_data = User::where('email',trim($data['email']))->where('is_deleted',0)->where('status',1)->select('id','email','password')->first();
             
+            if(empty($user_data)){
+                $errors['email'] = ['User does not exists with Email Address'];
+                return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'fail','message' => $errors['email'], 'errors' =>$errors),200);
+            }
             
-            return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'success','message' => 'User added'),200);
+            //if(Hash::make(trim($data['current_password'])) != $user_data->password){
+            if(!Auth::attempt(['email' =>$data['email'], 'password' =>$data['current_password'],'status'=>1,'is_deleted'=>0])) {    
+                $errors['current_password'] = ['Incorrect Current Password '];
+                return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'fail','message' => $errors['current_password'], 'errors' =>$errors),200);
+            }
+            
+            $updateArray = ['password'=>Hash::make(trim($data['new_password']))];
+            
+            User::where('id',$user_data->id)->update($updateArray);
+            
+            return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'success','message' => 'Password updated successfully'),200);
             
         }catch (\Exception $e){
             CommonHelper::saveException($e,'STORE',__FUNCTION__,__FILE__);
             return response(array('httpStatus'=>200,"dateTime"=>time(),'status' => 'fail','error_message'=>$e->getMessage().', '.$e->getLine(),'message'=>'Error in Processing Request'),200);
         }
+    }
+    
+    function getProfileData(Request $request,$user_id){
+        try{ 
+            $data = $request->all();
+            
+            $user_data = User::where('id',trim($user_id))->where('is_deleted',0)->where('status',1)->select('id','name','email','user_name','official_name','mobile_no',
+            'gender','dob','qualification','degree_year','course_name','profession','major_identity','more_about_you','image','address_line1','postal_code','country','state','district','sub_district','village')
+            ->first();
+            
+            if(empty($user_data)){
+                $errors['user_id'] = ['User does not exists'];
+                return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'fail','message' => $errors['user_id'], 'errors' =>$errors),200);
+            }
+            
+            $user_data->image_url = (!empty($user_data->image))?url('images/user_images/'.$user_data->image):url('images/default_profile.png');
+            
+            return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'success','message' => 'User Profile Data','user_data'=>$user_data),200);
+            
+        }catch (\Exception $e){
+            CommonHelper::saveException($e,'STORE',__FUNCTION__,__FILE__);
+            return response(array('httpStatus'=>200,"dateTime"=>time(),'status' => 'fail','error_message'=>$e->getMessage(),'message'=>'Error in Processing Request'),200);
+        }    
+    }
+    
+    function updateProfileData(Request $request){
+        try{ 
+            $data = $request->all();
+            $errors = [];
+            
+            if($data['profile_type'] == 'general'){
+                $validationRules = array('user_id'=>'required','name'=>'required','mobile_no'=>'required','gender'=>'required','dob'=>'required');
+            }
+            
+            $attributes = array('mobile_no'=>'Mobile No','dob'=>'DOB');
+            
+            $validator = Validator::make($data,$validationRules,array(),$attributes);
+            if ($validator->fails()){ 
+                return response(array('httpStatus'=>200, "dateTime"=>time(), 'status'=>'fail', 'message'=>'Validation Errors', 'errors' => $validator->errors()),200);
+            }	
+            
+            $user_data = User::where('id',trim($data['user_id']))->where('is_deleted',0)->where('status',1)->select('id','email','password')->first();
+            
+            if(empty($user_data)){
+                $errors['user_id'] = ['User does not exists'];
+                return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'fail','message' => $errors['user_id'], 'errors' =>$errors),200);
+            }
+            
+           
+            if($data['profile_type'] == 'general'){
+                $updateArray = ['name'=>trim($data['name']),'mobile_no'=>trim($data['mobile_no']),'gender'=>trim($data['gender']),'dob'=>trim($data['dob'])];
+            }
+            
+            User::where('id',trim($data['user_id']))->update($updateArray);
+            
+            return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'success','message' => 'Profile updated successfully'),200);
+            
+        }catch (\Exception $e){
+            CommonHelper::saveException($e,'STORE',__FUNCTION__,__FILE__);
+            return response(array('httpStatus'=>200,"dateTime"=>time(),'status' => 'fail','error_message'=>$e->getMessage().', '.$e->getLine(),'message'=>'Error in Processing Request'),200);
+        }
+    }
+    
+    function getQualificationList(Request $request){
+        try{ 
+            $data = $request->all();
+            
+            $qualification_list = ['under_5th_class'=>'Under 5th class','under_8th_class'=>'Under 8th class','secondary'=>'Secondary (10th Class)','higher_secondary'=>'Higher Secondary (10+2)',
+            'pursing_graduate'=>'Pursing Graduate','graduate'=>'Graduate','post_graduate'=>'Post Graduate','doctorate'=>'Doctorate'];
+            
+            return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'success','message' => 'Qualification List','qualification_list'=>$qualification_list),200);
+            
+        }catch (\Exception $e){
+            CommonHelper::saveException($e,'STORE',__FUNCTION__,__FILE__);
+            return response(array('httpStatus'=>200,"dateTime"=>time(),'status' => 'fail','error_message'=>$e->getMessage(),'message'=>'Error in Processing Request'),200);
+        }    
+    }
+    
+    function getCountryList(Request $request){
+        try{ 
+            
+            $data = $request->all();
+            $country_list = CountryList::where('is_deleted',0)->where('status',1)->select('*')->orderBy('id','ASC')->get()->toArray();
+            
+            return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'success','message' => 'Country List','country_list'=>$country_list),200);
+            
+        }catch (\Exception $e){
+            CommonHelper::saveException($e,'STORE',__FUNCTION__,__FILE__);
+            return response(array('httpStatus'=>200,"dateTime"=>time(),'status' => 'fail','error_message'=>$e->getMessage(),'message'=>'Error in Processing Request'),200);
+        }    
     }
     
     function getStateList(Request $request){
@@ -177,28 +282,30 @@ class DataApiController extends Controller
         }    
     }
     
-    function getDistrictList(Request $request){
+    function getDistrictList(Request $request,$state_id){
         try{ 
             
             $data = $request->all();
             $qs_str = '';
             
             $districts_list = DistrictList::join('state_list as s', 's.id', '=', 'district_list.state_id')
+            ->where('district_list.state_id',trim($state_id))        
             ->where('district_list.is_deleted',0)
             ->where('district_list.status',1)                
             ->where('s.status',1)        
             ->where('s.is_deleted',0);        
             
-            if(isset($data['state_id']) && !empty($data['state_id'])){
+            /*if(isset($data['state_id']) && !empty($data['state_id'])){
                 $districts_list = $districts_list->where('district_list.state_id',trim($data['state_id']));
                 $qs_str.='&state_id='.trim($data['state_id']);
-            }
+            }*/
             
             $districts_list = $districts_list->select('district_list.*','s.state_name')        
             ->orderBy('district_list.id','ASC')
-            ->paginate($this->REC_PER_PAGE);
+            ->get()->toArray();        
+            //->paginate($this->REC_PER_PAGE);
             
-            $districts_list = $this->updateAPIResponse($districts_list,$qs_str);
+            //$districts_list = $this->updateAPIResponse($districts_list,$qs_str);
             
             return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'success','message' => 'Districts List','district_list'=>$districts_list),200);
             
@@ -339,13 +446,14 @@ class DataApiController extends Controller
         }    
     }
     
-    function getSubDistrictList(Request $request){
+    function getSubDistrictList(Request $request,$district_id){
         try{ 
             $data = $request->all();
             $qs_str = '';
             
             $sub_district_list = SubDistrictList::join('district_list as d', 'd.id', '=', 'sub_district_list.district_id')
             ->join('state_list as s', 's.id', '=', 'd.state_id')
+            ->where('sub_district_list.district_id',$district_id)        
             ->where('sub_district_list.is_deleted',0)
             ->where('sub_district_list.status',1)
             ->where('d.status',1)
@@ -353,18 +461,39 @@ class DataApiController extends Controller
             ->where('d.is_deleted',0)        
             ->where('s.is_deleted',0);
             
-            if(isset($data['district_id']) && !empty($data['district_id'])){
+            /*if(isset($data['district_id']) && !empty($data['district_id'])){
                 $sub_district_list = $sub_district_list->where('sub_district_list.district_id',trim($data['district_id']));
                 $qs_str.='&district_id='.trim($data['district_id']);
-            }
+            }*/
             
             $sub_district_list = $sub_district_list->select('sub_district_list.*','s.state_name','d.district_name')        
             ->orderBy('sub_district_list.id','ASC')
-            ->paginate($this->REC_PER_PAGE);
+            ->get()->toArray();           
+            //->paginate($this->REC_PER_PAGE);
             
-            $sub_district_list = $this->updateAPIResponse($sub_district_list,$qs_str);
+            //$sub_district_list = $this->updateAPIResponse($sub_district_list,$qs_str);
             
             return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'success','message' => 'Sub District List','sub_district_list'=>$sub_district_list),200);
+            
+        }catch (\Exception $e){
+            CommonHelper::saveException($e,'STORE',__FUNCTION__,__FILE__);
+            return response(array('httpStatus'=>200,"dateTime"=>time(),'status' => 'fail','error_message'=>$e->getMessage(),'message'=>'Error in Processing Request'),200);
+        }    
+    }
+    
+    function getVillageList(Request $request,$sub_district_id){
+        try{ 
+            $data = $request->all();
+            $qs_str = '';
+            
+            $village_list = VillageList::where('sub_district_id',$sub_district_id)        
+            ->where('is_deleted',0)
+            ->where('status',1)
+            ->select('*')        
+            ->orderBy('id','ASC')
+            ->get()->toArray();           
+            
+            return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'success','message' => 'Village List','village_list'=>$village_list),200);
             
         }catch (\Exception $e){
             CommonHelper::saveException($e,'STORE',__FUNCTION__,__FILE__);
