@@ -227,5 +227,6 @@ Route::get('/user/login', [App\Http\Controllers\UserController::class, 'login'])
 Route::post('/user/login', [App\Http\Controllers\UserController::class, 'submitLogin'])->name('loginsubmit');
 Route::get('/user/signup', [App\Http\Controllers\UserController::class, 'signup'])->name('signup');
 Route::post('/user/signup', [App\Http\Controllers\UserController::class, 'submitSignup'])->name('submitsignup');
+Route::get('/user/profile/view/{userId}', [App\Http\Controllers\UserController::class, 'viewProfile'])->name('viewprofile');
 Route::get('/access-denied', [App\Http\Controllers\HomeController::class, 'accessDenied'])->name('accessdenied');
 Route::any('/api-data', [App\Http\Controllers\UserController::class, 'getAPIData'])->name('getapidata');

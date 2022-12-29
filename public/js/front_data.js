@@ -132,7 +132,7 @@ function getDistrictList(state_id,select_elem,error_elem,sel_val){
                         $("#"+error_elem).html(errors).show();
                     } 
                 }else{ 
-                    var districts = msg.response.district_list, sel = '';
+                    var districts = msg.district_list, sel = '';
                     for(var i=0;i<districts.length;i++){
                         sel = (sel_val == districts[i].id)?'selected':'';
                         str+='<option '+sel+' value="'+districts[i].id+'">'+districts[i].district_name+'</option>';
@@ -169,7 +169,7 @@ function getSubDistrictList(district_id,select_elem,error_elem,sel_val){
                         $("#"+error_elem).html(errors).show();
                     } 
                 }else{ 
-                    var sub_districts = msg.response.sub_district_list,sel = '';
+                    var sub_districts = msg.sub_district_list,sel = '';
                     for(var i=0;i<sub_districts.length;i++){
                         sel = (sel_val == sub_districts[i].id)?'selected':'';
                         str+='<option '+sel+' value="'+sub_districts[i].id+'">'+sub_districts[i].sub_district_name+'</option>';
@@ -206,7 +206,7 @@ function getVillageList(sub_district_id,select_elem,error_elem,sel_val){
                         $("#"+error_elem).html(errors).show();
                     } 
                 }else{ 
-                    var villages = msg.response.village_list,sel = '';
+                    var villages = msg.village_list,sel = '';
                     for(var i=0;i<villages.length;i++){
                         sel = (sel_val == villages[i].id)?'selected':'';
                         str+='<option '+sel+' value="'+villages[i].id+'">'+villages[i].village_name+'</option>';
@@ -239,7 +239,7 @@ function editUserProfile(profile_type,action){
     }
     
     if(action == 'save'){
-        var form_data = $("#"+profile_type+"_form").serialize();
+        var form_data = $("#"+profile_type+"_form").serialize(); 
         ajaxSetup();
 
         $.ajax({
@@ -256,6 +256,11 @@ function editUserProfile(profile_type,action){
                     }else{ 
                         $("#profileUpdateSuccessMessage").html(msg.message).show();
                         $("#profileUpdateErrorMessage,.invalid-feedback").html('').hide();
+                        document.getElementById("profileUpdateSuccessMessage").scrollIntoView();
+                        $("#"+profile_type+"_div .form-control").attr('readonly',true);
+                        $("."+profile_type+"-edit").show();
+                        $("."+profile_type+"-save").hide();
+                        $("."+profile_type+"-cancel").hide();
                         //var url = ROOT_PATH+"/ward/list";
                         //setTimeout(function(){  window.location.href = url; }, 1000);
                     }
@@ -266,5 +271,62 @@ function editUserProfile(profile_type,action){
                 $("#profileUpdateErrorMessage").html('Error in processing request').show();
             }
         });
+    }
+}
+
+function updateUserProfileImage(){
+    $("#profile_image_form").submit();
+}
+
+$("#profile_image_form").on('submit', function(event){
+    event.preventDefault(); 
+    var formData = new FormData(this);
+    
+    $(".invalid-feedback,#profileUpdateErrorMessage,#profileUpdateSuccessMessage").html('').hide();
+    
+    ajaxSetup();		
+    
+    $.ajax({
+        type: "POST",
+        method:"POST",
+        data:formData,
+        dataType:'JSON',
+        contentType: false,
+        cache: false,
+        processData: false,
+        url:ROOT_PATH+"/api-data?action=update_profile_image&profile_type=profile_image",
+        success:function(msg){
+            
+            if(msg.status == 'fail'){
+                var errors = getResponseErrors(msg,'<br/>','error_validation_');
+                
+                if(errors != ''){
+                    $("#profileUpdateErrorMessage").html(errors).show();
+                } 
+            }else{ 
+                $("#profileUpdateSuccessMessage").html(msg.message).show();
+                $("#profileUpdateErrorMessage,.invalid-feedback").html('').hide();
+                
+                setTimeout(function(){  window.location.reload(); }, 1000);
+            }
+        },error:function(obj,status,error){
+            $("#profileUpdateErrorMessage").html('Error in processing request').show();
+            
+        }
+    });
+});
+
+function editProfileImage(action){
+    if(action == 'edit'){
+        $("#edit_image_div").show();
+        $("#profile_image").val('');
+        $(".image-edit").hide();
+        $(".image-save,.image-cancel").show();
+    }
+    
+    if(action == 'cancel'){
+        $("#edit_image_div").hide();
+        $(".image-edit").show();
+        $(".image-save,.image-cancel").hide();
     }
 }

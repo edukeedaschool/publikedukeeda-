@@ -173,9 +173,31 @@ class UserController extends Controller
             $response = json_decode($response,true);
             $qualification_list = $response['qualification_list'];
             
-           $params = ['title'=>'User Profile','country_list'=>$country_list,'states_list'=>$states_list,'qualification_list'=>$qualification_list,'user_profile'=>$user_profile];
+            $params = ['title'=>'User Profile','country_list'=>$country_list,'states_list'=>$states_list,'qualification_list'=>$qualification_list,'user_profile'=>$user_profile];
             
             return view('front/user/profile',$params);
+            
+        }catch (\Exception $e){
+            return view('front/page_error',array('message' =>$e->getMessage().', '.$e->getLine()));
+        }
+    }
+    
+    public function viewProfile(Request $request,$user_id){
+        try{
+            $data = $request->all();
+            $user = Auth::user();
+            
+            $headers = CommonHelper::getAPIHeaders();
+            
+            $url = url('/api/profile/data/'.$user_id);
+            $postData = [];
+            $response = CommonHelper::processCURLRequest($url,$postData,'','',$headers);
+            $response = json_decode($response,true);
+            $user_profile = $response['user_data'];
+            
+            $params = ['title'=>'View User Profile','user_profile'=>$user_profile];
+            
+            return view('front/user/profile_view',$params);
             
         }catch (\Exception $e){
             return view('front/page_error',array('message' =>$e->getMessage().', '.$e->getLine()));
@@ -208,13 +230,50 @@ class UserController extends Controller
                 $response = json_decode($response,true);
             }
             
-            if(isset($data['action']) && $data['action'] == 'update_profile'){//print_r($headers);exit;
+            if(isset($data['action']) && $data['action'] == 'update_profile'){
                 $url = url('/api/profile/update');
-                $response = CommonHelper::processCURLRequest($url,$data,'','',$headers);
+                $response = CommonHelper::processCURLRequest($url,json_encode($data),'','',$headers);
                 $response = json_decode($response,true);
             }
             
-            return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'success','message' => 'API Response','response'=>$response),200);
+            if(isset($data['action']) && $data['action'] == 'update_profile_image'){
+                $validationRules = array('profile_image'=>'required');
+                $attributes = array();
+
+                $validator = Validator::make($data,$validationRules,array(),$attributes);
+                if ($validator->fails()){ 
+                    return response(array('httpStatus'=>200, "dateTime"=>time(), 'status'=>'fail', 'message'=>'Validation Errors', 'errors' => $validator->errors()),200);
+                }	
+                
+                $file = $request->file('profile_image');
+                $filePath=  ($file->getRealPath());
+                $fileMime = $file->getMimeType(); 
+                $fileName = $file->getClientOriginalName(); 
+                $cfile = new \CURLFile( $filePath,$fileMime,$fileName);
+                
+                $postFileDataArray['profile_image'] = $cfile;
+                $postFileDataArray['user_id'] = $user->id;
+                
+                $method 		= 'POST'; 
+                $url                    = url('/api/profile/update-image');
+                $authAPIToken 		= '';
+                
+                $curl = curl_init();	
+                curl_setopt($curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
+                curl_setopt($curl, CURLOPT_URL, $url);
+                //curl_setopt($curl, CURLOPT_HEADER, 1);
+                curl_setopt($curl, CURLOPT_HTTPHEADER, array("Authorization: Bearer $authAPIToken",'Content-Type: multipart/form-data','Accept: application/json'));
+                curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+                curl_setopt($curl, CURLOPT_POST, 1);
+                curl_setopt($curl, CURLOPT_POSTFIELDS,$postFileDataArray);
+                curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+                curl_setopt($curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+                
+                $response = curl_exec($curl);
+                curl_close($curl);
+            }
+            
+            return $response; 
             
         }catch (\Exception $e){
             return response(array("httpStatus"=>500,"dateTime"=>time(),'status' => 'fail','message' =>$e->getMessage()),500);

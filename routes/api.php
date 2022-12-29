@@ -49,3 +49,5 @@ Route::group(['middleware' => ['data_api']], function () {
     Route::get('/profile/data/{userId}', [App\Http\Controllers\DataApiController::class, 'getProfileData'])->name('getprofiledata');
     Route::post('/profile/update', [App\Http\Controllers\DataApiController::class, 'updateProfileData'])->name('updateprofiledata');
 });
+
+Route::post('/profile/update-image', [App\Http\Controllers\DataApiController::class, 'updateProfileImage'])->name('updateprofileimage');

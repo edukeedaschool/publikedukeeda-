@@ -63,7 +63,8 @@
 
                         <div class="row mb-0">
                             <div class="col-md-6 offset-md-4">
-                                <button type="submit" class="btn btn-primary">
+                                <button type="button" id="user_edit_cancel" name="user_edit_cancel" class="btn btn-secondary" data-dismiss="modal" onclick="window.location.href='{{url('/')}}'">Cancel</button>
+                                <button type="submit" class="btn btn-dialog">
                                     {{ __('Submit') }}
                                 </button>
                             </div>

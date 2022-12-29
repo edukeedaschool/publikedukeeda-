@@ -174,8 +174,17 @@ class DataApiController extends Controller
         try{ 
             $data = $request->all();
             
-            $user_data = User::where('id',trim($user_id))->where('is_deleted',0)->where('status',1)->select('id','name','email','user_name','official_name','mobile_no',
-            'gender','dob','qualification','degree_year','course_name','profession','major_identity','more_about_you','image','address_line1','postal_code','country','state','district','sub_district','village')
+            $user_data = User::leftJoin('country_list as cl',function($join){$join->on('cl.id','=','users.country')->where('cl.is_deleted','=','0')->where('cl.status','=','1');})                
+            ->leftJoin('state_list as sl',function($join){$join->on('sl.id','=','users.state')->where('sl.is_deleted','=','0')->where('sl.status','=','1');})
+            ->leftJoin('district_list as dl',function($join){$join->on('dl.id','=','users.district')->where('dl.is_deleted','=','0')->where('dl.status','=','1');})
+            ->leftJoin('sub_district_list as sd',function($join){$join->on('sd.id','=','users.sub_district')->where('sd.is_deleted','=','0')->where('sd.status','=','1');})
+            ->leftJoin('village_list as vl',function($join){$join->on('vl.id','=','users.village')->where('vl.is_deleted','=','0')->where('vl.status','=','1');})
+            ->where('users.id',trim($user_id))
+            ->where('users.is_deleted',0)
+            ->where('users.status',1)
+            ->select('users.id','users.name','users.email','users.user_name','users.official_name','users.mobile_no','users.gender','users.dob','users.qualification','users.degree_year',
+            'users.course_name','users.profession','users.major_identity','users.more_about_you','users.image','users.address_line1','users.postal_code','users.country','users.state',
+            'users.district','users.sub_district','users.village','cl.country_name','sl.state_name','dl.district_name','sd.sub_district_name','vl.village_name')
             ->first();
             
             if(empty($user_data)){
@@ -202,7 +211,18 @@ class DataApiController extends Controller
                 $validationRules = array('user_id'=>'required','name'=>'required','mobile_no'=>'required','gender'=>'required','dob'=>'required');
             }
             
-            $attributes = array('mobile_no'=>'Mobile No','dob'=>'DOB');
+            if($data['profile_type'] == 'qualification'){
+                $validationRules = array('user_id'=>'required','qualification'=>'required');
+                if(in_array($data['qualification'],['pursing_graduate','graduate','post_graduate','doctorate'])){
+                    $validationRules['degree_year'] = $validationRules['course_name'] = 'required';
+                }
+            }
+            
+            if($data['profile_type'] == 'address'){
+                $validationRules = array('user_id'=>'required','address_line1'=>'required','postal_code'=>'required','country'=>'required','state'=>'required','district'=>'required','sub_district'=>'required','village'=>'required');
+            }
+            
+            $attributes = array('mobile_no'=>'Mobile No','dob'=>'DOB','degree_year'=>'Degree Year','address_line1'=>'Address line 1');
             
             $validator = Validator::make($data,$validationRules,array(),$attributes);
             if ($validator->fails()){ 
@@ -216,9 +236,22 @@ class DataApiController extends Controller
                 return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'fail','message' => $errors['user_id'], 'errors' =>$errors),200);
             }
             
-           
             if($data['profile_type'] == 'general'){
-                $updateArray = ['name'=>trim($data['name']),'mobile_no'=>trim($data['mobile_no']),'gender'=>trim($data['gender']),'dob'=>trim($data['dob'])];
+                $updateArray = ['name'=>trim($data['name']),'mobile_no'=>trim($data['mobile_no']),'gender'=>trim($data['gender']),'dob'=>trim($data['dob']),'profession'=>trim($data['profession']),'more_about_you'=>trim($data['profession'])]; 
+            }
+            
+            if($data['profile_type'] == 'qualification'){
+                $updateArray = ['qualification'=>trim($data['qualification'])]; 
+                if(in_array($data['qualification'],['pursing_graduate','graduate','post_graduate','doctorate'])){
+                    $updateArray['degree_year'] = trim($data['degree_year']);
+                    $updateArray['course_name'] = trim($data['course_name']);
+                }else{
+                    $updateArray['degree_year'] = $updateArray['course_name'] = null;
+                }
+            }
+            
+            if($data['profile_type'] == 'address'){
+                $updateArray = ['address_line1'=>trim($data['address_line1']),'postal_code'=>trim($data['postal_code']),'country'=>trim($data['country']),'state'=>trim($data['state']),'district'=>trim($data['district']),'sub_district'=>trim($data['sub_district']),'village'=>trim($data['village'])]; 
             }
             
             User::where('id',trim($data['user_id']))->update($updateArray);
@@ -230,6 +263,32 @@ class DataApiController extends Controller
             return response(array('httpStatus'=>200,"dateTime"=>time(),'status' => 'fail','error_message'=>$e->getMessage().', '.$e->getLine(),'message'=>'Error in Processing Request'),200);
         }
     }
+    
+    function updateProfileImage(Request $request){
+        try{ 
+            $data = $request->all();
+            
+            $validationRules = array('user_id'=>'required','profile_image'=>'required');
+            $attributes = array('mobile_no'=>'Mobile No','dob'=>'DOB','degree_year'=>'Degree Year','address_line1'=>'Address line 1');
+            
+            $validator = Validator::make($data,$validationRules,array(),$attributes);
+            if ($validator->fails()){ 
+                return response(array('httpStatus'=>200, "dateTime"=>time(), 'status'=>'fail', 'message'=>'Validation Errors', 'errors' => $validator->errors()),200);
+            }	
+            
+            $file = $request->file('profile_image');
+            $image_name = CommonHelper::uploadImage($request,$request->file('profile_image'),'images/user_images');
+            
+            $updateArray = ['image'=>$image_name];
+            User::where('id',trim($data['user_id']))->update($updateArray);
+            
+            return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'success','message' => 'Profile Image updated successfully'),200);
+            
+        }catch (\Exception $e){
+            CommonHelper::saveException($e,'STORE',__FUNCTION__,__FILE__);
+            return response(array('httpStatus'=>200,"dateTime"=>time(),'status' => 'fail','error_message'=>$e->getMessage().', '.$e->getLine(),'message'=>'Error in Processing Request'),200);
+        }
+    }    
     
     function getQualificationList(Request $request){
         try{ 

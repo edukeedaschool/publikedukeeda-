@@ -10,30 +10,54 @@
     <div class="row justify-content-center">
         <div class="col-md-3">
             <div class="card">
-                <div class="card-header">{{ __('User Profile') }}</div>
+                <div class="card-header">{{ __('User Profile') }}
+                    <div style="float:right">
+                        <a href="javascript:;" class="user-list-edit image-edit"  onclick="editProfileImage('edit');"><i title="Edit " class="far fa-edit"></i></a>
+                        <a href="javascript:;" class="user-list-edit image-save" style="padding-left: 10px;display:none;" onclick="updateUserProfileImage();"><i title="Save" class="far fa-save"></i></a>
+                        <a href="javascript:;" class="user-list-edit image-cancel" style="padding-left: 10px;display:none;" onclick="editProfileImage('cancel');"><i title="Cancel" class="fa fa-times"></i></a>
+                    </div>
+                </div>
 
                 <div class="card-body">
-                    <div class="row mb-3">
-                        <div class="col-md-12">
-                            <img src="{{$user_profile['image_url']}}" class="img-thumbnail">
+                    <form method="POST" action="{{ url('user/profile') }}" name="profile_image_form" id="profile_image_form" enctype="multipart/form-data">
+                        <div class="row mb-3" >
+                            <div class="col-md-12">
+                                <img src="{{$user_profile['image_url']}}" class="img-thumbnail">
+                            </div>
                         </div>
-                    </div>
-                    
-                    <div class="row mb-3">
-                        <div class="col-md-12">
-                            {{$user_profile['name']}}
+                        
+                        <div class="row mb-3" style="display:none;" id="edit_image_div">
+                            <div class="col-md-12">
+                                <input id="profile_image" type="file" class="form-control" name="profile_image" value=""  >
+                            </div>
                         </div>
-                    </div>
-                    <div class="row mb-3">
-                        <div class="col-md-12">
-                            {{$user_profile['email']}}
+
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                {{$user_profile['name']}}
+                            </div>
                         </div>
-                    </div>
-                     <div class="row mb-3">
-                        <div class="col-md-12">
-                            {{$user_profile['mobile_no']}}
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                {{$user_profile['email']}}
+                            </div>
                         </div>
-                    </div>
+                         <div class="row mb-3">
+                            <div class="col-md-12">
+                                {{$user_profile['mobile_no']}}
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <a href="{{url('user/change-password')}}" class="btn btn-dialog">Change Password</a>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <a href="{{url('user/profile/view/'.$user_profile['id'])}}" class="btn btn-dialog">View Profile</a>
+                            </div>
+                        </div>
+                    </form>    
                 </div>
             </div>    
         </div>
@@ -111,7 +135,7 @@
                                 <div class="invalid-feedback" id="error_validation_more_about_you"></div>
                             </div>
                         </div>
-                        
+                        <input id="user_id" type="hidden" class="form-control" name="user_id" value="{{$user_profile['id']}}"  />
                     </form>
                 </div>
             </div>
@@ -119,7 +143,13 @@
             <div class="clear">&nbsp;</div>
             
             <div class="card" id="qualification_div">
-                <div class="card-header">{{ __('Qualification') }}</div>
+                <div class="card-header">{{ __('Qualification') }}
+                    <div style="float:right">
+                        <a href="javascript:;" class="user-list-edit qualification-edit"  onclick="editUserProfile('qualification','edit');"><i title="Edit " class="far fa-edit"></i></a>
+                        <a href="javascript:;" class="user-list-edit qualification-save" style="padding-left: 10px;display:none;" onclick="editUserProfile('qualification','save');"><i title="Save" class="far fa-save"></i></a>
+                        <a href="javascript:;" class="user-list-edit qualification-cancel" style="padding-left: 10px;display:none;" onclick="editUserProfile('qualification','cancel');"><i title="Cancel" class="fa fa-times"></i></a>
+                    </div>
+                </div>
 
                 <div class="card-body">
                     <form method="POST" action="{{ url('user/profile') }}" name="qualification_form" id="qualification_form">
@@ -153,6 +183,7 @@
                                 <div class="invalid-feedback" id="error_validation_course_name"></div>
                             </div>
                         </div>
+                        <input id="user_id" type="hidden" class="form-control" name="user_id" value="{{$user_profile['id']}}"  />
                     </form>
                 </div>
             </div>    
@@ -163,7 +194,13 @@
             <div class="alert alert-danger alert-dismissible elem-hidden"  id="addressErrorMessage"></div>
                     
             <div class="card" id="address_div">
-                <div class="card-header">{{ __('Address') }}</div>
+                <div class="card-header">{{ __('Address') }}
+                    <div style="float:right">
+                        <a href="javascript:;" class="user-list-edit address-edit"  onclick="editUserProfile('address','edit');"><i title="Edit " class="far fa-edit"></i></a>
+                        <a href="javascript:;" class="user-list-edit address-save" style="padding-left: 10px;display:none;" onclick="editUserProfile('address','save');"><i title="Save" class="far fa-save"></i></a>
+                        <a href="javascript:;" class="user-list-edit address-cancel" style="padding-left: 10px;display:none;" onclick="editUserProfile('address','cancel');"><i title="Cancel" class="fa fa-times"></i></a>
+                    </div>
+                </div>
 
                 <div class="card-body">
                     <form method="POST" action="{{ url('user/profile') }}" name="address_form" id="address_form">
@@ -172,7 +209,7 @@
                             <label for="address_line1" class="col-md-5 col-form-label text-md-end">{{ __('Address line 1') }}</label>
                             <div class="col-md-7">
                                 <input id="address_line1" type="text" class="form-control" name="address_line1" value="{{$user_profile['address_line1']}}"  >
-                                <div class="invalid-feedback" id="error_validation_address_line_1"></div>
+                                <div class="invalid-feedback" id="error_validation_address_line1"></div>
                             </div>
                         </div>
 
@@ -238,6 +275,7 @@
                                 <div class="invalid-feedback" id="error_validation_village"></div>
                             </div>
                         </div>
+                        <input id="user_id" type="hidden" class="form-control" name="user_id" value="{{$user_profile['id']}}"  />
                     </form>
                 </div>
             </div>    
