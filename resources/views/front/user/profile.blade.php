@@ -29,6 +29,7 @@
                         <div class="row mb-3" style="display:none;" id="edit_image_div">
                             <div class="col-md-12">
                                 <input id="profile_image" type="file" class="form-control" name="profile_image" value=""  >
+                                <div class="invalid-feedback" id="error_validation_profile_image"></div>
                             </div>
                         </div>
 

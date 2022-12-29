@@ -94,6 +94,7 @@
                 <a href="{{url('submission-purpose/list')}}" class="dropdown-item">Submission Purpose</a>
                 <a href="{{url('submission-type/list')}}" class="dropdown-item">Submission Type</a>
                 <a href="{{url('review-level/list')}}" class="dropdown-item">Review Level</a>
+                <a href="{{url('package/list')}}" class="dropdown-item">Packages</a>
             </div>
         </div>
         <div class="btn-group" style="margin-left:0px; ">
@@ -125,8 +126,6 @@
 @if(isset(Auth::user()->name) && Auth::user()->user_role == 2)
 <div class="bs-example" style="text-align: center;">
     <div class="btn-group">
-        
-        
         <div class="btn-group" style="margin-left:0px; ">
             <button type="button" class="btn btn-dialog dropdown-toggle" data-toggle="dropdown">Subscribers</button>
             <div class="dropdown-menu">
@@ -136,8 +135,6 @@
                 <a href="{{url('review-official/list')}}" class="dropdown-item">Review Officials</a>
             </div>
         </div>
-        
-        
     </div>
 </div>
 @endif

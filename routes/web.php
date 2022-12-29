@@ -182,6 +182,13 @@ Route::get('/user/edit/{Id}', [App\Http\Controllers\UserController::class, 'edit
 Route::post('/user/edit/{Id}', [App\Http\Controllers\UserController::class, 'submitEditUser'])->name('submitedituser');
 Route::post('/user/update', [App\Http\Controllers\UserController::class, 'updateUser'])->name('updateuser');
 Route::get('/user/data/{email}', [App\Http\Controllers\UserController::class, 'getUserData'])->name('getuserdata');
+
+Route::get('/package/list', [App\Http\Controllers\PackageController::class, 'listPackage'])->name('packagelisting');
+Route::get('/package/add', [App\Http\Controllers\PackageController::class, 'addPackage'])->name('addpackage');
+Route::post('/package/add', [App\Http\Controllers\PackageController::class, 'submitAddPackage'])->name('submitaddpackage');
+Route::get('/package/edit/{Id}', [App\Http\Controllers\PackageController::class, 'editPackage'])->name('editpackage');
+Route::post('/package/edit/{Id}', [App\Http\Controllers\PackageController::class, 'submitEditPackage'])->name('submiteditpackage');
+Route::post('/package/update', [App\Http\Controllers\PackageController::class, 'updatePackage'])->name('updatepackage');
 });
 
 Route::group(['middleware' => ['auth','subscriber']], function () {
@@ -213,6 +220,7 @@ Route::post('/review-official/edit/{Id}', [App\Http\Controllers\SubscriberContro
 Route::post('/review-official/update', [App\Http\Controllers\SubscriberController::class, 'updateReviewOfficial'])->name('updatereviewofficial');
 Route::get('/subscriber-review/data/{Id}', [App\Http\Controllers\SubscriberController::class, 'getSubscriberReviewData'])->name('getsubscriberreviewdata');
 Route::get('/user/data/{email}', [App\Http\Controllers\UserController::class, 'getUserData'])->name('getuserdata');
+
 });
 
 Route::group(['middleware' => ['auth']], function () {
@@ -228,5 +236,5 @@ Route::post('/user/login', [App\Http\Controllers\UserController::class, 'submitL
 Route::get('/user/signup', [App\Http\Controllers\UserController::class, 'signup'])->name('signup');
 Route::post('/user/signup', [App\Http\Controllers\UserController::class, 'submitSignup'])->name('submitsignup');
 Route::get('/user/profile/view/{userId}', [App\Http\Controllers\UserController::class, 'viewProfile'])->name('viewprofile');
-Route::get('/access-denied', [App\Http\Controllers\HomeController::class, 'accessDenied'])->name('accessdenied');
+Route::get('/access-denied', [App\Http\Controllers\HomeController::class, 'accessDenied'])->name('access-denied');
 Route::any('/api-data', [App\Http\Controllers\UserController::class, 'getAPIData'])->name('getapidata');
