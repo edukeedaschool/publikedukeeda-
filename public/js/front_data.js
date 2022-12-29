@@ -239,6 +239,8 @@ function editUserProfile(profile_type,action){
     }
     
     if(action == 'save'){
+        $("#profileUpdateSuccessMessage,#profileUpdateErrorMessage,.invalid-feedback").html('').hide();
+        
         var form_data = $("#"+profile_type+"_form").serialize(); 
         ajaxSetup();
 
@@ -261,8 +263,6 @@ function editUserProfile(profile_type,action){
                         $("."+profile_type+"-edit").show();
                         $("."+profile_type+"-save").hide();
                         $("."+profile_type+"-cancel").hide();
-                        //var url = ROOT_PATH+"/ward/list";
-                        //setTimeout(function(){  window.location.href = url; }, 1000);
                     }
                 }else{
                     displayResponseError(msg,'profileUpdateErrorMessage');

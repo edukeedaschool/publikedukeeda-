@@ -219,7 +219,7 @@ class DataApiController extends Controller
             }
             
             if($data['profile_type'] == 'address'){
-                $validationRules = array('user_id'=>'required','address_line1'=>'required','postal_code'=>'required','country'=>'required','state'=>'required','district'=>'required','sub_district'=>'required','village'=>'required');
+                $validationRules = array('user_id'=>'required','address_line1'=>'required','postal_code'=>'required','country'=>'required','state'=>'required','district'=>'required','sub_district'=>'required');
             }
             
             $attributes = array('mobile_no'=>'Mobile No','dob'=>'DOB','degree_year'=>'Degree Year','address_line1'=>'Address line 1');
@@ -237,7 +237,7 @@ class DataApiController extends Controller
             }
             
             if($data['profile_type'] == 'general'){
-                $updateArray = ['name'=>trim($data['name']),'mobile_no'=>trim($data['mobile_no']),'gender'=>trim($data['gender']),'dob'=>trim($data['dob']),'profession'=>trim($data['profession']),'more_about_you'=>trim($data['profession'])]; 
+                $updateArray = ['name'=>trim($data['name']),'mobile_no'=>trim($data['mobile_no']),'gender'=>trim($data['gender']),'dob'=>trim($data['dob']),'profession'=>trim($data['profession']),'more_about_you'=>trim($data['more_about_you'])]; 
             }
             
             if($data['profile_type'] == 'qualification'){
@@ -251,7 +251,8 @@ class DataApiController extends Controller
             }
             
             if($data['profile_type'] == 'address'){
-                $updateArray = ['address_line1'=>trim($data['address_line1']),'postal_code'=>trim($data['postal_code']),'country'=>trim($data['country']),'state'=>trim($data['state']),'district'=>trim($data['district']),'sub_district'=>trim($data['sub_district']),'village'=>trim($data['village'])]; 
+                $village = (!empty($data['village']))?$data['village']:null;
+                $updateArray = ['address_line1'=>trim($data['address_line1']),'postal_code'=>trim($data['postal_code']),'country'=>trim($data['country']),'state'=>trim($data['state']),'district'=>trim($data['district']),'sub_district'=>trim($data['sub_district']),'village'=>$village]; 
             }
             
             User::where('id',trim($data['user_id']))->update($updateArray);

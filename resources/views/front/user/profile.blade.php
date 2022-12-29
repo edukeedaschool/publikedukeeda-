@@ -86,7 +86,7 @@
                         <div class="row mb-3">
                             <label for="mobile_no" class="col-md-5 col-form-label text-md-end">{{ __('Mobile No') }}</label>
                             <div class="col-md-7">
-                                <input id="mobile_no" type="text" class="form-control" name="mobile_no" value="{{$user_profile['mobile_no']}}"  >
+                                <input id="mobile_no" type="text" class="form-control" name="mobile_no" value="{{$user_profile['mobile_no']}}" maxlength="10" >
                                 <div class="invalid-feedback" id="error_validation_mobile_no"></div>
                             </div>
                         </div>
