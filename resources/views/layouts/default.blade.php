@@ -95,6 +95,7 @@
                 <a href="{{url('submission-type/list')}}" class="dropdown-item">Submission Type</a>
                 <a href="{{url('review-level/list')}}" class="dropdown-item">Review Level</a>
                 <a href="{{url('package/list')}}" class="dropdown-item">Packages</a>
+                <a href="{{url('package-price/list')}}" class="dropdown-item">Package Price</a>
             </div>
         </div>
         <div class="btn-group" style="margin-left:0px; ">

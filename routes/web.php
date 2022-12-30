@@ -189,6 +189,19 @@ Route::post('/package/add', [App\Http\Controllers\PackageController::class, 'sub
 Route::get('/package/edit/{Id}', [App\Http\Controllers\PackageController::class, 'editPackage'])->name('editpackage');
 Route::post('/package/edit/{Id}', [App\Http\Controllers\PackageController::class, 'submitEditPackage'])->name('submiteditpackage');
 Route::post('/package/update', [App\Http\Controllers\PackageController::class, 'updatePackage'])->name('updatepackage');
+Route::get('/package/data/{Id}', [App\Http\Controllers\PackageController::class, 'getPackageData'])->name('getpackagedata');
+
+Route::get('/package-price/list', [App\Http\Controllers\PackageController::class, 'listPackagePrice'])->name('packagepricelisting');
+Route::get('/package-price/edit', [App\Http\Controllers\PackageController::class, 'editPackagePrice'])->name('editpackageprice');
+Route::post('/package-price/edit', [App\Http\Controllers\PackageController::class, 'submitEditPackagePrice'])->name('submiteditpackageprice');
+
+Route::get('/subscriber-package/list', [App\Http\Controllers\PackageController::class, 'listSubscriberPackage'])->name('subscriberpackagelisting');
+Route::get('/subscriber-package/add', [App\Http\Controllers\PackageController::class, 'addSubscriberPackage'])->name('addsubscriberpackage');
+Route::post('/subscriber-package/add', [App\Http\Controllers\PackageController::class, 'submitAddSubscriberPackage'])->name('submitaddsubscriberpackage');
+Route::get('/subscriber-package/edit/{Id}', [App\Http\Controllers\PackageController::class, 'editSubscriberPackage'])->name('editsubscriberpackage');
+Route::post('/subscriber-package/edit/{Id}', [App\Http\Controllers\PackageController::class, 'submitEditSubscriberPackage'])->name('submiteditsubscriberpackage');
+Route::post('/subscriber-package/update', [App\Http\Controllers\PackageController::class, 'updateSubscriberPackage'])->name('updatesubscriberpackage');
+
 });
 
 Route::group(['middleware' => ['auth','subscriber']], function () {
