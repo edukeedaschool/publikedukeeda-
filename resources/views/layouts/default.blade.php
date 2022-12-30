@@ -102,6 +102,7 @@
             <button type="button" class="btn btn-dialog dropdown-toggle" data-toggle="dropdown">Subscribers</button>
             <div class="dropdown-menu">
                 <a href="{{url('subscriber/list')}}" class="dropdown-item">Subscribers</a>
+                <a href="{{url('subscriber-package/list')}}" class="dropdown-item">Subscriber Package</a>
                 <!--<a href="{{url('review-official/list')}}" class="dropdown-item">Review Officials</a>-->
             </div>
         </div>
