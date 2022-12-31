@@ -306,7 +306,7 @@ class PackageController extends Controller
             $requiredFields = [];
             $total_price = 0;
             
-            $validationRules = array('subscriber'=>'required','package'=>'required','status'=>'required','discounted_price'=>'numeric');
+            $validationRules = array('subscriber'=>'required','package'=>'required','status'=>'required','discounted_price'=>'numeric|nullable');
             $attributes = array('pc'=>'Parliamentary Constituency','ac'=>'Assembly Constituency');
             
             $rangeData = ['country'=>'country','state'=>'country,state','district'=>'country,state,district','pc'=>'country,state,pc','ac'=>'country,state,ac'];
@@ -408,7 +408,7 @@ class PackageController extends Controller
             $subscriber_package_id = $id;
             $subscriber_package_data = SubscriberPackage::where('id',$subscriber_package_id)->first();
             
-            $validationRules = array('subscriber'=>'required','package'=>'required','status'=>'required','discounted_price'=>'numeric');
+            $validationRules = array('subscriber'=>'required','package'=>'required','status'=>'required','discounted_price'=>'numeric|nullable');
             $attributes = array('pc'=>'Parliamentary Constituency','ac'=>'Assembly Constituency');
             
             $rangeData = ['country'=>'country','state'=>'country,state','district'=>'country,state,district','pc'=>'country,state,pc','ac'=>'country,state,ac'];
