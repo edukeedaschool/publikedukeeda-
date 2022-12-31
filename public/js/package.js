@@ -142,7 +142,7 @@ function submitEditPackagePrice(){
     });
 }
 
-function getPackageData(id,error_elem){
+function getPackageData(id,error_elem,state_sel,district_sel,ac_sel,pc_sel){
     $("#district,#pc,#ac").html('<option value="">Select One</option>').val('');
     $("#country,#state").val('');
     $("#country_div,#state_div,#district_div,#pc_div,#ac_div").hide();
@@ -165,17 +165,35 @@ function getPackageData(id,error_elem){
                 }else{ 
                     var package_data = msg.package_data;
                     if(package_data.receive_submission == 'yes'){
-                        var range = package_data.receive_submission_range;
+                        var range = package_data.receive_submission_range;//alert(range);
                         if(range == 'country'){
+                            $("#country").val(1);
                             $("#country_div").show();
                         }else if(range == 'state'){
+                            $("#country").val(1);
                             $("#country_div,#state_div").show();
+                            getStatesListing('checkbox',error_elem,state_sel,'','');
                         }else if(range == 'district'){
+                            $("#country").val(1);
+                            getStatesListing('select',error_elem,state_sel,'district',district_sel);
+                            if(district_sel != ''){
+                                getDistrictListing(state_sel,'checkbox',error_elem,district_sel);
+                            }
                             $("#country_div,#state_div,#district_div").show();
                         }else if(range == 'ac'){
-                            $("#country_div,#state_div,#district_div,#ac_div").show();
+                            $("#country").val(1);
+                            getStatesListing('select',error_elem,state_sel,'ac',ac_sel);
+                            if(ac_sel != ''){
+                                getLACListing(state_sel,'checkbox',error_elem,ac_sel);
+                            }
+                            $("#country_div,#state_div,#ac_div").show();
                         }else if(range == 'pc'){
-                            $("#country_div,#state_div,#district_div,#pc_div").show();
+                            $("#country").val(1);
+                            getStatesListing('select',error_elem,state_sel,'pc',pc_sel);
+                            if(pc_sel != ''){
+                                getPCListing(state_sel,'checkbox',error_elem,pc_sel);
+                            }
+                            $("#country_div,#state_div,#pc_div").show();
                         }
                     }
                 }
@@ -294,6 +312,241 @@ function updateSubscriberPackages(action){
             }
         },error:function(obj,status,error){
             $("#packageErrorMessage").html('Error in processing request').show();
+        }
+    });
+}
+
+function getStatesListing(elem_type,error_elem,state_sel,target_elem,target_elem_sel){
+    
+    $.ajax({
+        url:ROOT_PATH+"/state/listing/1",
+        method:"GET",
+        data:'',
+        success:function(msg){
+            if(objectPropertyExists(msg,'status')){
+                if(msg.status == 'fail'){
+                    var errors = getResponseErrors(msg,'<br/>','error_validation_');
+                    if(errors != ''){
+                        $("#"+error_elem).html(errors).show();
+                    } 
+                }else{ 
+                    var state_list = msg.state_list,chk = '',str = '',state_sel_arr = [],sel = '';
+                    if(elem_type == 'checkbox'){
+                        str = '<table><tr>';
+                        if(state_sel != ''){
+                            state_sel = state_sel.split(',');
+                            for(var i=0;i<state_sel.length;i++){
+                                state_sel_arr.push(parseInt(state_sel[i]));
+                            }
+                        }
+                        for(var i=0;i<state_list.length;i++){
+                            chk = (state_sel_arr.indexOf(state_list[i].id) >= 0)?'checked':''; 
+                            str+='<td><input type="checkbox" name="state[]" id="state_'+state_list[i].id+'" '+chk+' value="'+state_list[i].id+'"> '+state_list[i].state_name+'</td>';
+                            if(i > 0 && (i+1)%5 == 0) { str+='</tr><tr>'; } 
+                        }
+
+                        str+='</tr></table>';
+                    }else{
+                        str = '<select id="state" class="form-control" name="state"><option value="">State</option>';
+                        for(var i=0;i<state_list.length;i++){
+                            sel = (state_sel == state_list[i].id)?'selected':'';
+                            str+='<option '+sel+' value="'+state_list[i].id+'">'+state_list[i].state_name+'</option>';
+                        }
+                        str+='</select>';
+                    }
+                    
+                    $("#state_elem_div").html(str);
+                    
+                    if(target_elem == 'district'){
+                        $("#state").on('change',function(){
+                            getDistrictListing(this.value,'checkbox',error_elem,target_elem_sel); 
+                        });
+                    }
+                    
+                    if(target_elem == 'ac'){
+                        $("#state").on('change',function(){
+                            getLACListing(this.value,'checkbox',error_elem,target_elem_sel); 
+                        });
+                    }
+                    
+                    if(target_elem == 'pc'){
+                        $("#state").on('change',function(){
+                            getPCListing(this.value,'checkbox',error_elem,target_elem_sel); 
+                        });
+                    }
+                    
+                }
+            }else{
+                displayResponseError(msg,error_elem);
+            }
+        },error:function(obj,status,error){
+            $("#"+error_elem).html('Error in processing request').show();
+        }
+    });
+}
+
+
+function getDistrictListing(state_id,elem_type,error_elem,district_sel){
+    
+    if(state_id == ''){ 
+        $("#district_elem_div").html('');
+        return false;
+    }
+    
+    $.ajax({
+        url:ROOT_PATH+"/districts/listing/"+state_id,
+        method:"GET",
+        data:'',
+        success:function(msg){
+            if(objectPropertyExists(msg,'status')){
+                if(msg.status == 'fail'){
+                    var errors = getResponseErrors(msg,'<br/>','error_validation_');
+                    if(errors != ''){
+                        $("#"+error_elem).html(errors).show();
+                    } 
+                }else{ 
+                    var district_list = msg.district_list,chk = '',str = '',district_sel_arr = [],sel = '';
+                    if(elem_type == 'checkbox'){
+                        str = '<table><tr>';
+                        if(district_sel != ''){
+                            district_sel = district_sel.split(',');
+                            for(var i=0;i<district_sel.length;i++){
+                                district_sel_arr.push(parseInt(district_sel[i]));
+                            }
+                        }
+                        for(var i=0;i<district_list.length;i++){
+                            chk = (district_sel_arr.indexOf(district_list[i].id) >= 0)?'checked':''; 
+                            str+='<td><input type="checkbox" name="district[]" id="district_'+district_list[i].id+'" '+chk+' value="'+district_list[i].id+'"> '+district_list[i].district_name+'</td>';
+                            if(i > 0 && (i+1)%5 == 0) { str+='</tr><tr>'; } 
+                        }
+
+                        str+='</tr></table>';
+                    }else{
+                        str = '<select id="district" class="form-control" name="district"><option value="">District</option>';
+                        for(var i=0;i<district_list.length;i++){
+                            sel = (district_sel == district_list[i].id)?'selected':'';
+                            str+='<option '+sel+' value="'+district_list[i].id+'">'+district_list[i].district_name+'</option>';
+                        }
+                        str+='</select>';
+                    }
+
+                    $("#district_elem_div").html(str);
+                }
+            }else{
+                displayResponseError(msg,error_elem);
+            }
+        },error:function(obj,status,error){
+            $("#"+error_elem).html('Error in processing request').show();
+        }
+    });
+}
+
+function getLACListing(state_id,elem_type,error_elem,lac_sel){
+    
+    if(state_id == ''){ 
+        $("#ac_elem_div").html('');
+        return false;
+    }
+    
+    $.ajax({
+        url:ROOT_PATH+"/lac-1/listing/"+state_id,
+        method:"GET",
+        data:'',
+        success:function(msg){
+            if(objectPropertyExists(msg,'status')){
+                if(msg.status == 'fail'){
+                    var errors = getResponseErrors(msg,'<br/>','error_validation_');
+                    if(errors != ''){
+                        $("#"+error_elem).html(errors).show();
+                    } 
+                }else{ 
+                    var lac_list = msg.lac_list,chk = '',str = '',lac_sel_arr = [],sel = '';
+                    if(elem_type == 'checkbox'){
+                        str = '<table><tr>';
+                        if(lac_sel != ''){
+                            lac_sel = lac_sel.split(',');
+                            for(var i=0;i<lac_sel.length;i++){
+                                lac_sel_arr.push(parseInt(lac_sel[i]));
+                            }
+                        }
+                        for(var i=0;i<lac_list.length;i++){
+                            chk = (lac_sel_arr.indexOf(lac_list[i].id) >= 0)?'checked':''; 
+                            str+='<td><input type="checkbox" name="ac[]" id="ac_'+lac_list[i].id+'" '+chk+' value="'+lac_list[i].id+'"> '+lac_list[i].constituency_name+'</td>';
+                            if(i > 0 && (i+1)%5 == 0) { str+='</tr><tr>'; } 
+                        }
+
+                        str+='</tr></table>';
+                    }else{
+                        str = '<select id="ac" class="form-control" name="ac"><option value="">Assembly Constituency</option>';
+                        for(var i=0;i<lac_list.length;i++){
+                            sel = (lac_sel == lac_list[i].id)?'selected':'';
+                            str+='<option '+sel+' value="'+lac_list[i].id+'">'+lac_list[i].district_name+'</option>';
+                        }
+                        str+='</select>';
+                    }
+
+                    $("#ac_elem_div").html(str);
+                }
+            }else{
+                displayResponseError(msg,error_elem);
+            }
+        },error:function(obj,status,error){
+            $("#"+error_elem).html('Error in processing request').show();
+        }
+    });
+}
+
+function getPCListing(state_id,elem_type,error_elem,pc_sel){
+    
+    if(state_id == ''){ 
+        $("#pc_elem_div").html('');
+        return false;
+    }
+    
+    $.ajax({
+        url:ROOT_PATH+"/pc-1/listing/"+state_id,
+        method:"GET",
+        data:'',
+        success:function(msg){
+            if(objectPropertyExists(msg,'status')){
+                if(msg.status == 'fail'){
+                    var errors = getResponseErrors(msg,'<br/>','error_validation_');
+                    if(errors != ''){
+                        $("#"+error_elem).html(errors).show();
+                    } 
+                }else{ 
+                    var pc_list = msg.pc_list,chk = '',str = '',pc_sel_arr = [],sel = '';
+                    if(elem_type == 'checkbox'){
+                        str = '<table><tr>';
+                        if(pc_sel != ''){
+                            pc_sel = pc_sel.split(',');
+                            for(var i=0;i<pc_sel.length;i++){
+                                pc_sel_arr.push(parseInt(pc_sel[i]));
+                            }
+                        }
+                        for(var i=0;i<pc_list.length;i++){
+                            chk = (pc_sel_arr.indexOf(pc_list[i].id) >= 0)?'checked':''; 
+                            str+='<td><input type="checkbox" name="pc[]" id="pc_'+pc_list[i].id+'" '+chk+' value="'+pc_list[i].id+'"> '+pc_list[i].constituency_name+'</td>';
+                            if(i > 0 && (i+1)%5 == 0) { str+='</tr><tr>'; } 
+                        }
+
+                        str+='</tr></table>';
+                    }else{
+                        str = '<select id="pc" class="form-control" name="pc"><option value="">Assembly Constituency</option>';
+                        for(var i=0;i<pc_list.length;i++){
+                            sel = (pc_sel == pc_list[i].id)?'selected':'';
+                            str+='<option '+sel+' value="'+pc_list[i].id+'">'+pc_list[i].district_name+'</option>';
+                        }
+                        str+='</select>';
+                    }
+
+                    $("#pc_elem_div").html(str);
+                }
+            }else{
+                displayResponseError(msg,error_elem);
+            }
+        },error:function(obj,status,error){
+            $("#"+error_elem).html('Error in processing request').show();
         }
     });
 }

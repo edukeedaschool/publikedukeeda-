@@ -28,7 +28,7 @@
                     <div class="form-row">
                         <div class="form-group col-md-6" >
                             <label>Package</label>
-                            <select id="package" class="form-control" name="package" onchange="getPackageData(this.value,'addSubscriberPackageErrorMessage');" >
+                            <select id="package" class="form-control" name="package" onchange="getPackageData(this.value,'addSubscriberPackageErrorMessage','','','','');" >
                             <option value="">Package</option>
                             @for($i=0;$i<count($package_list);$i++)
                                 <option value="{{$package_list[$i]['id']}}">{{$package_list[$i]['package_name']}}</option>
@@ -54,12 +54,7 @@
                     <div class="form-row" id="state_div" style="display:none;">
                         <div class="form-group col-md-6" >
                             <label>State</label>
-                            <select id="state" class="form-control" name="state" onchange="getDistrictList(this.value,'district','addSubscriberPackageErrorMessage');">
-                                <option value="">State</option>
-                                @for($i=0;$i<count($states_list);$i++)
-                                    <option value="{{$states_list[$i]['id']}}">{{$states_list[$i]['state_name']}}</option>
-                                @endfor    
-                            </select>    
+                            <div id="state_elem_div"></div>
                             <div class="invalid-feedback" id="error_validation_state"></div>
                         </div>
                     </div>   
@@ -67,9 +62,7 @@
                     <div class="form-row" id="district_div" style="display:none;">
                         <div class="form-group col-md-6" >
                             <label>District</label>
-                            <select id="district" class="form-control" name="district" onchange="getLACList(this.value,'ac','addSubscriberPackageErrorMessage');getPCList(this.value,'pc','addSubscriberPackageErrorMessage');">
-                                <option value="">District</option>
-                            </select>    
+                            <div id="district_elem_div"></div>
                             <div class="invalid-feedback" id="error_validation_district"></div>
                         </div>
                     </div>   
@@ -77,9 +70,7 @@
                     <div class="form-row" id="pc_div" style="display:none;">
                         <div class="form-group col-md-6" >
                             <label>Parliamentary Constituency</label>
-                            <select id="pc" class="form-control" name="pc" >
-                                <option value="">Parliamentary Constituency</option>
-                            </select>    
+                            <div id="pc_elem_div"></div>
                             <div class="invalid-feedback" id="error_validation_pc"></div>
                         </div>
                     </div>   
@@ -87,9 +78,7 @@
                     <div class="form-row" id="ac_div" style="display:none;">
                         <div class="form-group col-md-6">
                             <label>Assembly Constituency</label>
-                            <select id="ac" class="form-control" name="ac" >
-                                <option value="">Assembly Constituency</option>
-                            </select>    
+                            <div id="ac_elem_div"></div>
                             <div class="invalid-feedback" id="error_validation_ac"></div>
                         </div>
                     </div>  

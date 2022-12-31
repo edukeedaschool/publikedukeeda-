@@ -32,7 +32,8 @@
                             <th><input type="checkbox" name="package_id_chk_all" id="package_id_chk_all" onclick="checkAllCheckboxes(this,'package-id')"> ID</th>
                             <th>Subscriber Name</th>
                             <th>Package Name</th>
-                           
+                            <th>Total Price</th>
+                            <th>Discounted Price</th>
                             <th>Status</th>
                             <th>Action</th></tr>
                         </thead>
@@ -42,6 +43,8 @@
                                     <td><input type="checkbox" name="package_id_chk" id="package_id_chk" value="{{$subscriber_package_list[$i]['id']}}" class="package-id-chk"> {{$subscriber_package_list[$i]['id']}}</td>
                                     <td>{{$subscriber_package_list[$i]['subscriber_name']}}</td>
                                     <td>{{$subscriber_package_list[$i]['package_name']}}</td>
+                                    <td>{{$subscriber_package_list[$i]['total_price']}}</td>
+                                    <td>{{$subscriber_package_list[$i]['discounted_price']}}</td>
                                     <td>{{($subscriber_package_list[$i]['status'] == 1)?'Enabled':'Disabled'}}</td>
                                     <td>
                                         <a href="{{url('subscriber-package/edit/'.$subscriber_package_list[$i]['id'])}}" class="package-list-edit"><i  title="Edit Package" class="far fa-edit"></i></a>&nbsp;&nbsp;

@@ -30,7 +30,7 @@
                     <div class="form-row">
                         <div class="form-group col-md-6" >
                             <label>Package</label>
-                            <select id="package" class="form-control" name="package" onchange="getPackageData(this.value,'editSubscriberPackageErrorMessage');" >
+                            <select id="package" class="form-control" name="package" onchange="getPackageData(this.value,'editSubscriberPackageErrorMessage','','','','');"  >
                             <option value="">Package</option>
                             @for($i=0;$i<count($package_list);$i++)
                                 <?php if($package_list[$i]['id'] == $subscriber_package_data->package_id) $sel = 'selected';else $sel = ''; ?>
@@ -58,12 +58,7 @@
                     <div class="form-row" id="state_div" style="display:none;">
                         <div class="form-group col-md-6" >
                             <label>State</label>
-                            <select id="state" class="form-control" name="state" onchange="getDistrictList(this.value,'district','editSubscriberPackageErrorMessage');">
-                                <option value="">State</option>
-                                @for($i=0;$i<count($states_list);$i++)
-                                    <option value="{{$states_list[$i]['id']}}">{{$states_list[$i]['state_name']}}</option>
-                                @endfor    
-                            </select>    
+                            <div id="state_elem_div"></div> 
                             <div class="invalid-feedback" id="error_validation_state"></div>
                         </div>
                     </div>   
@@ -71,9 +66,7 @@
                     <div class="form-row" id="district_div" style="display:none;">
                         <div class="form-group col-md-6" >
                             <label>District</label>
-                            <select id="district" class="form-control" name="district" onchange="getLACList(this.value,'ac','editSubscriberPackageErrorMessage');getPCList(this.value,'pc','editSubscriberPackageErrorMessage');">
-                                <option value="">District</option>
-                            </select>    
+                            <div id="district_elem_div"></div>    
                             <div class="invalid-feedback" id="error_validation_district"></div>
                         </div>
                     </div>   
@@ -81,9 +74,7 @@
                     <div class="form-row" id="pc_div" style="display:none;">
                         <div class="form-group col-md-6" >
                             <label>Parliamentary Constituency</label>
-                            <select id="pc" class="form-control" name="pc" >
-                                <option value="">Parliamentary Constituency</option>
-                            </select>    
+                            <div id="pc_elem_div"></div>  
                             <div class="invalid-feedback" id="error_validation_pc"></div>
                         </div>
                     </div>   
@@ -91,9 +82,7 @@
                     <div class="form-row" id="ac_div" style="display:none;">
                         <div class="form-group col-md-6">
                             <label>Assembly Constituency</label>
-                            <select id="ac" class="form-control" name="ac" >
-                                <option value="">Assembly Constituency</option>
-                            </select>    
+                            <div id="ac_elem_div"></div>
                             <div class="invalid-feedback" id="error_validation_ac"></div>
                         </div>
                     </div>  
@@ -101,7 +90,7 @@
                     <div class="form-row">
                         <div class="form-group col-md-6" >
                             <label>Total Price</label>
-                            <input id="total_price" type="text" class="form-control" name="total_price" value="" readonly="true" >
+                            <input id="total_price" type="text" class="form-control" name="total_price" value="{{$subscriber_package_data->total_price}}" readonly="true" >
                             <div class="invalid-feedback" id="error_validation_total_price"></div>
                         </div>
                     </div>    
@@ -147,12 +136,13 @@
 <script src="{{ asset('js/package.js') }}" ></script>
 <script type="text/javascript" >
     $(document).ready(function(){
-        getPackageData("{{$subscriber_package_data->package_id}}");
-        $("#country").val("{{$subscriber_package_data->country}}");
+        //getPackageData("{{$subscriber_package_data->package_id}}");
+        getPackageData("{{$subscriber_package_data->package_id}}",'editSubscriberPackageErrorMessage','{{$subscriber_package_data->state}}','{{$subscriber_package_data->district}}','{{$subscriber_package_data->ac}}','{{$subscriber_package_data->pc}}');
+        /*$("#country").val("{{$subscriber_package_data->country}}");
         $("#state").val("{{$subscriber_package_data->state}}");
         getDistrictList("{{$subscriber_package_data->state}}",'district','editSubscriberPackageErrorMessage',"{{$subscriber_package_data->district}}");
         getLACList("{{$subscriber_package_data->district}}",'ac','editSubscriberPackageErrorMessage',"{{$subscriber_package_data->ac}}");
-        getPCList("{{$subscriber_package_data->district}}",'pc','editSubscriberPackageErrorMessage',"{{$subscriber_package_data->pc}}");
+        getPCList("{{$subscriber_package_data->district}}",'pc','editSubscriberPackageErrorMessage',"{{$subscriber_package_data->pc}}");*/
     });
 </script>
 @endsection

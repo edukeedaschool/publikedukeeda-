@@ -46,6 +46,7 @@ Route::post('/mc2/add', [App\Http\Controllers\MasterDataController::class, 'subm
 Route::get('/mc2/edit/{Id}', [App\Http\Controllers\MasterDataController::class, 'editMC2'])->name('editmc2');
 Route::post('/mc2/edit/{Id}', [App\Http\Controllers\MasterDataController::class, 'submitEditMC2'])->name('submiteditmc2');
 
+Route::get('/state/listing/{countryId}', [App\Http\Controllers\MasterDataController::class, 'getStateList'])->name('stateslisting1');
 Route::get('/districts/listing/{stateId}', [App\Http\Controllers\MasterDataController::class, 'getDistrictList'])->name('districtslisting1');
 Route::get('/mc1/listing/{stateId}', [App\Http\Controllers\MasterDataController::class, 'getMC1List'])->name('mc1listing1');
 Route::get('/mc2/listing/{districtId}', [App\Http\Controllers\MasterDataController::class, 'getMC2List'])->name('mc2listing1');
@@ -56,6 +57,8 @@ Route::get('/village/listing/{subDistrictId}', [App\Http\Controllers\MasterDataC
 Route::get('/ward/listing/{cityCouncilId}', [App\Http\Controllers\MasterDataController::class, 'getWardList'])->name('wardlisting1');
 Route::get('/lac/listing/{districtId}', [App\Http\Controllers\MasterDataController::class, 'getLACList'])->name('laclisting1');
 Route::get('/pc/listing/{districtId}', [App\Http\Controllers\MasterDataController::class, 'getPCList'])->name('pclisting1');
+Route::get('/lac-1/listing/{stateId}', [App\Http\Controllers\MasterDataController::class, 'getLACListByState'])->name('laclisting2');
+Route::get('/pc-1/listing/{stateId}', [App\Http\Controllers\MasterDataController::class, 'getPCListByState'])->name('pclisting2');
 
 Route::get('/city-council/list', [App\Http\Controllers\MasterDataController::class, 'listCityCouncil'])->name('citycouncillisting');
 Route::get('/city-council/add', [App\Http\Controllers\MasterDataController::class, 'addCityCouncil'])->name('addcitycouncil');

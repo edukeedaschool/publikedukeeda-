@@ -449,6 +449,18 @@ class MasterDataController extends Controller
         }
     }
     
+    public function getStateList(Request $request,$country_id){
+        try{
+            $data = $request->all();
+            $state_list = StateList::where('country_id',$country_id)->where('is_deleted',0)->orderBy('state_name')->get()->toArray();
+          
+            return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'success','message' => 'State List','state_list'=>$state_list),200);
+            
+        }catch (\Exception $e){
+            return response(array("httpStatus"=>500,"dateTime"=>time(),'status' => 'fail','message' =>$e->getMessage()),500);
+        }  
+    }
+    
     public function getDistrictList(Request $request,$state_id){
         try{
             $data = $request->all();
@@ -1076,10 +1088,34 @@ class MasterDataController extends Controller
         }  
     }
     
+    public function getLACListByState(Request $request,$state_id){
+        try{
+            $data = $request->all();
+            $lac_list = LegislativeAssemblyConstituency::where('state_id',$state_id)->where('is_deleted',0)->orderBy('constituency_name')->get()->toArray();
+          
+            return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'success','message' => 'LAC List','lac_list'=>$lac_list),200);
+            
+        }catch (\Exception $e){
+            return response(array("httpStatus"=>500,"dateTime"=>time(),'status' => 'fail','message' =>$e->getMessage()),500);
+        }  
+    }
+    
     public function getPCList(Request $request,$district_id){
         try{
             $data = $request->all();
             $pc_list = ParliamentaryConstituency::whereRaw("FIND_IN_SET($district_id,district_list)")->where('is_deleted',0)->orderBy('constituency_name')->get()->toArray();
+          
+            return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'success','message' => 'PC List','pc_list'=>$pc_list),200);
+            
+        }catch (\Exception $e){
+            return response(array("httpStatus"=>500,"dateTime"=>time(),'status' => 'fail','message' =>$e->getMessage()),500);
+        }  
+    }
+    
+    public function getPCListByState(Request $request,$state_id){
+        try{
+            $data = $request->all();
+            $pc_list = ParliamentaryConstituency::where('state_id',$state_id)->where('is_deleted',0)->orderBy('constituency_name')->get()->toArray();
           
             return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'success','message' => 'PC List','pc_list'=>$pc_list),200);
             

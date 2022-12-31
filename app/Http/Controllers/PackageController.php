@@ -304,11 +304,12 @@ class PackageController extends Controller
             $user = Auth::user();
             $range = null;
             $requiredFields = [];
+            $total_price = 0;
             
             $validationRules = array('subscriber'=>'required','package'=>'required','status'=>'required','discounted_price'=>'numeric');
             $attributes = array('pc'=>'Parliamentary Constituency','ac'=>'Assembly Constituency');
             
-            $rangeData = ['country'=>'country','state'=>'country,state','district'=>'country,state,district','pc'=>'country,state,district,pc','ac'=>'country,state,district,ac'];
+            $rangeData = ['country'=>'country','state'=>'country,state','district'=>'country,state,district','pc'=>'country,state,pc','ac'=>'country,state,ac'];
             
             if(isset($data['package']) && !empty($data['package'])){
                 $package_data = Packages::where('id',$data['package'])->first();   
@@ -332,8 +333,26 @@ class PackageController extends Controller
                 return response(array('httpStatus'=>200, "dateTime"=>time(), 'status'=>'fail', 'message'=>'Package already exists for Subscriber', 'errors' => 'Package already exists for Subscriber'));
             }
             
+            $package_prices = PackagesPrice::where('is_deleted',0)->first();
+            
+            if(empty($package_prices)){
+                return response(array('httpStatus'=>200, "dateTime"=>time(), 'status'=>'fail', 'message'=>'Package Prices not added', 'errors' => 'Package Prices not added'));
+            }
+            
+            if($range == 'country'){
+                $total_price = round($package_prices->country_range,2);
+            }elseif($range == 'state'){
+                $total_price = round($package_prices->state_range*count($data['state']),2);
+            }elseif($range == 'district'){
+                $total_price = round($package_prices->district_range*count($data['district']),2);
+            }elseif($range == 'ac'){
+                $total_price = round($package_prices->ac_range*count($data['ac']),2);
+            }elseif($range == 'pc'){
+                $total_price = round($package_prices->pc_range*count($data['pc']),2);
+            }
+            
             $discounted_price = !empty($data['discounted_price'])?$data['discounted_price']:null;
-            $insertArray = array('subscriber_id'=>trim($data['subscriber']),'package_id'=>trim($data['package']),'submission_range'=>$range,'discounted_price'=>$discounted_price,'status'=>trim($data['status']));
+            $insertArray = array('subscriber_id'=>trim($data['subscriber']),'package_id'=>trim($data['package']),'submission_range'=>$range,'discounted_price'=>$discounted_price,'status'=>trim($data['status']),'total_price'=>$total_price);
             
             for($i=0;$i<count($requiredFields);$i++){
                 $field = $requiredFields[$i];
@@ -384,6 +403,7 @@ class PackageController extends Controller
             $user = Auth::user();
             $range = null;
             $requiredFields = [];
+            $total_price = 0;
             
             $subscriber_package_id = $id;
             $subscriber_package_data = SubscriberPackage::where('id',$subscriber_package_id)->first();
@@ -391,7 +411,7 @@ class PackageController extends Controller
             $validationRules = array('subscriber'=>'required','package'=>'required','status'=>'required','discounted_price'=>'numeric');
             $attributes = array('pc'=>'Parliamentary Constituency','ac'=>'Assembly Constituency');
             
-            $rangeData = ['country'=>'country','state'=>'country,state','district'=>'country,state,district','pc'=>'country,state,district,pc','ac'=>'country,state,district,ac'];
+            $rangeData = ['country'=>'country','state'=>'country,state','district'=>'country,state,district','pc'=>'country,state,pc','ac'=>'country,state,ac'];
             
             if(isset($data['package']) && !empty($data['package'])){
                 $package_data = Packages::where('id',$data['package'])->first();   
@@ -415,12 +435,30 @@ class PackageController extends Controller
                 return response(array('httpStatus'=>200, "dateTime"=>time(), 'status'=>'fail', 'message'=>'Package already exists for Subscriber', 'errors' => 'Package already exists for Subscriber'));
             }
             
+            $package_prices = PackagesPrice::where('is_deleted',0)->first();
+            
+            if(empty($package_prices)){
+                return response(array('httpStatus'=>200, "dateTime"=>time(), 'status'=>'fail', 'message'=>'Package Prices not added', 'errors' => 'Package Prices not added'));
+            }
+            
+            if($range == 'country'){
+                $total_price = round($package_prices->country_range,2);
+            }elseif($range == 'state'){
+                $total_price = round($package_prices->state_range*count($data['state']),2);
+            }elseif($range == 'district'){
+                $total_price = round($package_prices->district_range*count($data['district']),2);
+            }elseif($range == 'ac'){
+                $total_price = round($package_prices->ac_range*count($data['ac']),2);
+            }elseif($range == 'pc'){
+                $total_price = round($package_prices->pc_range*count($data['pc']),2);
+            }
+            
             $discounted_price = !empty($data['discounted_price'])?$data['discounted_price']:null;
-            $updateArray = array('subscriber_id'=>trim($data['subscriber']),'package_id'=>trim($data['package']),'submission_range'=>$range,'discounted_price'=>$discounted_price,'status'=>trim($data['status']));
+            $updateArray = array('subscriber_id'=>trim($data['subscriber']),'package_id'=>trim($data['package']),'submission_range'=>$range,'discounted_price'=>$discounted_price,'status'=>trim($data['status']),'total_price'=>$total_price);
             
             for($i=0;$i<count($requiredFields);$i++){
                 $field = $requiredFields[$i];
-                $updateArray[$field] = $data[$field];
+                $updateArray[$field] = is_array($data[$field])?implode(',',$data[$field]):$data[$field];
             }
             
             SubscriberPackage::where('id',$subscriber_package_id)->update($updateArray);
@@ -446,7 +484,7 @@ class PackageController extends Controller
             ->where('p.is_deleted',0);               
             
             if(isset($data['name']) && !empty($data['name'])){
-                $subscriber_package_list = $subscriber_package_list->where('u1.name','LIKE','%'.trim($data['name']).'%');
+                $subscriber_package_list = $subscriber_package_list->where('p.package_name','LIKE','%'.trim($data['name']).'%');
             }
             
             $subscriber_package_list = $subscriber_package_list->select('subscriber_package.*','u1.name as subscriber_name','p.package_name')        
