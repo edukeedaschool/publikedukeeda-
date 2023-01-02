@@ -19,7 +19,7 @@
     <div class="container-fluid">
         <div class="row align-items-md-center">
             <div class="col-md-4 logo">
-                <a href="{{ url('/home') }}">Review Management System</a>
+                <a href="{{ url('/') }}">Review Management System</a>
             </div> 
             <div class="col-md-4 text-center">
                 <h2><?php if(!empty($title)){echo $title;}else{echo "";}?></h2>

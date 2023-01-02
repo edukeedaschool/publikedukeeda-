@@ -6,7 +6,17 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 
-class HomeController extends Controller
+use App\Models\StateList;
+use App\Models\CountryList;
+use App\Models\DistrictList;
+use App\Models\VillageList;
+use App\Models\User;
+use App\Helpers\CommonHelper;
+use Validator;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
+
+class SubmissionController extends Controller
 {
     /**
      * Create a new controller instance.
@@ -24,24 +34,14 @@ class HomeController extends Controller
      * @return \Illuminate\Contracts\Support\Renderable
      */
     public function index(Request $request){
-        
         try{
             $data = $request->all();
             $states_list = [];
             $user = Auth::user();
             
-            /*if(! ($user->status == 1 && $user->is_deleted == 0)){
-                
-                Session::flush();
-        
-                Auth::logout();
-        
-                return redirect('/login');
-            }*/
             
-            if(! ((isset($user->id) && !empty($user->id)))){
-                return redirect('user/login');
-            }
+            
+            
             
             return view('home',array('user'=>$user,'title'=>'Home Page'));
          
@@ -50,7 +50,5 @@ class HomeController extends Controller
         }
     }
     
-    public function accessDenied(Request $request){
-        return view('access_denied',array('title'=>'Access Denied'));
-    }
+   
 }

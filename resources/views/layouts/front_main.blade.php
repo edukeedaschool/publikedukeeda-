@@ -56,6 +56,12 @@
                 <li><a href="javascript:;"><i class="fas fa-star"></i> Submissions for review</a></li>
                 <li><a href="javascript:;"><i class="fas fa-search"></i> Search Group</a></li>
                 @if(isset($user_data->id) && !empty($user_data->id) )
+                    @if($user_data->user_role == 1)
+                        <li><a href="{{url('states/list')}}" ><i class="fas fa-users"></i> Admin Panel</a></li>
+                    @endif
+                    @if($user_data->user_role == 2)
+                        <li><a href="{{url('subscriber/review-data/view')}}" ><i class="fas fa-users"></i> Subscriber Panel</a></li>
+                    @endif
                     <li><a href="javascript:;" onclick="event.preventDefault();document.getElementById('logout-form').submit();"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
                 @else
                     <li><a href="{{url('user/login')}}" ><i class="fas fa-sign-out-alt"></i> Login</a></li>
