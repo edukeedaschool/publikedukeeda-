@@ -243,6 +243,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('/user/change-password', [App\Http\Controllers\UserController::class, 'changePassword'])->name('changepassword');
     Route::post('/user/change-password', [App\Http\Controllers\UserController::class, 'submitChangePassword'])->name('submitchangepassword');
     Route::get('/user/profile', [App\Http\Controllers\UserController::class, 'profile'])->name('profile');
+    Route::get('/submission/add', [App\Http\Controllers\SubmissionController::class, 'addSubmission'])->name('addsubmission');
 });
 
 

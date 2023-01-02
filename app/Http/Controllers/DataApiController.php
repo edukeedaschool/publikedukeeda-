@@ -29,6 +29,9 @@ use App\Models\SubmissionPurposeList;
 use App\Models\SubmissionTypeList;
 use App\Models\ReviewLevel;
 use App\Models\RepresentationAreaList;
+use App\Models\Submissions;
+use App\Models\SubscriberList;
+use App\Models\SubscriberPackage;
 use App\Helpers\CommonHelper;
 use Validator;
 use Illuminate\Validation\Rule;
@@ -743,7 +746,8 @@ class DataApiController extends Controller
             
             $group_list  = $group_list->select('group_list.*')        
             ->orderBy('group_list.id','ASC')
-            ->paginate($this->REC_PER_PAGE);
+            ->get()->toArray();          
+            //->paginate($this->REC_PER_PAGE);
             
             $group_list = $this->updateAPIResponse($group_list,$qs_str);
             
@@ -773,7 +777,8 @@ class DataApiController extends Controller
             
             $sub_group_list = $sub_group_list->select('sub_group_list.*','g.group_name')        
             ->orderBy('sub_group_list.id','ASC')
-            ->paginate($this->REC_PER_PAGE);
+            ->get()->toArray();        
+            //->paginate($this->REC_PER_PAGE);
             
             $sub_group_list = $this->updateAPIResponse($sub_group_list,$qs_str);
             
@@ -859,6 +864,35 @@ class DataApiController extends Controller
             $review_level_list = $this->updateAPIResponse($review_level_list,$qs_str);
             
             return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'success','message' => 'Review Level List','review_level_list'=>$review_level_list),200);
+            
+        }catch (\Exception $e){
+            CommonHelper::saveException($e,'STORE',__FUNCTION__,__FILE__);
+            return response(array('httpStatus'=>200,"dateTime"=>time(),'status' => 'fail','error_message'=>$e->getMessage(),'message'=>'Error in Processing Request'),200);
+        }    
+    }
+    
+    function getSubmissionSubscribersList(Request $request,$sub_group_id,$user_id){
+        try{ 
+            $data = $request->all();
+            $qs_str = '';
+            
+            $user_data = User::where('id',$user_id)->where('is_deleted',0)->first();
+            $user_country = $user_data->country;
+            $user_state = $user_data->state;
+            $user_district = $user_data->district;
+            
+            $subscriber_list = SubscriberList::join('subscriber_package as sp', 'sp.subscriber_id', '=', 'subscriber_list.id')
+            ->whereRaw("((sp.submission_range = 'country' AND  sp.country = $user_country) OR (sp.submission_range = 'state' AND FIND_IN_SET($user_state,sp.state)) OR (sp.submission_range = 'district' AND FIND_IN_SET($user_district,sp.district)))")        
+            ->where('subscriber_list.office_belongs_to',$sub_group_id)
+            ->where('sp.is_deleted',0)
+            ->where('subscriber_list.is_deleted',0)        
+            ->where('sp.status',1)
+            ->where('subscriber_list.status',1)
+            ->select('subscriber_list.*')        
+            ->orderBy('subscriber_list.id','ASC')
+            ->get()->toArray();
+            
+            return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'success','message' => 'Submission Subscribers List','subscriber_list'=>$subscriber_list),200);
             
         }catch (\Exception $e){
             CommonHelper::saveException($e,'STORE',__FUNCTION__,__FILE__);
