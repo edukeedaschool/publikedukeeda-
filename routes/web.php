@@ -243,7 +243,14 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('/user/change-password', [App\Http\Controllers\UserController::class, 'changePassword'])->name('changepassword');
     Route::post('/user/change-password', [App\Http\Controllers\UserController::class, 'submitChangePassword'])->name('submitchangepassword');
     Route::get('/user/profile', [App\Http\Controllers\UserController::class, 'profile'])->name('profile');
-    Route::get('/submission/add', [App\Http\Controllers\SubmissionController::class, 'addSubmission'])->name('addsubmission');
+    Route::get('/submission/subscriber/add', [App\Http\Controllers\SubmissionController::class, 'addSubmissionSubscriber'])->name('addsubmissionsubscriber');
+    Route::get('/submission/type/add/{subscriberId}', [App\Http\Controllers\SubmissionController::class, 'addSubmissionType'])->name('addsubmissiontype');
+    Route::get('/submission/detail/add/{subscriberId}/{subscriberTypeId}', [App\Http\Controllers\SubmissionController::class, 'addSubmissionDetail'])->name('addsubmissiondetail');
+    Route::post('/submission/detail/save', [App\Http\Controllers\SubmissionController::class, 'saveSubmissionDetail'])->name('savesubmissiondetail');
+    Route::get('/submission/confirm/add/{submissionId}', [App\Http\Controllers\SubmissionController::class, 'addSubmissionConfirm'])->name('addsubmissionsubmissiondetail');
+    
+    Route::get('/submission-subscribers/list/{subGroupId}/{userId}', [App\Http\Controllers\SubmissionController::class, 'getSubmissionSubscribersList'])->name('getsubmissionsubscriberslist');
+    Route::get('/submission-subscriber/data/{subscriberId}', [App\Http\Controllers\SubmissionController::class, 'getSubmissionSubscriberData'])->name('getsubmissionsubscriberdata');
 });
 
 

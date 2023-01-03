@@ -9,8 +9,8 @@ class DataApiAuthenticated
     public function handle($request, Closure $next)
     {  
         $content_type_header = $request->header('Content-Type');
-        if(empty($content_type_header) || strtolower($content_type_header) != 'application/json' ){
-            return response(array('httpStatus'=>200, "dateTime"=>time(), 'status'=>'fail', 'message'=>'Invalid Content-Type Header', 'errors' => 'Invalid Content-Type Header'),200);
+        if(! (!empty($content_type_header) && ($content_type_header == 'application/json' || strpos($content_type_header,'multipart/form-data') !== false) )){
+            return response(array('httpStatus'=>200, "dateTime"=>time(), 'status'=>'fail', 'message'=>'Invalid Content-Type Header'.$content_type_header, 'errors' => 'Invalid Content-Type Header'.$content_type_header),200);
         }
             
         $access_token_header = $request->header('Access-Token');

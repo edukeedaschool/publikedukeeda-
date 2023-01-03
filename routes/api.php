@@ -44,6 +44,8 @@ Route::group(['middleware' => ['data_api']], function () {
     Route::get('/qualification/list', [App\Http\Controllers\DataApiController::class, 'getQualificationList'])->name('getqualificationlist');
     Route::get('/village/list/{subDistrictId}', [App\Http\Controllers\DataApiController::class, 'getVillageList'])->name('getvillagelist');
     Route::get('/submission-subscribers/list/{subGroupId}/{userId}', [App\Http\Controllers\DataApiController::class, 'getSubmissionSubscribersList'])->name('getsubmissionsubscriberslist');
+    Route::get('/submission-subscriber/data/{subscriberId}', [App\Http\Controllers\DataApiController::class, 'getSubmissionSubscriberData'])->name('getsubmissionsubscriberdata');
+    Route::post('/submission/detail/save', [App\Http\Controllers\DataApiController::class, 'saveSubmissionDetail'])->name('savesubmissiondetail');
     
     Route::post('/signup', [App\Http\Controllers\DataApiController::class, 'signup'])->name('signup');
     Route::post('/change-password', [App\Http\Controllers\DataApiController::class, 'changePassword'])->name('changepassword');

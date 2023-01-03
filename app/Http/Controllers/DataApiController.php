@@ -874,25 +874,87 @@ class DataApiController extends Controller
     function getSubmissionSubscribersList(Request $request,$sub_group_id,$user_id){
         try{ 
             $data = $request->all();
-            $qs_str = '';
             
             $user_data = User::where('id',$user_id)->where('is_deleted',0)->first();
-            $user_country = $user_data->country;
-            $user_state = $user_data->state;
-            $user_district = $user_data->district;
+            $sub_group_data = SubGroupList::where('id',$sub_group_id)->where('is_deleted',0)->first();
+            
+            if(!empty($user_data)){
+                if(!empty($user_data->country) && !empty($user_data->state) && !empty($user_data->district)){
+                    $user_country = $user_data->country;
+                    $user_state = $user_data->state;
+                    $user_district = $user_data->district;
+                }else{
+                    return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'fail','message' => 'Country/State/District is empty'),200);
+                }
+            }else{
+                return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'fail','message' => 'User does not exists'),200);
+            }
+            
+            if(empty($sub_group_data)){
+                return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'fail','message' => 'SubGroup does not exists'),200);
+            }
             
             $subscriber_list = SubscriberList::join('subscriber_package as sp', 'sp.subscriber_id', '=', 'subscriber_list.id')
+            ->join('users as u', 'u.id', '=', 'subscriber_list.user_id')        
             ->whereRaw("((sp.submission_range = 'country' AND  sp.country = $user_country) OR (sp.submission_range = 'state' AND FIND_IN_SET($user_state,sp.state)) OR (sp.submission_range = 'district' AND FIND_IN_SET($user_district,sp.district)))")        
             ->where('subscriber_list.office_belongs_to',$sub_group_id)
             ->where('sp.is_deleted',0)
-            ->where('subscriber_list.is_deleted',0)        
+            ->where('subscriber_list.is_deleted',0)       
+            ->where('u.is_deleted',0)        
             ->where('sp.status',1)
             ->where('subscriber_list.status',1)
-            ->select('subscriber_list.*')        
+            ->select('subscriber_list.*','u.name as subscriber_name','u.email')        
             ->orderBy('subscriber_list.id','ASC')
             ->get()->toArray();
             
             return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'success','message' => 'Submission Subscribers List','subscriber_list'=>$subscriber_list),200);
+            
+        }catch (\Exception $e){
+            CommonHelper::saveException($e,'STORE',__FUNCTION__,__FILE__);
+            return response(array('httpStatus'=>200,"dateTime"=>time(),'status' => 'fail','error_message'=>$e->getMessage(),'message'=>'Error in Processing Request'),200);
+        }    
+    }
+    
+    function getSubmissionSubscriberData(Request $request,$subscriber_id){
+        try{ 
+            $data = $request->all();
+            
+            $subscriber_data = SubscriberList::join('users as u', 'u.id', '=', 'subscriber_list.user_id')        
+            ->where('subscriber_list.id',$subscriber_id)
+            ->where('subscriber_list.is_deleted',0)
+            ->where('u.is_deleted',0)        
+            ->select('subscriber_list.*','u.name as subscriber_name')                 
+            ->first();
+            
+            $sub_group_data = SubGroupList::where('id',$subscriber_data->office_belongs_to)->where('is_deleted',0)->first();
+            
+            $submission_purpose_list = SubmissionPurposeList::where('group_id',$sub_group_data->group_id)->where('is_deleted',0)->where('status',1)->get()->toArray();
+            $submission_type_list = SubmissionTypeList::where('group_id',$sub_group_data->group_id)->where('is_deleted',0)->where('status',1)->get()->toArray();
+            
+            return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'success','message' => 'Submission Subscriber Data','subscriber_data'=>$subscriber_data,'submission_purpose_list'=>$submission_purpose_list,'submission_type_list'=>$submission_type_list),200);
+            
+        }catch (\Exception $e){
+            CommonHelper::saveException($e,'STORE',__FUNCTION__,__FILE__);
+            return response(array('httpStatus'=>200,"dateTime"=>time(),'status' => 'fail','error_message'=>$e->getMessage(),'message'=>'Error in Processing Request'),200);
+        }    
+    }
+    
+    function saveSubmissionDetail(Request $request){
+        try{ 
+            $data = $request->all();
+            
+            $file = $request->file('detail_file');
+            $file_name = CommonHelper::uploadImage($request,$request->file('detail_file'),'documents/submission_documents',false);
+            
+            $subscriber_data = SubscriberList::where('id',trim($data['subscriber_id']))->first();
+            
+            $insertArray = ['sub_group_id'=>$subscriber_data->office_belongs_to,'place'=>null,'subscriber_id'=>trim($data['subscriber_id']),'submission_type'=>trim($data['submission_type_id']),
+            'purpose'=>trim($data['purpose']),'nature'=>trim($data['nature']),'subject'=>trim($data['subject']),'summary'=>trim($data['summary']),'file'=>$file_name,
+            'user_id'=>trim($data['user_id'])];
+            
+            $submission = Submissions::create($insertArray);
+            
+            return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'success','message' => 'Submission added successfully','submission_data'=>$submission),200);
             
         }catch (\Exception $e){
             CommonHelper::saveException($e,'STORE',__FUNCTION__,__FILE__);

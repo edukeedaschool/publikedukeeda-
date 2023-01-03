@@ -18,6 +18,7 @@
   <link href="{{ asset('css/owl.theme.default.min.css') }}" rel="stylesheet" type="text/css">
   <!-- Custom CSS -->
   <link href="{{ asset('css/style.css') }}" rel="stylesheet" type="text/css">
+  <link href="{{ asset('css/developer-front.css') }}" rel="stylesheet" type="text/css">
   <script>var ROOT_PATH = "{{url('/')}}"; </script>
 </head>
 
@@ -103,7 +104,8 @@
   <script src="{{ asset('js/bootstrap.min.js') }}" type="text/javascript"></script>
   <script src="{{ asset('js/popper.min.js') }}" type="text/javascript"></script>
   <!-- jQuery for menu -->
-  <script src="{{ asset('js/menu.js') }}" type="text/javascript" ></script>
+  <?php /* ?><script src="{{ asset('js/menu.js') }}" type="text/javascript" ></script> <?php */ ?>
+  <script src="{{ asset('js/common.js?v=1.65') }}" ></script> 
   <script type="text/javascript">
     /*jQuery(document).ready(function ($) {
       jQuery('.siteMenus').stellarNav({

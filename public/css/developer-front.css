@@ -1,0 +1,4 @@
+.elem-hidden{display:none;}
+.btn-sub-type{color: #fff;background-color: #0069d9;border-color: #0062cc;}
+.btn-sub-type:hover{background-color: #E6A35C;border:1px solid #DF8B31;color: #fff;}
+.btn-selected{background-color: #E6A35C;border:1px solid #DF8B31;color: #fff;}

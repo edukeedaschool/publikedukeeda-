@@ -7,7 +7,7 @@
         <figure><img src="{{url('images/user.jpg')}}" class="img-fluid"></figure>
         <textarea name="" id="" cols="30" rows="10">Want to connect & submit suggestion/request?</textarea>
       </div>
-      <a href="{{url('submission/add')}}">Click Here</a>
+      <a href="{{url('submission/subscriber/add')}}">Click Here</a>
     </div>
     <div class="socialFeed">
       <ul class="nav nav-fill navtop">
