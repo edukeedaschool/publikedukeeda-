@@ -117,25 +117,51 @@ header{background-color: #fff; padding: 8px 0;min-height: 56px; box-shadow: 0 0 
 .submissionBtn li a:hover{background-color: rgb(253, 124, 54);}
 .alrtMsg{font-size: 12px;color:  rgb(253, 124, 54);font-style: italic; margin-top: 5px;}
 
-.choose table tr td{font-size: 13px;}
+.choose table tr td,.choose table tr th{font-size: 13px; padding: 4px 12px;}
 .orTitle{font-size:17px; margin-bottom: 10px;}
 .brd{border-bottom:4px solid #ccc;margin-bottom:25px;}
-.callIcon a{width:30px;height:30px;border-radius: 5px;background-color:rgb(29, 155, 240);color: #fff;display: inline-block;font-size:14px;line-height: 30px;margin-right: 5px;}
+.callIcon a{width:25px;height:25px;border-radius: 5px;background-color:rgb(29, 155, 240);color: #fff;display: inline-block;font-size:12px;line-height:26px;margin-right: 5px;}
 .callIcon a:hover{background-color: rgb(253, 124, 54); color: #fff;}
 
 .follingList ul{padding: 0;}
-.follingList ul li{display: flex; align-items: center; justify-content: space-between; font-size:16px;font-weight: 600;position: relative; border-bottom:1px solid #ccc;padding: 15px 0;}
-.follingList ul li img{width:40px;border-radius: 50%;height:40px;margin-right: 10px;}
-.follingList .followBtn{width:auto;padding: 7px 20px;background:rgb(29, 155, 240);border-radius:5px;font-size: 14px;color: #fff;}
-.follingList .followBtn:hover .followDetail{display: block;}
-.followDetail{display: none;background-color: #fff;position: absolute;top:50px;z-index: 1;width: 50%;right: 0;min-height: 200px;padding: 25px;border-radius:5px;border: 1px solid #ccc;}
-.followDetail::before{width: 0;height: 0;border-left: 10px solid transparent;border-right: 10px solid transparent;border-bottom: 11px solid #dedede;content: "";position: absolute;top:-11px;right:27px;}
+.follingList .followUser{display: flex; align-items: center; justify-content: space-between; font-size:16px;font-weight: 600;position: relative; border-bottom:1px solid #ccc;padding: 15px 0;}
+.follingList .followUser img{width:40px;border-radius: 50%;height:40px;margin-right: 10px;}
+.follingList .followBtn{width:auto;padding:4px 15px;background:rgb(29, 155, 240);border-radius:5px;font-size: 14px;color: #fff;}
+.follingList .followUser a:hover .followDetail{display: block;}
+.followDetail{display: none;background-color: #fff;position: absolute;top:70px;z-index: 1;width:70%;left: 0;min-height: 200px;padding: 25px;border-radius:5px;border: 1px solid #ccc;}
+.followDetail::before{width: 0;height: 0;border-left: 10px solid transparent;border-right: 10px solid transparent;border-bottom: 11px solid #dedede;content: "";position: absolute;top:-11px;left:10px;}
 .followDetail .followName{text-align: left;color: #333;font-size: 15px;font-weight: 500;}
 .followDetail .followName span{font-size: 14px;color: #aeaeae;}
-.followDetail p{font-weight: normal; margin-top:7px;color: #000;}
+.followDetail p{font-weight: normal; margin-top:7px;color: #000; font-size: 13px;}
 .followDetail ul{padding:0;border-top: 1px solid #ccc; padding-top: 10px;margin-top: 10px;}
 .followDetail ul li{color: #000; text-align: left; font-size: 14px; font-weight: 500;margin-top: 10px;}
 .followDetail ul li span{color: #858585;}
+.follingList .followUser .followDetail img{width: 30px; height: 30px;}
+
+.personList{padding: 0; margin-bottom:30px;}
+.personList li{border-top: 1px solid #ccc; padding: 10px 0;}
+.personList li h6{ margin-right: 20px;}
+.personList li span{display: inline-block;margin-left:0px;}
+.personList li .flwBtn{width:auto;padding:4px 13px;background:rgb(29, 155, 240);border-radius:5px;font-size: 14px;color: #fff;}
+.personList li .flwBtn:hover{background-color: rgb(253, 124, 54);}
+
+.address1{border-bottom:5px solid #e3e3e3; padding-bottom: 15px; margin-bottom:30px;}
+.address1 ul{padding: 0;}
+.address1 ul li{display: flex; margin-bottom:10px;}
+.address1 ul li i{color: rgb(253, 124, 54);font-size: 12px; display: contents;}
+.address1 ul li span{width: 150px; font-weight:600; flex: 0 0 auto;}
+.userImg img{width:100px;height:100px;border-radius: 50%;margin-bottom:20px; }
+.address1 ul li img{width:150px;}
+.brdNone{border: none;}
+.confirmBtn{text-align: right;}
+.confirmBtn a{background: #ccc; color: #000; display: inline-block; padding: 5px 20px; font-weight: 500;border-radius:5px;}
+.confirmBtn a:hover,.confirmBtn a.active{background:rgb(29, 155, 240);color: #fff;}
+.userImg2 {
+  position: absolute;
+  right: 47px;
+  top: 90px;
+}
+.viewpdf{flex: 0 0 auto; display: contents;}
 /*======== Media Queries for Mobile =========*/
 @media all and (max-width:1199px){
   body .container{min-width:100%;}
@@ -158,6 +184,7 @@ header{background-color: #fff; padding: 8px 0;min-height: 56px; box-shadow: 0 0 
 .submissionBtn li{width: 100%;text-align: center;margin-bottom: 10px;}
 .mainCenter .navtop li a{font-size: 12px; padding: 0 8px;}
 .comtBox a{position: relative;right: 0;top: 11px;}
+.choose .table{width: 500px;}
 
 }
 @media all and (max-width:375px){
@@ -165,19 +192,3 @@ header{background-color: #fff; padding: 8px 0;min-height: 56px; box-shadow: 0 0 
 
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

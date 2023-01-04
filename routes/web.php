@@ -46,20 +46,6 @@ Route::post('/mc2/add', [App\Http\Controllers\MasterDataController::class, 'subm
 Route::get('/mc2/edit/{Id}', [App\Http\Controllers\MasterDataController::class, 'editMC2'])->name('editmc2');
 Route::post('/mc2/edit/{Id}', [App\Http\Controllers\MasterDataController::class, 'submitEditMC2'])->name('submiteditmc2');
 
-Route::get('/state/listing/{countryId}', [App\Http\Controllers\MasterDataController::class, 'getStateList'])->name('stateslisting1');
-Route::get('/districts/listing/{stateId}', [App\Http\Controllers\MasterDataController::class, 'getDistrictList'])->name('districtslisting1');
-Route::get('/mc1/listing/{stateId}', [App\Http\Controllers\MasterDataController::class, 'getMC1List'])->name('mc1listing1');
-Route::get('/mc2/listing/{districtId}', [App\Http\Controllers\MasterDataController::class, 'getMC2List'])->name('mc2listing1');
-Route::get('/city-council/listing/{districtId}', [App\Http\Controllers\MasterDataController::class, 'getCityCouncilList'])->name('citycouncillisting1');
-Route::get('/sub-district/listing/{districtId}', [App\Http\Controllers\MasterDataController::class, 'getSubDistrictList'])->name('subdistrictlisting1');
-Route::get('/block/listing/{districtId}', [App\Http\Controllers\MasterDataController::class, 'getBlockList'])->name('blocklisting1');
-Route::get('/village/listing/{subDistrictId}', [App\Http\Controllers\MasterDataController::class, 'getVillageList'])->name('villagelisting1');
-Route::get('/ward/listing/{cityCouncilId}', [App\Http\Controllers\MasterDataController::class, 'getWardList'])->name('wardlisting1');
-Route::get('/lac/listing/{districtId}', [App\Http\Controllers\MasterDataController::class, 'getLACList'])->name('laclisting1');
-Route::get('/pc/listing/{districtId}', [App\Http\Controllers\MasterDataController::class, 'getPCList'])->name('pclisting1');
-Route::get('/lac-1/listing/{stateId}', [App\Http\Controllers\MasterDataController::class, 'getLACListByState'])->name('laclisting2');
-Route::get('/pc-1/listing/{stateId}', [App\Http\Controllers\MasterDataController::class, 'getPCListByState'])->name('pclisting2');
-
 Route::get('/city-council/list', [App\Http\Controllers\MasterDataController::class, 'listCityCouncil'])->name('citycouncillisting');
 Route::get('/city-council/add', [App\Http\Controllers\MasterDataController::class, 'addCityCouncil'])->name('addcitycouncil');
 Route::post('/city-council/add', [App\Http\Controllers\MasterDataController::class, 'submitAddCityCouncil'])->name('submitaddcitycouncil');
@@ -240,6 +226,20 @@ Route::get('/user/data/{email}', [App\Http\Controllers\UserController::class, 'g
 });
 
 Route::group(['middleware' => ['auth']], function () {
+    Route::get('/state/listing/{countryId}', [App\Http\Controllers\MasterDataController::class, 'getStateList'])->name('stateslisting1');
+    Route::get('/districts/listing/{stateId}', [App\Http\Controllers\MasterDataController::class, 'getDistrictList'])->name('districtslisting1');
+    Route::get('/mc1/listing/{stateId}', [App\Http\Controllers\MasterDataController::class, 'getMC1List'])->name('mc1listing1');
+    Route::get('/mc2/listing/{districtId}', [App\Http\Controllers\MasterDataController::class, 'getMC2List'])->name('mc2listing1');
+    Route::get('/city-council/listing/{districtId}', [App\Http\Controllers\MasterDataController::class, 'getCityCouncilList'])->name('citycouncillisting1');
+    Route::get('/sub-district/listing/{districtId}', [App\Http\Controllers\MasterDataController::class, 'getSubDistrictList'])->name('subdistrictlisting1');
+    Route::get('/block/listing/{districtId}', [App\Http\Controllers\MasterDataController::class, 'getBlockList'])->name('blocklisting1');
+    Route::get('/village/listing/{subDistrictId}', [App\Http\Controllers\MasterDataController::class, 'getVillageList'])->name('villagelisting1');
+    Route::get('/ward/listing/{cityCouncilId}', [App\Http\Controllers\MasterDataController::class, 'getWardList'])->name('wardlisting1');
+    Route::get('/lac/listing/{districtId}', [App\Http\Controllers\MasterDataController::class, 'getLACList'])->name('laclisting1');
+    Route::get('/pc/listing/{districtId}', [App\Http\Controllers\MasterDataController::class, 'getPCList'])->name('pclisting1');
+    Route::get('/lac-1/listing/{stateId}', [App\Http\Controllers\MasterDataController::class, 'getLACListByState'])->name('laclisting2');
+    Route::get('/pc-1/listing/{stateId}', [App\Http\Controllers\MasterDataController::class, 'getPCListByState'])->name('pclisting2');
+
     Route::get('/user/change-password', [App\Http\Controllers\UserController::class, 'changePassword'])->name('changepassword');
     Route::post('/user/change-password', [App\Http\Controllers\UserController::class, 'submitChangePassword'])->name('submitchangepassword');
     Route::get('/user/profile', [App\Http\Controllers\UserController::class, 'profile'])->name('profile');
@@ -248,11 +248,13 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('/submission/detail/add/{subscriberId}/{subscriberTypeId}', [App\Http\Controllers\SubmissionController::class, 'addSubmissionDetail'])->name('addsubmissiondetail');
     Route::post('/submission/detail/save', [App\Http\Controllers\SubmissionController::class, 'saveSubmissionDetail'])->name('savesubmissiondetail');
     Route::get('/submission/confirm/add/{submissionId}', [App\Http\Controllers\SubmissionController::class, 'addSubmissionConfirm'])->name('addsubmissionsubmissiondetail');
+    Route::post('/submission/confirm/save', [App\Http\Controllers\SubmissionController::class, 'saveSubmissionConfirm'])->name('savesubmissionconfirm');
     
     Route::get('/submission-subscribers/list/{subGroupId}/{userId}', [App\Http\Controllers\SubmissionController::class, 'getSubmissionSubscribersList'])->name('getsubmissionsubscriberslist');
     Route::get('/submission-subscriber/data/{subscriberId}', [App\Http\Controllers\SubmissionController::class, 'getSubmissionSubscriberData'])->name('getsubmissionsubscriberdata');
+    
+    Route::get('/team/members/{subscriberId}', [App\Http\Controllers\TeamController::class, 'getTeamMembersList'])->name('getsubscriberteammembers');
 });
-
 
 Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 Route::get('/user/login', [App\Http\Controllers\UserController::class, 'login'])->name('login');

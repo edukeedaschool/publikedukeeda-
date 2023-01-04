@@ -46,6 +46,10 @@ Route::group(['middleware' => ['data_api']], function () {
     Route::get('/submission-subscribers/list/{subGroupId}/{userId}', [App\Http\Controllers\DataApiController::class, 'getSubmissionSubscribersList'])->name('getsubmissionsubscriberslist');
     Route::get('/submission-subscriber/data/{subscriberId}', [App\Http\Controllers\DataApiController::class, 'getSubmissionSubscriberData'])->name('getsubmissionsubscriberdata');
     Route::post('/submission/detail/save', [App\Http\Controllers\DataApiController::class, 'saveSubmissionDetail'])->name('savesubmissiondetail');
+    Route::get('/submission/data/{submissionId}', [App\Http\Controllers\DataApiController::class, 'getSubmissionData'])->name('getsubmissiondata');
+    Route::post('/submission/confirm/save', [App\Http\Controllers\DataApiController::class, 'saveSubmissionConfirm'])->name('savesubmissionconfirm');
+    Route::get('/user/teams/{userId}', [App\Http\Controllers\DataApiController::class, 'getUserTeamsList'])->name('getuserteamslist');
+    Route::get('/team/members/{subscriberId}', [App\Http\Controllers\DataApiController::class, 'getTeamMembersList'])->name('getteammemberslist');
     
     Route::post('/signup', [App\Http\Controllers\DataApiController::class, 'signup'])->name('signup');
     Route::post('/change-password', [App\Http\Controllers\DataApiController::class, 'changePassword'])->name('changepassword');

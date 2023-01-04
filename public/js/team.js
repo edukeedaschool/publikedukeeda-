@@ -165,15 +165,17 @@ function getTeamMemberData(email){
                         $("#addTeamMemberErrorMessage").html(errors).show();
                     } 
                 }else{ 
-                    var user_data = msg.user_data;//alert(user_data);
+                    var user_data = msg.user_data;
                     if(user_data != null && user_data != ''){
                         $("#userName").val(user_data.name);
                         $("#mobileNumber").val(user_data.mobile_no);
                         $("#gender").val(user_data.gender);
                         $("#DOB").val(user_data.dob);
-                        $("#userName,#mobileNumber,#gender,#DOB,#officialName").attr('readonly',true);
+                        $("#user_Name").val(user_data.user_name);
+                        $("#officialName").val(user_data.official_name);
+                        $("#userName,#mobileNumber,#gender,#DOB,#officialName,#user_Name").attr('readonly',true);
                     }else{
-                        $("#userName,#mobileNumber,#gender,#DOB,#officialName").val('').attr('readonly',false);
+                        $("#userName,#mobileNumber,#gender,#DOB,#officialName,#user_Name").val('').attr('readonly',false);
                     }
                 }
             }else{

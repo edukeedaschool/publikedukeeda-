@@ -32,6 +32,7 @@ use App\Models\RepresentationAreaList;
 use App\Models\Submissions;
 use App\Models\SubscriberList;
 use App\Models\SubscriberPackage;
+use App\Models\TeamMembers;
 use App\Helpers\CommonHelper;
 use Validator;
 use Illuminate\Validation\Rule;
@@ -955,6 +956,125 @@ class DataApiController extends Controller
             $submission = Submissions::create($insertArray);
             
             return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'success','message' => 'Submission added successfully','submission_data'=>$submission),200);
+            
+        }catch (\Exception $e){
+            CommonHelper::saveException($e,'STORE',__FUNCTION__,__FILE__);
+            return response(array('httpStatus'=>200,"dateTime"=>time(),'status' => 'fail','error_message'=>$e->getMessage(),'message'=>'Error in Processing Request'),200);
+        }    
+    }
+    
+    function getSubmissionData(Request $request,$submission_id){
+        try{ 
+            $data = $request->all();
+            
+            $submission_data = Submissions::join('subscriber_list as sl', 'sl.id', '=', 'submissions.subscriber_id')
+            ->join('users as u1', 'u1.id', '=', 'sl.user_id')                
+            ->join('users as u2', 'u2.id', '=', 'submissions.user_id')        
+            ->join('submission_type_list as st', 'st.id', '=', 'submissions.submission_type')        
+            ->join('submission_purpose_list as sp', 'sp.id', '=', 'submissions.purpose')
+            ->leftJoin('country_list as c', 'c.id', '=', 'u2.country')                     
+            ->leftJoin('state_list as s', 's.id', '=', 'u2.state')                             
+            ->leftJoin('district_list as dl', 'dl.id', '=', 'u2.district')               
+            ->leftJoin('sub_district_list as sd', 'sd.id', '=', 'u2.sub_district')          
+            ->where('submissions.id',$submission_id)                
+            ->where('submissions.is_deleted',0)        
+            ->where('sl.is_deleted',0)                
+            ->where('u1.is_deleted',0)          
+            ->where('u2.is_deleted',0)     
+            ->where('st.is_deleted',0)          
+            ->where('sp.is_deleted',0)                  
+            ->select('submissions.*','u1.name as subscriber_name','sl.bio as subscriber_bio','u2.name as submitted_by_name','u2.email as submitted_by_email','u2.mobile_no as submitted_by_mobile_no',
+            'u2.gender as submitted_by_gender','u2.dob as submitted_by_dob','u2.qualification as submitted_by_qualification','u2.profession as submitted_by_profession',
+            'u2.address_line1 as submitted_by_address_line1','u2.postal_code as submitted_by_postal_code','c.country_name as submitted_by_country_name','u2.image as submitted_by_profile_image',
+            's.state_name as submitted_by_state_name','dl.district_name as submitted_by_district_name','sd.sub_district_name as submitted_by_sub_district_name','sp.submission_purpose','st.submission_type')        
+            ->first();        
+            
+            if(!empty($submission_data)){
+                $submission_data->submitted_by_profile_image_url = (!empty($submission_data->submitted_by_profile_image))?url('images/user_images/'.$submission_data->submitted_by_profile_image):url('images/default_profile.png');
+                $submission_data->file_url = (!empty($submission_data->file))?url('documents/submission_documents/'.$submission_data->file):'';
+            }
+            
+            //print_r($submission_data);
+            return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'success','message' => 'Submission Data','submission_data'=>$submission_data),200);
+            
+        }catch (\Exception $e){
+            CommonHelper::saveException($e,'STORE',__FUNCTION__,__FILE__);
+            return response(array('httpStatus'=>200,"dateTime"=>time(),'status' => 'fail','error_message'=>$e->getMessage(),'message'=>'Error in Processing Request'),200);
+        }    
+    }
+    
+    function saveSubmissionConfirm(Request $request){
+        try{ 
+            $data = $request->all();
+            
+            $submission_id = trim($data['submission_id']);
+            
+            $updateArray = ['submission_status'=>'completed'];
+            
+            $submission = Submissions::where('id',$submission_id)->update($updateArray);
+            
+            return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'success','message' => 'Submission updated successfully'),200);
+            
+        }catch (\Exception $e){
+            CommonHelper::saveException($e,'STORE',__FUNCTION__,__FILE__);
+            return response(array('httpStatus'=>200,"dateTime"=>time(),'status' => 'fail','error_message'=>$e->getMessage(),'message'=>'Error in Processing Request'),200);
+        }    
+    }
+    
+    function getUserTeamsList(Request $request,$user_id){
+        try{ 
+            $data = $request->all();
+            
+            $users_teams = TeamMembers::join('subscriber_list as sl', 'sl.id', '=', 'team_members.subscriber_id')
+            ->join('users as u1', 'u1.id', '=', 'sl.user_id')      
+            ->where('team_members.user_id',$user_id)                
+            ->where('team_members.is_deleted',0)        
+            ->where('sl.is_deleted',0)                
+            ->where('u1.is_deleted',0)        
+            ->where('team_members.status',1)        
+            ->where('sl.status',1)                
+            ->where('u1.status',1)     
+            ->select('team_members.user_id','team_members.subscriber_id','u1.name as subscriber_name','sl.bio as subscriber_bio')        
+            ->get()->toArray();                
+            
+            return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'success','message' => 'User Teams','users_teams'=>$users_teams),200);
+            
+        }catch (\Exception $e){
+            CommonHelper::saveException($e,'STORE',__FUNCTION__,__FILE__);
+            return response(array('httpStatus'=>200,"dateTime"=>time(),'status' => 'fail','error_message'=>$e->getMessage(),'message'=>'Error in Processing Request'),200);
+        }    
+    }
+    
+    function getTeamMembersList(Request $request,$subscriber_id){
+        try{ 
+            $data = $request->all();
+            
+            $team_members = TeamMembers::join('subscriber_list as sl', 'sl.id', '=', 'team_members.subscriber_id')
+            ->join('team_designations as td', 'td.id', '=', 'team_members.designation_id')           
+            ->join('representation_area_list as ral', 'ral.id', '=', 'td.rep_area_id')         
+            ->join('users as u1', 'u1.id', '=', 'sl.user_id')      
+            ->join('users as u2', 'u2.id', '=', 'team_members.user_id')          
+            ->where('team_members.subscriber_id',$subscriber_id)                
+            ->where('team_members.is_deleted',0)        
+            ->where('sl.is_deleted',0)                
+            ->where('u1.is_deleted',0)        
+            ->where('u2.is_deleted',0)                
+            ->where('team_members.status',1)        
+            ->where('sl.status',1)                
+            ->where('u1.status',1)     
+            ->where('u2.status',1)        
+            ->select('team_members.subscriber_id','team_members.designation_id','u1.name as subscriber_name','sl.bio as subscriber_bio','u2.id as team_member_id','u2.name as team_member_name',
+            'u2.email as team_member_email','u2.mobile_no as team_member_mobile_no','td.designation_name','ral.representation_area')        
+            ->get()->toArray();        
+            
+            $subscriber_data = SubscriberList::join('users as u', 'u.id', '=', 'subscriber_list.user_id')        
+            ->where('subscriber_list.id',$subscriber_id)
+            ->where('subscriber_list.is_deleted',0)
+            ->where('u.is_deleted',0)        
+            ->select('subscriber_list.*','u.name as subscriber_name')                 
+            ->first();
+            
+            return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'success','message' => 'Team Members List','team_members'=>$team_members,'subscriber_data'=>$subscriber_data),200);
             
         }catch (\Exception $e){
             CommonHelper::saveException($e,'STORE',__FUNCTION__,__FILE__);

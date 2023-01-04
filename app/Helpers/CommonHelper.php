@@ -5,6 +5,7 @@ use Illuminate\Http\Request;
 use App\Models\User_links;
 use App\Models\App_logs;
 use App\Models\RepresentationAreaList;
+use App\Models\SubscriberList;
 use Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Auth;
@@ -534,5 +535,9 @@ class CommonHelper
         }
         
         return $headers;
+    }
+    
+    public static function getSubscriberData($user_id){
+        return SubscriberList::where('user_id',$user_id)->where('is_deleted',0)->first();
     }
 }

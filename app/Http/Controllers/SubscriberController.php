@@ -149,9 +149,11 @@ class SubscriberController extends Controller
             
             $image_name = CommonHelper::uploadImage($request,$request->file('subscriberImage'),'images/user_images');
             
+            $village = !empty($data['village'])?$data['village']:null;
+            
             $insertArray = array('name'=>trim($data['subscriberName']),'email'=>trim($data['emailAddress']),'mobile_no'=>trim($data['mobileNumber']),'address_line1'=>trim($data['addressLine1']),
             'postal_code'=>trim($data['postalCode']),'user_role'=>2,'country'=>trim($data['country']),'state'=>trim($data['state']),'district'=>trim($data['district']),'user_name'=>trim($data['userName']),
-            'sub_district'=>trim($data['subDistrict']),'village'=>trim($data['village']),'sub_district'=>trim($data['subDistrict']),'image'=>$image_name,'password'=>Hash::make($data['password']));
+            'sub_district'=>trim($data['subDistrict']),'village'=>$village,'sub_district'=>trim($data['subDistrict']),'image'=>$image_name,'password'=>Hash::make($data['password']));
                 
             $user_data = User::create($insertArray);
             
@@ -400,9 +402,11 @@ class SubscriberController extends Controller
             
             $subscriber = SubscriberList::where('id',$subscriber_id)->update($updateArray);
             
+            $village = !empty($data['village'])?$data['village']:null;
+            
             $updateArray = array('name'=>trim($data['subscriberName']),'mobile_no'=>trim($data['mobileNumber']),'address_line1'=>trim($data['addressLine1']),
             'postal_code'=>trim($data['postalCode']),'country'=>trim($data['country']),'state'=>trim($data['state']),'district'=>trim($data['district']),
-            'sub_district'=>trim($data['subDistrict']),'village'=>trim($data['village']),'sub_district'=>trim($data['subDistrict']));
+            'sub_district'=>trim($data['subDistrict']),'village'=>$village,'sub_district'=>trim($data['subDistrict']));
             
             if(!empty($request->file('subscriberImage'))){
                 $image_name = CommonHelper::uploadImage($request,$request->file('subscriberImage'),'images/user_images');
@@ -449,11 +453,12 @@ class SubscriberController extends Controller
         try{
             $data = $request->all();
             $user = Auth::user();
+            $subscriber_data = CommonHelper::getSubscriberData($user->id);
             $review_levels = $subscriber_reviews = $subscriber_reviews_list = [];
             
             $subscriber_reviews = SubscriberReview::join('review_level as rl', 'rl.id', '=', 'subscriber_review.review_level_id')
             ->join('review_range as rr', 'rr.id', '=', 'subscriber_review.review_range_id')        
-            ->where('subscriber_review.subscriber_id',$user->id)
+            ->where('subscriber_review.subscriber_id',$subscriber_data->id)
             ->where('subscriber_review.is_deleted',0)        
             ->where('rl.is_deleted',0)                
             ->where('subscriber_review.status',1)                        
@@ -500,7 +505,8 @@ class SubscriberController extends Controller
             $data = $request->all();
             $user = Auth::user();
             $review_range_added = false;
-            $subscriber_id = $user->id;
+            $subscriber_data = CommonHelper::getSubscriberData($user->id);
+            $subscriber_id = $subscriber_data->id;
             
             \DB::beginTransaction();
             
@@ -543,10 +549,11 @@ class SubscriberController extends Controller
             $data = $request->all();
             $user = Auth::user();
             $review_levels = $subscriber_reviews = $subscriber_reviews_list = [];
+            $subscriber_data = CommonHelper::getSubscriberData($user->id);
             
             $subscriber_reviews = SubscriberReview::join('review_level as rl', 'rl.id', '=', 'subscriber_review.review_level_id')
             ->join('review_range as rr', 'rr.id', '=', 'subscriber_review.review_range_id')        
-            ->where('subscriber_review.subscriber_id',$user->id)
+            ->where('subscriber_review.subscriber_id',$subscriber_data->id)
             ->where('subscriber_review.is_deleted',0)        
             ->where('rl.is_deleted',0)                
             ->where('subscriber_review.status',1)                        
@@ -595,10 +602,11 @@ class SubscriberController extends Controller
         try{
             $data = $request->all();
             $user = Auth::user();
+            $subscriber_data = CommonHelper::getSubscriberData($user->id);
             
             $subscriber_review_data = SubscriberReview::join('review_level as rl', 'rl.id', '=', 'subscriber_review.review_level_id')
             ->join('review_range as rr', 'rr.id', '=', 'subscriber_review.review_range_id')        
-            ->where('subscriber_review.subscriber_id',$user->id)
+            ->where('subscriber_review.subscriber_id',$subscriber_data->id)
             ->where('subscriber_review.id',$Id)        
             ->where('subscriber_review.is_deleted',0)        
             ->where('rl.is_deleted',0)                
@@ -624,10 +632,11 @@ class SubscriberController extends Controller
         try{
             $data = $request->all();
             $user = Auth::user();
+            $subscriber_data = CommonHelper::getSubscriberData($user->id);
             
             $subscriber_reviews = SubscriberReview::join('review_level as rl', 'rl.id', '=', 'subscriber_review.review_level_id')
             ->join('review_range as rr', 'rr.id', '=', 'subscriber_review.review_range_id')        
-            ->where('subscriber_review.subscriber_id',$user->id)
+            ->where('subscriber_review.subscriber_id',$subscriber_data->id)
             ->where('subscriber_review.is_deleted',0)        
             ->where('rl.is_deleted',0)                
             ->where('subscriber_review.status',1)                        
@@ -653,6 +662,7 @@ class SubscriberController extends Controller
             $data = $request->all();
             $user = Auth::user();
             $user_data = [];
+            $subscriber_data = CommonHelper::getSubscriberData($user->id);
             
             $validationRules = array('emailAddress'=>'required|email','subscriber_review_id'=>'required','reviewOfficialStatus'=>'required','officialName'=>'required','user_Name'=>'required');
             $attributes = array('emailAddress'=>'Email Address','subscriber_review_id'=>'Designation','reviewOfficialStatus'=>'Member Status','officialName'=>'Official Name','mobileNumber'=>'Mobile Number','DOB'=>'DOB','user_Name'=>'Username');
@@ -676,7 +686,7 @@ class SubscriberController extends Controller
             if(!empty($data['subscriber_review_id'])){
                 $subscriber_review_data = SubscriberReview::join('review_level as rl', 'rl.id', '=', 'subscriber_review.review_level_id')
                 ->join('review_range as rr', 'rr.id', '=', 'subscriber_review.review_range_id')        
-                ->where('subscriber_review.subscriber_id',$user->id)
+                ->where('subscriber_review.subscriber_id',$subscriber_data->id)
                 ->where('subscriber_review.id',$data['subscriber_review_id'])        
                 ->where('subscriber_review.is_deleted',0)        
                 ->where('rl.is_deleted',0)                
@@ -737,7 +747,7 @@ class SubscriberController extends Controller
                 return response(array('httpStatus'=>200, "dateTime"=>time(), 'status'=>'fail', 'message'=>'User Type is not General User', 'errors' => 'User Type is not General User'));
             }
             
-            $insertArray = array('user_id'=>$user_data->id,'subscriber_review_id'=>trim($data['subscriber_review_id']),'subscriber_id'=>$user->id,'status'=>$data['reviewOfficialStatus']);
+            $insertArray = array('user_id'=>$user_data->id,'subscriber_review_id'=>trim($data['subscriber_review_id']),'subscriber_id'=>$subscriber_data->id,'status'=>$data['reviewOfficialStatus']);
             
             $fieldsArray = ['country_ro'=>'country_ro','state_ro'=>'state_ro','district_ro'=>'district_ro','lac_ro'=>'LAC_ro','pc_ro'=>'PC_ro','mc1_ro'=>'MC1_ro','mc2_ro'=>'MC2_ro',
             'cc_ro'=>'CC_ro','block_ro'=>'block_ro','ward_ro'=>'ward_ro','sub_district_ro'=>'subDistrict_ro','village_ro'=>'village_ro'];
@@ -759,12 +769,12 @@ class SubscriberController extends Controller
         try{
             $data = $request->all();
             $user = Auth::user();
-            
+            $subscriber_data = CommonHelper::getSubscriberData($user->id);
             $review_official_id = $id;
             
             $subscriber_reviews = SubscriberReview::join('review_level as rl', 'rl.id', '=', 'subscriber_review.review_level_id')
             ->join('review_range as rr', 'rr.id', '=', 'subscriber_review.review_range_id')        
-            ->where('subscriber_review.subscriber_id',$user->id)
+            ->where('subscriber_review.subscriber_id',$subscriber_data->id)
             ->where('subscriber_review.is_deleted',0)        
             ->where('rl.is_deleted',0)                
             ->where('subscriber_review.status',1)                        
@@ -792,6 +802,7 @@ class SubscriberController extends Controller
             $data = $request->all();
             $user = Auth::user();
             $user_data = [];
+            $subscriber_data = CommonHelper::getSubscriberData($user->id);
             
             $review_official_id = $id;
             $ro_data = ReviewOfficial::where('id',$review_official_id)->where('is_deleted',0)->first();
@@ -818,7 +829,7 @@ class SubscriberController extends Controller
             if(!empty($data['subscriber_review_id'])){
                 $subscriber_review_data = SubscriberReview::join('review_level as rl', 'rl.id', '=', 'subscriber_review.review_level_id')
                 ->join('review_range as rr', 'rr.id', '=', 'subscriber_review.review_range_id')        
-                ->where('subscriber_review.subscriber_id',$user->id)
+                ->where('subscriber_review.subscriber_id',$subscriber_data->id)
                 ->where('subscriber_review.id',$data['subscriber_review_id'])        
                 ->where('subscriber_review.is_deleted',0)        
                 ->where('rl.is_deleted',0)                
@@ -896,12 +907,13 @@ class SubscriberController extends Controller
         try{
             $data = $request->all();
             $user = Auth::user();
+            $subscriber_data = CommonHelper::getSubscriberData($user->id);
             
             $ro_list = ReviewOfficial::join('subscriber_review as sr', 'sr.id', '=', 'review_official.subscriber_review_id')
             ->join('review_level as rl', 'rl.id', '=', 'sr.review_level_id')           
             ->join('users as u1', 'u1.id', '=', 'review_official.user_id')        
             ->join('users as u2', 'u2.id', '=', 'review_official.subscriber_id')        
-            ->where('review_official.subscriber_id',$user->id)                
+            ->where('review_official.subscriber_id',$subscriber_data->id)                
             ->where('review_official.is_deleted',0)        
             ->where('sr.is_deleted',0)                
             ->where('u1.is_deleted',0)                

@@ -51,9 +51,9 @@ class SubmissionController extends Controller
             
             $headers = CommonHelper::getAPIHeaders();
             $url = url('/api/submission-subscribers/list/'.$sub_group_id.'/'.$user_id);
-            $response = CommonHelper::processCURLRequest($url,'','','',$headers);
+            $response = CommonHelper::processCURLRequest($url,'','','',$headers);//print_r($response);exit;
             $response = json_decode($response,true);
-            $subscriber_list = $response['subscriber_list'];
+            $subscriber_list = isset($response['subscriber_list'])?$response['subscriber_list']:[];
             
             return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'success','message' => 'Submission Subscribers List','subscriber_list'=>$subscriber_list),200);
             
@@ -88,7 +88,6 @@ class SubmissionController extends Controller
     public function addSubmissionDetail(Request $request,$subscriber_id,$submission_type_id){
         try{
             $data = $request->all();
-            $states_list = [];
             $user = Auth::user();
             
             $headers = CommonHelper::getAPIHeaders();
@@ -155,6 +154,53 @@ class SubmissionController extends Controller
             $response = curl_exec($curl);
             curl_close($curl);
            
+            return $response;
+         
+        }catch (\Exception $e){
+            \DB::rollBack();
+            return response(array("httpStatus"=>500,"dateTime"=>time(),'status' => 'fail','message' =>$e->getMessage()),500);
+        }
+    }
+    
+    public function addSubmissionConfirm(Request $request,$submission_id){
+        try{
+            $data = $request->all();
+            $user = Auth::user();
+            
+            $headers = CommonHelper::getAPIHeaders();
+            $url = url('/api/submission/data/'.$submission_id);
+            $response = CommonHelper::processCURLRequest($url,'','','',$headers);//print_r($response);
+            $response = json_decode($response,true);
+            
+            $submission_data = $response['submission_data'];
+            
+            return view('front/submission/submission_confirm_add',array('user'=>$user,'title'=>'Confirm Submission','submission_data'=>$submission_data));
+         
+        }catch (\Exception $e){
+            return view('admin/page_error',array('message' =>$e->getMessage()));
+        }
+    }
+    
+    public function saveSubmissionConfirm(Request $request){
+        try{
+            $data = $request->all();
+            $access_token = '';
+            $user = Auth::user();
+            
+            $validationRules = array('submission_id'=>'required');
+            $attributes = [];
+            
+            $validator = Validator::make($data,$validationRules,array(),$attributes);
+            if ($validator->fails()){ 
+                return response(array('httpStatus'=>200, "dateTime"=>time(), 'status'=>'fail', 'message'=>'Validation error', 'errors' => $validator->errors()));
+            }	
+            
+            $headers = CommonHelper::getAPIHeaders();
+            $url = url('/api/submission/confirm/save');
+            $post_data = ['submission_id'=>trim($data['submission_id'])];
+            $response = CommonHelper::processCURLRequest($url,json_encode($post_data),'','',$headers);//print_r($response);exit;
+            $response = json_decode($response,true);
+            
             return $response;
          
         }catch (\Exception $e){

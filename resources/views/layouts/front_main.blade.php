@@ -8,7 +8,7 @@
   <link rel="icon" href="images/favicon.ico">
   <meta name="csrf-token" content="{{ csrf_token() }}">
   <!-- Title of website -->
-  <title></title>
+  <title>@if(isset($page_title)) {{$page_title}} @endif</title>
   <!-- Bootstrap core CSS -->
   <link href="{{ asset('css/bootstrap.min.css') }}" rel="stylesheet" type="text/css" >
   <!-- Custom Fonts CSS -->
@@ -22,7 +22,15 @@
   <script>var ROOT_PATH = "{{url('/')}}"; </script>
 </head>
 
-<?php $user_data = Auth::user();//print_r($user_data); ?>
+<?php $user_data = Auth::user(); ?>
+<?php  use App\Helpers\CommonHelper; ?>
+<?php 
+    $headers = CommonHelper::getAPIHeaders();
+    $url = url('/api/user/teams/'.$user_data->id);
+    $response = CommonHelper::processCURLRequest($url,'','','',$headers);//print_r($response);//exit;
+    $response = json_decode($response,true);
+    $user_teams = isset($response['users_teams'])?$response['users_teams']:[];
+?>
 <body>
       <header class="d-flex align-items-center">
     <div class="container">
@@ -52,8 +60,9 @@
                 <li><a href="javascript:;"><i class="fas fa-envelope"></i> Message</a></li>
                 <li><a href="javascript:;"><i class="fas fa-file-alt"></i> Your submissions</a></li>
                 <li><a href="{{url('user/profile')}}"><i class="fas fa-user"></i> profile</a></li>
-                <li><a href="javascript:;"><i class="fas fa-users"></i> Team 1</a></li>
-                <li><a href="javascript:;"><i class="fas fa-users"></i> Team "Subscriber Name 2"</a></li>
+                @for($i=0;$i<count($user_teams);$i++)
+                    <li><a href="{{url('team/members/'.$user_teams[$i]['subscriber_id'])}}"><i class="fas fa-users"></i> Team {{$user_teams[$i]['subscriber_name']}}</a></li>
+                @endfor    
                 <li><a href="javascript:;"><i class="fas fa-star"></i> Submissions for review</a></li>
                 <li><a href="javascript:;"><i class="fas fa-search"></i> Search Group</a></li>
                 @if(isset($user_data->id) && !empty($user_data->id) )
@@ -87,13 +96,22 @@
             @endif
         </div>
         </div>
-        <div class="col-lg-6">
-            @yield('content')
-        </div>
-        <div class="col-md-3 d-none d-lg-block">
-          <div><img src="{{url('images/banner.jpg')}}" class="img-fluid"></div>
-          <div class="mt-3"><img src="{{url('images/banner2.jpg')}}" class="img-fluid"></div>
-        </div>
+        
+        @if(isset($display_banner) && $display_banner == 'no')  
+            <div class="col-lg-9">
+                @yield('content')
+            </div>
+        @else
+            <div class="col-lg-6">
+                @yield('content')
+            </div>
+            <div class="col-md-3 d-none d-lg-block">
+                <div><img src="{{url('images/banner.jpg')}}" class="img-fluid"></div>
+                <div class="mt-3"><img src="{{url('images/banner2.jpg')}}" class="img-fluid"></div>
+            </div>
+        @endif
+        
+          
       </div>
     </div>
   </section>

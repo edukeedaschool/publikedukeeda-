@@ -119,7 +119,7 @@ $("#saveSubmissionDetailForm").on('submit', function(event){
                 $("#addsubmissionErrorMessage,.invalid-feedback").html('').hide();
                 var submission_data = msg.submission_data
                 
-                var url = ROOT_PATH+"/submission/confirm/"+submission_data.id;
+                var url = ROOT_PATH+"/submission/confirm/add/"+submission_data.id;
                 setTimeout(function(){  window.location.href = url; }, 800);
             }
         },error:function(obj,status,error){
@@ -128,3 +128,36 @@ $("#saveSubmissionDetailForm").on('submit', function(event){
         }
     });
 });
+
+function submitAddSubmissionConfirm(){
+    $("#addsubmissionErrorMessage,#addsubmissionSuccessMessage,.invalid-feedback").html('').hide();
+    
+    var submission_id = $("#submission_id").val();
+    ajaxSetup();
+
+    $.ajax({
+        url:ROOT_PATH+"/submission/confirm/save",
+        method:"POST",
+        data:{submission_id:submission_id},
+        success:function(msg){
+            if(objectPropertyExists(msg,'status')){
+                if(msg.status == 'fail'){
+                    var errors = getResponseErrors(msg,'<br/>','error_validation_');
+                    if(errors != ''){
+                        $("#addsubmissionErrorMessage").html(errors).show();
+                    } 
+                }else{ 
+                    $("#addsubmissionSuccessMessage").html(msg.message).show();
+                    $("#addsubmissionErrorMessage,.invalid-feedback").html('').hide();
+                    document.getElementById("addsubmissionSuccessMessage").scrollIntoView();
+                    var url = ROOT_PATH+"/";
+                    setTimeout(function(){  window.location.href = url; }, 1000);
+                }
+            }else{
+                displayResponseError(msg,'addsubmissionErrorMessage');
+            }
+        },error:function(obj,status,error){
+            $("#addsubmissionErrorMessage").html('Error in processing request').show();
+        }
+    });
+}

@@ -47,6 +47,7 @@ class TeamController extends Controller
         try{
             $data = $request->all();
             $user = Auth::user();
+            $subscriber_data = CommonHelper::getSubscriberData($user->id);
             
             $validationRules = array('designationName'=>'required','representationArea'=>'required','designationStatus'=>'required');
             
@@ -57,12 +58,12 @@ class TeamController extends Controller
                 return response(array('httpStatus'=>200, "dateTime"=>time(), 'status'=>'fail', 'message'=>'Validation error', 'errors' => $validator->errors()));
             }	
             
-            $designation_exists = TeamDesignations::where('designation_name',trim($data['designationName']))->where('rep_area_id',trim($data['representationArea']))->where('subscriber_id',$user->id)->where('is_deleted',0)->first();
+            $designation_exists = TeamDesignations::where('designation_name',trim($data['designationName']))->where('rep_area_id',trim($data['representationArea']))->where('subscriber_id',$subscriber_data->id)->where('is_deleted',0)->first();
             if(!empty($designation_exists)){
                 return response(array('httpStatus'=>200, "dateTime"=>time(), 'status'=>'fail', 'message'=>'Designation already exists', 'errors' => 'Designation already exists'));
             }
             
-            $insertArray = array('designation_name'=>trim($data['designationName']),'rep_area_id'=>trim($data['representationArea']),'subscriber_id'=>$user->id);
+            $insertArray = array('designation_name'=>trim($data['designationName']),'rep_area_id'=>trim($data['representationArea']),'subscriber_id'=>$subscriber_data->id);
        
             $designation = TeamDesignations::create($insertArray);
           
@@ -94,6 +95,7 @@ class TeamController extends Controller
         try{
             $data = $request->all();
             $user = Auth::user();
+            $subscriber_data = CommonHelper::getSubscriberData($user->id);
             
             $designation_id = $id;
             $designation_data = TeamDesignations::where('id',$designation_id)->first();
@@ -107,7 +109,7 @@ class TeamController extends Controller
                 return response(array('httpStatus'=>200, "dateTime"=>time(), 'status'=>'fail', 'message'=>'Validation error', 'errors' => $validator->errors()));
             }	
             
-            $designation_exists = TeamDesignations::where('designation_name',trim($data['designationName']))->where('rep_area_id',trim($data['representationArea']))->where('subscriber_id',$user->id)->where('id','!=',$designation_id)->where('is_deleted',0)->first();
+            $designation_exists = TeamDesignations::where('designation_name',trim($data['designationName']))->where('rep_area_id',trim($data['representationArea']))->where('subscriber_id',$subscriber_data->id)->where('id','!=',$designation_id)->where('is_deleted',0)->first();
             if(!empty($designation_exists)){
                 return response(array('httpStatus'=>200, "dateTime"=>time(), 'status'=>'fail', 'message'=>'Designation already exists', 'errors' => 'Designation already exists'));
             }
@@ -127,10 +129,11 @@ class TeamController extends Controller
         try{
             $data = $request->all();
             $user = Auth::user();
+            $subscriber_data = CommonHelper::getSubscriberData($user->id);
             
             $designation_list = TeamDesignations::join('representation_area_list as ral', 'ral.id', '=', 'team_designations.rep_area_id')
             ->join('users as u', 'u.id', '=', 'team_designations.subscriber_id')        
-            ->where('team_designations.subscriber_id',$user->id)               
+            ->where('team_designations.subscriber_id',$subscriber_data->id)               
             ->where('team_designations.is_deleted',0)        
             ->where('ral.is_deleted',0)                
             ->where('u.is_deleted',0);
@@ -185,11 +188,12 @@ class TeamController extends Controller
         try{
             $data = $request->all();
             $user = Auth::user();
+            $subscriber_data = CommonHelper::getSubscriberData($user->id);
             
             $member_list = TeamMembers::join('team_designations as td', 'td.id', '=', 'team_members.designation_id')
             ->join('users as u1', 'u1.id', '=', 'team_members.user_id')        
             ->join('users as u2', 'u2.id', '=', 'team_members.subscriber_id')    
-            ->where('team_members.subscriber_id',$user->id)        
+            ->where('team_members.subscriber_id',$subscriber_data->id)        
             ->where('team_members.is_deleted',0)        
             ->where('td.is_deleted',0)                
             ->where('u1.is_deleted',0)                
@@ -214,9 +218,10 @@ class TeamController extends Controller
         try{
             $data = $request->all();
             $user = Auth::user();
+            $subscriber_data = CommonHelper::getSubscriberData($user->id);
             
             $designation_list = TeamDesignations::join('representation_area_list as ral', 'ral.id', '=', 'team_designations.rep_area_id')
-            ->where('team_designations.subscriber_id',$user->id)                        
+            ->where('team_designations.subscriber_id',$subscriber_data->id)                        
             ->where('team_designations.is_deleted',0)        
             ->where('ral.is_deleted',0)                
             ->select('team_designations.*','ral.representation_area')        
@@ -240,6 +245,7 @@ class TeamController extends Controller
             $data = $request->all();
             $user = Auth::user();
             $user_data = [];
+            $subscriber_data = CommonHelper::getSubscriberData($user->id);
             
             $validationRules = array('emailAddress'=>'required|email','designation'=>'required','memberStatus'=>'required','user_Name'=>'required','officialName'=>'required');
             $attributes = array('emailAddress'=>'Email Address','designation'=>'Designation','memberStatus'=>'Member Status','officialName'=>'Official Name','mobileNumber'=>'Mobile Number','DOB'=>'DOB','user_Name'=>'Username');
@@ -298,7 +304,7 @@ class TeamController extends Controller
                 $user_data = User::create($insertArray);
             }
             
-            $insertArray = array('user_id'=>$user_data->id,'designation_id'=>trim($data['designation']),'subscriber_id'=>$user->id);
+            $insertArray = array('user_id'=>$user_data->id,'designation_id'=>trim($data['designation']),'subscriber_id'=>$subscriber_data->id);
             
             $fieldsArray = ['country_tm'=>'country_tm','state_tm'=>'state_tm','district_tm'=>'district_tm','lac_tm'=>'LAC_tm','pc_tm'=>'PC_tm','mc1_tm'=>'MC1_tm','mc2_tm'=>'MC2_tm',
             'cc_tm'=>'CC_tm','block_tm'=>'block_tm','ward_tm'=>'ward_tm','sub_district_tm'=>'subDistrict_tm','village_tm'=>'village_tm'];
@@ -322,13 +328,14 @@ class TeamController extends Controller
         try{
             $data = $request->all();
             $user = Auth::user();
+            $subscriber_data = CommonHelper::getSubscriberData($user->id);
             
             $tm_id = $id;
             $tm_data = TeamMembers::where('id',$tm_id)->first();
             $user_data = User::where('id',$tm_data->user_id)->where('is_deleted',0)->first();
             
             $designation_list = TeamDesignations::join('representation_area_list as ral', 'ral.id', '=', 'team_designations.rep_area_id')
-            ->where('team_designations.subscriber_id',$user->id)                        
+            ->where('team_designations.subscriber_id',$subscriber_data->id)                        
             ->where('team_designations.is_deleted',0)        
             ->where('ral.is_deleted',0)                
             ->select('team_designations.*','ral.representation_area')        
@@ -475,6 +482,34 @@ class TeamController extends Controller
             \DB::rollBack();
             return response(array("httpStatus"=>500,"dateTime"=>time(),'status' => 'fail','message' =>$e->getMessage()),500);
         }  
+    }
+    
+    public function getTeamMembersList(Request $request,$subscriber_id){
+        try{
+            $data = $request->all();
+            $team_members_list = $designation_list = [];
+            
+            $headers = CommonHelper::getAPIHeaders();
+            $url = url('/api/team/members/'.$subscriber_id);
+            $response = CommonHelper::processCURLRequest($url,'','','',$headers);//print_r($response);
+            $response = json_decode($response,true);
+            
+            $team_members = isset($response['team_members'])?$response['team_members']:[];
+            $subscriber_data = isset($response['subscriber_data'])?$response['subscriber_data']:[];
+            
+            for($i=0;$i<count($team_members);$i++){
+                $designation_id = $team_members[$i]['designation_id'];
+                $designation_list[$designation_id]  = $team_members[$i]['designation_name'];
+                $team_members_list[$designation_id][] = $team_members[$i];
+            }
+            //print_r($team_members_list);exit;
+            $params = ['designation_list'=>$designation_list,'team_members_list'=>$team_members_list,'subscriber_data'=>$subscriber_data,'title'=>'Team Members'];
+            
+            return view('front/team/team_members_list',$params);
+            
+        }catch (\Exception $e){
+            return view('admin/page_error',array('message' =>$e->getMessage()));
+        }
     }
     
 }

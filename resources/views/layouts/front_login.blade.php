@@ -9,7 +9,7 @@
   <link rel="icon" href="images/favicon.ico">
   <meta name="csrf-token" content="{{ csrf_token() }}">
   <!-- Title of website -->
-  <title></title>
+  <title>@if(isset($page_title)) {{$page_title}} @endif</title>
   <!-- Bootstrap core CSS -->
   <link href="{{ asset('css/bootstrap.min.css') }}" rel="stylesheet" type="text/css" >
   <!-- Custom Fonts CSS -->
@@ -21,8 +21,27 @@
   <link href="{{ asset('css/style.css') }}" rel="stylesheet" type="text/css">
   <script>var ROOT_PATH = "{{url('/')}}"; </script>
 </head>
-
+<?php $user_data = Auth::user(); ?>
 <body class="loginBg">
+    @if(isset($user_data->id))
+        <header class="d-flex align-items-center">
+            <div class="container">
+              <div class="row align-items-center justify-content-between">
+                    <div class="col-auto">
+                      <div class="logo">Logo Here</div>
+                    </div>
+                    <div class="col-auto">
+                      <ul class="bellMsg">
+                            <li><a href=""><i class="fas fa-envelope"></i></a></li>
+                            <li><a href=""><i class="fas fa-bell"></i></a></li>
+                            <li class="d-lg-none d-block"><a href="#" class="button-left"><i class="fas fa-bars"></i></a></li>
+                      </ul>
+                    </div>
+              </div>
+            </div>
+        </header>
+    @endif
+    
     <section class="loginPage">
         <div class="container">
             <div class="d-flex justify-content-center loginBox">
