@@ -1,4 +1,5 @@
 "use strict";
+var groupData = '';
 
 function getOfficeBelongsToData(val){
     $(".toggle-div").hide();
@@ -23,6 +24,7 @@ function getOfficeBelongsToData(val){
                     } 
                 }else{ 
                     var group_data = msg.group_data;
+                    //groupData = group_data;
                     if(group_data.group_type == 'political'){
                         $("#politicalParty_div").show();
                     }
@@ -81,29 +83,29 @@ function updateSubscriberFields(val,field,pos_type,sel_val){
         
         getMC1List(val,'MC1_'+pos_type,'addSubscriberErrorMessage',sel_val);
     }
-    
+    //alert(val);alert(field);alert(pos_type);alert(rep_area);
     if(field == 'district'){
-        if(rep_area == 'sub_district' || rep_area == 'village'){
+        if(rep_area == '11' || rep_area == '12'){
             getSubDistrictList(val,'subDistrict_'+pos_type,'addSubscriberErrorMessage',sel_val);
         }
         
-        if(rep_area == 'municipality'){
+        if(rep_area == '7'){
             getMC2List(val,'MC2_'+pos_type,'addSubscriberErrorMessage',sel_val);
         }
         
-        if(rep_area == 'city_council' || rep_area == 'ward'){
+        if(rep_area == '8' || rep_area == '10'){
             getCityCouncilList(val,'CC_'+pos_type,'addSubscriberErrorMessage',sel_val);
         }
         
-        if(rep_area == 'block'){
+        if(rep_area == '9'){
             getBlockList(val,'block_'+pos_type,'addSubscriberErrorMessage',sel_val);
         }
         
-        if(rep_area == 'legislative_assembly_constituency'){
+        if(rep_area == '4'){
             getLACList(val,'LAC_'+pos_type,'addSubscriberErrorMessage',sel_val);
         }
         
-        if(rep_area == 'parliamentary_constituency'){
+        if(rep_area == '5'){
             getPCList(val,'PC_'+pos_type,'addSubscriberErrorMessage',sel_val);
         }
     }
@@ -122,6 +124,52 @@ function toggleOfficialPosData(){
         $("#keyIdentity1_div").show();
     }else{
         $("#keyIdentity1_div").hide();
+    }
+    
+    var officeBelongsTo = $("#officeBelongsTo").val();
+    
+    if(officeBelongsTo != ''){
+        ajaxSetup();
+
+        $.ajax({
+            url:ROOT_PATH+"/office-belongs-to-data/"+officeBelongsTo,
+            method:"GET",
+            data:'',
+            success:function(msg){
+                if(objectPropertyExists(msg,'status')){
+                    if(msg.status == 'fail'){
+                        var errors = getResponseErrors(msg,'<br/>','error_validation_');
+                        if(errors != ''){
+                            $("#addSubscriberErrorMessage").html(errors).show();
+                        } 
+                    }else{ 
+                        var groupData = msg.group_data;
+                       
+                        if(groupData.group_sub_type !== null && groupData.group_sub_type == 'person' && $("#politicalPartyOfficialPosition").val() == "0"){
+                            $("#repAreaOfficialPartyPosition_div").hide();
+                            //$("#repAreaOfficialPartyPosition").val('');
+                            //$(".pp-rep-area-field").hide();
+                        }else if(groupData.group_sub_type !== null && groupData.group_sub_type == 'person' && $("#politicalPartyOfficialPosition").val() != "0"){
+                            $("#repAreaOfficialPartyPosition_div").show();
+                            //$(".pp-rep-area-field").show();
+                        }
+
+                        if(groupData.group_sub_type !== null && groupData.group_sub_type == 'person' && $("#electedOfficialPositionName").val() == "0"){
+                            $("#repAreaElectedOfficialPosition_div").hide();
+                            //$("#repAreaElectedOfficialPosition").val('');
+                            //$(".eo-rep-area-field").hide();
+                        }else if(groupData.group_sub_type !== null && groupData.group_sub_type == 'person' && $("#electedOfficialPositionName").val() != "0"){
+                            $("#repAreaElectedOfficialPosition_div").show();
+                            //$(".eo-rep-area-field").show();
+                        }
+                    }
+                }else{
+                    displayResponseError(msg,'addSubscriberErrorMessage');
+                }
+            },error:function(obj,status,error){
+                $("#addSubscriberErrorMessage").html('Error in processing request').show();
+            }
+        });
     }
 }
 

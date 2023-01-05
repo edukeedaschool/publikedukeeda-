@@ -83,7 +83,7 @@
                             <label>Official Position in Political Party</label>
                             <select id="politicalPartyOfficialPosition" class="form-control" name="politicalPartyOfficialPosition"  onchange="toggleOfficialPosData();">
                                 <option value="">Official Position in Political Party</option>
-                                <option value="0">No Official Position</option>
+                                <option value="0" @if($subscriber_data->off_pos_pol_party == '0') selected @endif>No Official Position</option>
                                 @for($i=0;$i<count($off_pos_pol_party);$i++)
                                     <?php $sel = ($off_pos_pol_party[$i]['id'] == $subscriber_data->off_pos_pol_party)?'selected':''; ?>    
                                     <option {{$sel}} value="{{$off_pos_pol_party[$i]['id']}}">{{$off_pos_pol_party[$i]['position_name']}}</option>
@@ -240,7 +240,7 @@
                             <label>Elected Official Position Name</label>
                             <select id="electedOfficialPositionName" class="form-control" name="electedOfficialPositionName" onchange="toggleOfficialPosData();">
                                 <option value="">Elected Official Position Name</option>
-                                <option value="0">Not Applicable</option>
+                                <option value="0" @if($subscriber_data->elec_off_pos_name == '0') selected @endif>Not Applicable</option>
                                 @for($i=0;$i<count($elec_off_position);$i++)
                                     <?php $sel = ($elec_off_position[$i]['id'] == $subscriber_data->elec_off_pos_name)?'selected':''; ?>    
                                     <option {{$sel}} value="{{$elec_off_position[$i]['id']}}">{{$elec_off_position[$i]['position_name']}}</option>
@@ -611,8 +611,8 @@
 @endsection
 
 @section('scripts')
-<script src="{{ asset('js/subscriber.js') }}" ></script>
-<script src="{{ asset('js/master_data.js') }}" ></script>
+<script src="{{ asset('js/subscriber.js?v=1.1') }}" ></script>
+<script src="{{ asset('js/master_data.js?v=1.1') }}" ></script>
 <script type="text/javascript" >
     $(document).ready(function(){
        getOfficeBelongsToData("{{$subscriber_data->office_belongs_to}}"); 

@@ -94,9 +94,21 @@ class SubscriberController extends Controller
                 }
                 
                 if($group_data->group_type == 'political' && $group_data->group_sub_type == 'person'){
-                    $validationRules['subscriberGender'] = 'required';$validationRules['subscriberDOB'] = 'required';$validationRules['politicalParty'] = 'required';
-                    $validationRules['politicalPartyOfficialPosition'] = 'required';$validationRules['repAreaOfficialPartyPosition'] = 'required';
-                    $validationRules['electedOfficialPositionName'] = 'required';$validationRules['repAreaElectedOfficialPosition'] = 'required';
+                    $validationRules['subscriberGender'] = 'required';
+                    $validationRules['subscriberDOB'] = 'required';
+                    $validationRules['politicalParty'] = 'required';
+                    $validationRules['politicalPartyOfficialPosition'] = 'required';
+                    //$validationRules['repAreaOfficialPartyPosition'] = 'required';
+                    $validationRules['electedOfficialPositionName'] = 'required';
+                    //$validationRules['repAreaElectedOfficialPosition'] = 'required';
+                    
+                    if($group_data->group_sub_type !== null && $group_data->group_sub_type == 'person' && $data['politicalPartyOfficialPosition'] != "0"){
+                        $validationRules['repAreaOfficialPartyPosition'] = 'required';
+                    }
+                    
+                    if($group_data->group_sub_type !== null && $group_data->group_sub_type == 'person' && $data['electedOfficialPositionName'] != "0"){
+                        $validationRules['repAreaElectedOfficialPosition'] = 'required';
+                    }
                     
                     if(!empty($data['repAreaOfficialPartyPosition'])){
                         $loc_list = $this->getLocList();
@@ -174,7 +186,17 @@ class SubscriberController extends Controller
             'cc_eo'=>'CC_eo','block_eo'=>'block_eo','ward_eo'=>'ward_eo','sub_district_eo'=>'subDistrict_eo','village_eo'=>'village_eo','status'=>'subscriberStatus','bio'=>'subscriberBio'];
             
             foreach($fieldsArray as $key=>$value){
-                $insertArray[$key] = (isset($data[$value]) && !empty($data[$value]))?trim($data[$value]):null;
+                $insertArray[$key] = (isset($data[$value]) && $data[$value] != '')?trim($data[$value]):null;
+            }
+            
+            if($data['politicalPartyOfficialPosition'] == '0'){
+                $insertArray['rep_area_off_party_pos'] = $insertArray['country_pp'] = $insertArray['state_pp'] = $insertArray['district_pp'] = $insertArray['lac_pp'] = $insertArray['pc_pp'] = null;
+                $insertArray['mc1_pp'] = $insertArray['mc2_pp'] = $insertArray['cc_pp'] = $insertArray['block_pp'] = $insertArray['ward_pp'] = $insertArray['sub_district_pp'] = $insertArray['village_pp'] = null;
+            }
+            
+            if($data['electedOfficialPositionName'] == '0'){
+                $insertArray['rep_area_elec_off_pos'] = $insertArray['country_eo'] = $insertArray['state_eo'] = $insertArray['district_eo'] = $insertArray['lac_eo'] = $insertArray['pc_eo'] = null;
+                $insertArray['mc1_eo'] = $insertArray['mc2_eo'] = $insertArray['cc_eo'] = $insertArray['block_eo'] = $insertArray['ward_eo'] = $insertArray['sub_district_eo'] = $insertArray['village_eo'] = null;
             }
             
             $insertArray['user_id'] = $user_data->id;
@@ -190,10 +212,11 @@ class SubscriberController extends Controller
     
     function getLocList(){
         $loc_list = [];
-        $loc_list['1'] = 'country'; $loc_list['2'] = 'country,state'; $loc_list['3'] = 'country,state,district';  $loc_list['11'] = 'country,state,district,subDistrict';
+        $loc_list['1'] = 'country'; $loc_list['2'] = 'country,state'; $loc_list['3'] = 'country,state,district';
         $loc_list['4'] = 'country,state,district,LAC';$loc_list['5'] = 'country,state,district,PC';
         $loc_list['6'] = 'country,state,MC1';$loc_list['7'] = 'country,state,district,MC2';$loc_list['8'] = 'country,state,district,CC';
-        $loc_list['9'] = 'country,state,district,block';$loc_list['10'] = 'country,state,district,CC,ward';$loc_list['11'] = 'country,state,district,subDistrict,village';
+        $loc_list['9'] = 'country,state,district,block';$loc_list['10'] = 'country,state,district,CC,ward';
+        $loc_list['11'] = 'country,state,district,subDistrict'; $loc_list['12'] = 'country,state,district,subDistrict,village';
 
         return $loc_list;
     }
@@ -229,23 +252,23 @@ class SubscriberController extends Controller
                 $rep_area_pp_state_def_val = $subscriber_data->mc1_pp;
             }*/
             
-            if($rep_area_pp == 'sub_district'){
+            if($rep_area_pp == '11'){
                 $rep_area_pp_district_def_val = $subscriber_data->sub_district_pp;
-            }elseif($rep_area_pp == 'municipal_corporation'){
+            }elseif($rep_area_pp == '6'){
                 $rep_area_pp_district_def_val = $subscriber_data->mc1_pp;
-            }elseif($rep_area_pp == 'village'){
+            }elseif($rep_area_pp == '12'){
                 $rep_area_pp_district_def_val = $subscriber_data->village_pp;
-            }elseif($rep_area_pp == 'municipality'){
+            }elseif($rep_area_pp == '7'){
                 $rep_area_pp_district_def_val = $subscriber_data->mc2_pp;
-            }elseif($rep_area_pp == 'city_council'){
+            }elseif($rep_area_pp == '8'){
                 $rep_area_pp_district_def_val = $subscriber_data->cc_pp;
-            }elseif($rep_area_pp == 'ward'){
+            }elseif($rep_area_pp == '10'){
                 $rep_area_pp_district_def_val = $subscriber_data->ward_pp;
-            }elseif($rep_area_pp == 'block'){
+            }elseif($rep_area_pp == '9'){
                 $rep_area_pp_district_def_val = $subscriber_data->block_pp;
-            }elseif($rep_area_pp == 'legislative_assembly_constituency'){
+            }elseif($rep_area_pp == '4'){
                 $rep_area_pp_district_def_val = $subscriber_data->lac_pp;
-            }elseif($rep_area_pp == 'parliamentary_constituency'){
+            }elseif($rep_area_pp == '5'){
                 $rep_area_pp_district_def_val = $subscriber_data->pc_pp;
             }
             
@@ -259,23 +282,23 @@ class SubscriberController extends Controller
                 $rep_area_eo_state_def_val = $subscriber_data->mc1_eo;
             }*/
             
-            if($rep_area_eo == 'sub_district'){
+            if($rep_area_eo == '11'){
                 $rep_area_eo_district_def_val = $subscriber_data->sub_district_eo;
-            }elseif($rep_area_eo == 'municipal_corporation'){
+            }elseif($rep_area_eo == '6'){
                 $rep_area_eo_district_def_val = $subscriber_data->mc1_eo;
-            }elseif($rep_area_eo == 'village'){
+            }elseif($rep_area_eo == '12'){
                 $rep_area_eo_district_def_val = $subscriber_data->village_eo;
-            }elseif($rep_area_eo == 'municipality'){
+            }elseif($rep_area_eo == '7'){
                 $rep_area_eo_district_def_val = $subscriber_data->mc2_eo;
-            }elseif($rep_area_eo == 'city_council'){
+            }elseif($rep_area_eo == '8'){
                 $rep_area_eo_district_def_val = $subscriber_data->cc_eo;
-            }elseif($rep_area_eo == 'ward'){
+            }elseif($rep_area_eo == '10'){
                 $rep_area_eo_district_def_val = $subscriber_data->ward_eo;
-            }elseif($rep_area_eo == 'block'){
+            }elseif($rep_area_eo == '9'){
                 $rep_area_eo_district_def_val = $subscriber_data->block_eo;
-            }elseif($rep_area_eo == 'legislative_assembly_constituency'){
+            }elseif($rep_area_eo == '4'){
                 $rep_area_eo_district_def_val = $subscriber_data->lac_eo;
-            }elseif($rep_area_eo == 'parliamentary_constituency'){
+            }elseif($rep_area_eo == '5'){
                 $rep_area_eo_district_def_val = $subscriber_data->pc_eo;
             }
             
@@ -335,9 +358,21 @@ class SubscriberController extends Controller
                 }
                 
                 if($group_data->group_type == 'political' && $group_data->group_sub_type == 'person'){
-                    $validationRules['subscriberGender'] = 'required';$validationRules['subscriberDOB'] = 'required';$validationRules['politicalParty'] = 'required';
-                    $validationRules['politicalPartyOfficialPosition'] = 'required';$validationRules['repAreaOfficialPartyPosition'] = 'required';
-                    $validationRules['electedOfficialPositionName'] = 'required';$validationRules['repAreaElectedOfficialPosition'] = 'required';
+                    $validationRules['subscriberGender'] = 'required';
+                    $validationRules['subscriberDOB'] = 'required';
+                    $validationRules['politicalParty'] = 'required';
+                    $validationRules['politicalPartyOfficialPosition'] = 'required';
+                    //$validationRules['repAreaOfficialPartyPosition'] = 'required';
+                    $validationRules['electedOfficialPositionName'] = 'required';
+                    //$validationRules['repAreaElectedOfficialPosition'] = 'required';
+                    
+                    if($group_data->group_sub_type !== null && $group_data->group_sub_type == 'person' && $data['politicalPartyOfficialPosition'] != "0"){
+                        $validationRules['repAreaOfficialPartyPosition'] = 'required';
+                    }
+                    
+                    if($group_data->group_sub_type !== null && $group_data->group_sub_type == 'person' && $data['electedOfficialPositionName'] != "0"){
+                        $validationRules['repAreaElectedOfficialPosition'] = 'required';
+                    }
                     
                     if(!empty($data['repAreaOfficialPartyPosition'])){
                         $loc_list = $this->getLocList();
@@ -397,7 +432,17 @@ class SubscriberController extends Controller
             'cc_eo'=>'CC_eo','block_eo'=>'block_eo','ward_eo'=>'ward_eo','sub_district_eo'=>'subDistrict_eo','village_eo'=>'village_eo','status'=>'subscriberStatus','bio'=>'subscriberBio'];
             
             foreach($fieldsArray as $key=>$value){
-                $updateArray[$key] = (isset($data[$value]) && !empty($data[$value]))?trim($data[$value]):null;
+                $updateArray[$key] = (isset($data[$value]) && $data[$value] != '' )?trim($data[$value]):null;
+            }
+            
+            if($data['politicalPartyOfficialPosition'] == '0'){
+                $updateArray['rep_area_off_party_pos'] = $updateArray['country_pp'] = $updateArray['state_pp'] = $updateArray['district_pp'] = $updateArray['lac_pp'] = $updateArray['pc_pp'] = null;
+                $updateArray['mc1_pp'] = $updateArray['mc2_pp'] = $updateArray['cc_pp'] = $updateArray['block_pp'] = $updateArray['ward_pp'] = $updateArray['sub_district_pp'] = $updateArray['village_pp'] = null;
+            }
+            
+            if($data['electedOfficialPositionName'] == '0'){
+                $updateArray['rep_area_elec_off_pos'] = $updateArray['country_eo'] = $updateArray['state_eo'] = $updateArray['district_eo'] = $updateArray['lac_eo'] = $updateArray['pc_eo'] = null;
+                $updateArray['mc1_eo'] = $updateArray['mc2_eo'] = $updateArray['cc_eo'] = $updateArray['block_eo'] = $updateArray['ward_eo'] = $updateArray['sub_district_eo'] = $updateArray['village_eo'] = null;
             }
             
             $subscriber = SubscriberList::where('id',$subscriber_id)->update($updateArray);

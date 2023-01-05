@@ -584,7 +584,7 @@
 @endsection
 
 @section('scripts')
-<script src="{{ asset('js/subscriber.js') }}" ></script>
-<script src="{{ asset('js/master_data.js') }}" ></script>
+<script src="{{ asset('js/subscriber.js?v=1.1') }}" ></script>
+<script src="{{ asset('js/master_data.js?v=1.1') }}" ></script>
 
 @endsection

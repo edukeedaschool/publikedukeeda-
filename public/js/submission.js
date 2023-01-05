@@ -21,14 +21,14 @@ function getSubmissionSubscribersList(sub_group_id,user_id,select_elem,error_ele
                     } 
                 }else{ 
                     var subscriber_list = msg.subscriber_list,sel = '';//alert(user_data);
-                    if(subscriber_list != null && subscriber_list != ''){
+                    if(subscriber_list !== null && subscriber_list != ''){
                        for(var i=0;i<subscriber_list.length;i++){
                             sel = (sel_val == subscriber_list[i].id)?'selected':'';
                             str+='<option '+sel+' value="'+subscriber_list[i].id+'">'+subscriber_list[i].subscriber_name+'</option>';
                         }
-
-                        $("#"+select_elem).html(str);
                     }
+                    
+                    $("#"+select_elem).html(str);
                 }
             }else{
                 displayResponseError(msg,error_elem);

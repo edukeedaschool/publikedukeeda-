@@ -114,6 +114,6 @@
 @endsection
 
 @section('scripts')
-<script src="{{ asset('js/submission.js') }}" ></script>
+<script src="{{ asset('js/submission.js?v=1.1') }}" ></script>
 @endsection
 
