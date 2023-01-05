@@ -64,7 +64,7 @@
                     <li><a href="{{url('team/members/'.$user_teams[$i]['subscriber_id'])}}"><i class="fas fa-users"></i> Team {{$user_teams[$i]['subscriber_name']}}</a></li>
                 @endfor    
                 <li><a href="javascript:;"><i class="fas fa-star"></i> Submissions for review</a></li>
-                <li><a href="javascript:;"><i class="fas fa-search"></i> Search Group</a></li>
+                <li><a href="{{url('groups/list')}}"><i class="fas fa-search"></i> Search Group</a></li>
                 @if(isset($user_data->id) && !empty($user_data->id) )
                     @if($user_data->user_role == 1)
                         <li><a href="{{url('states/list')}}" ><i class="fas fa-users"></i> Admin Panel</a></li>

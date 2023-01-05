@@ -50,6 +50,9 @@ Route::group(['middleware' => ['data_api']], function () {
     Route::post('/submission/confirm/save', [App\Http\Controllers\DataApiController::class, 'saveSubmissionConfirm'])->name('savesubmissionconfirm');
     Route::get('/user/teams/{userId}', [App\Http\Controllers\DataApiController::class, 'getUserTeamsList'])->name('getuserteamslist');
     Route::get('/team/members/{subscriberId}', [App\Http\Controllers\DataApiController::class, 'getTeamMembersList'])->name('getteammemberslist');
+    Route::get('/subscribers/list', [App\Http\Controllers\DataApiController::class, 'getSubscribersList'])->name('getsubscriberslist');
+    Route::post('/subscriber/follow', [App\Http\Controllers\DataApiController::class, 'addSubscriberFollower'])->name('addsubscriberfollower');
+    Route::post('/subscriber/unfollow', [App\Http\Controllers\DataApiController::class, 'deleteSubscriberFollower'])->name('deletesubscriberfollower');
     
     Route::post('/signup', [App\Http\Controllers\DataApiController::class, 'signup'])->name('signup');
     Route::post('/change-password', [App\Http\Controllers\DataApiController::class, 'changePassword'])->name('changepassword');

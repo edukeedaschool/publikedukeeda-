@@ -254,6 +254,9 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('/submission-subscriber/data/{subscriberId}', [App\Http\Controllers\SubmissionController::class, 'getSubmissionSubscriberData'])->name('getsubmissionsubscriberdata');
     
     Route::get('/team/members/{subscriberId}', [App\Http\Controllers\TeamController::class, 'getTeamMembersList'])->name('getsubscriberteammembers');
+    Route::get('/groups/list', [App\Http\Controllers\SubscriberController::class, 'getSubscribersList'])->name('getsubscriberslist');
+    Route::post('/subscriber/follow', [App\Http\Controllers\SubscriberController::class, 'addSubscriberFollower'])->name('addsubscriberfollower');
+    Route::post('/subscriber/unfollow', [App\Http\Controllers\SubscriberController::class, 'deleteSubscriberFollower'])->name('deletesubscriberfollower');
 });
 
 Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('home');

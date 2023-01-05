@@ -616,3 +616,38 @@ function updateReviewOfficial(action){
         }
     });
 }
+
+function followUnfollowSubscriber(elem,subscriber_id){
+    $("#followErrorMessage,#followSuccessMessage,.invalid-feedback").html('').hide();
+    
+    var url = $(elem).hasClass('following')?'/subscriber/unfollow':'/subscriber/follow';
+    ajaxSetup();//alert(url);
+
+    $.ajax({
+        url:ROOT_PATH+url,
+        method:"POST",
+        data:{subscriber_id:subscriber_id},
+        success:function(msg){
+            if(objectPropertyExists(msg,'status')){
+                if(msg.status == 'fail'){
+                    var errors = getResponseErrors(msg,'<br/>','error_validation_');
+                    if(errors != ''){
+                        $("#followErrorMessage").html(errors).show();
+                    } 
+                }else{ 
+                    //$("#followSuccessMessage").html(msg.message).show();
+                    $("#followErrorMessage,.invalid-feedback").html('').hide();
+                    if($(elem).hasClass('following')){
+                        $(elem).removeClass('following').html('Follow');
+                    }else{
+                        $(elem).addClass('following').html('Unfollow');
+                    }
+                }
+            }else{
+                displayResponseError(msg,'followErrorMessage');
+            }
+        },error:function(obj,status,error){
+            $("#followErrorMessage").html('Error in processing request').show();
+        }
+    });
+}

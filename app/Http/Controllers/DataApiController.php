@@ -33,6 +33,7 @@ use App\Models\Submissions;
 use App\Models\SubscriberList;
 use App\Models\SubscriberPackage;
 use App\Models\TeamMembers;
+use App\Models\SubscriberFollowers;
 use App\Helpers\CommonHelper;
 use Validator;
 use Illuminate\Validation\Rule;
@@ -1075,6 +1076,107 @@ class DataApiController extends Controller
             ->first();
             
             return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'success','message' => 'Team Members List','team_members'=>$team_members,'subscriber_data'=>$subscriber_data),200);
+            
+        }catch (\Exception $e){
+            CommonHelper::saveException($e,'STORE',__FUNCTION__,__FILE__);
+            return response(array('httpStatus'=>200,"dateTime"=>time(),'status' => 'fail','error_message'=>$e->getMessage(),'message'=>'Error in Processing Request'),200);
+        }    
+    }
+    
+    function getSubscribersList(Request $request){
+        try{ 
+            $data = $request->all();
+            
+            $subscribers_list = SubscriberList::join('users as u', 'u.id', '=', 'subscriber_list.user_id')      
+            ->join('district_list as d', 'd.id', '=', 'u.district')          
+            ->join('state_list as s', 's.id', '=', 'u.state')           
+            ->join('sub_group_list as sg', 'sg.id', '=', 'subscriber_list.office_belongs_to')          
+            ->join('group_list as g', 'g.id', '=', 'sg.group_id');           
+            
+            if(isset($data['name']) && !empty($data['name'])){
+                $subscribers_list = $subscribers_list->where('u.name','LIKE','%'.trim($data['name'].'%'));
+            }
+            
+            if(isset($data['district']) && !empty($data['district'])){
+                $subscribers_list = $subscribers_list->where('d.district_name','LIKE','%'.trim($data['district'].'%'));
+            }
+            
+            $subscribers_list = $subscribers_list->where('subscriber_list.is_deleted',0)        
+            ->where('u.is_deleted',0)                
+            ->where('d.is_deleted',0)        
+            ->where('s.is_deleted',0)                
+            ->where('sg.is_deleted',0)        
+            ->where('g.is_deleted',0)                
+            ->where('subscriber_list.status',1)        
+            ->where('u.status',1)                
+            ->where('d.status',1)        
+            ->where('s.status',1)                
+            ->where('sg.status',1)        
+            ->where('g.status',1)               
+            ->select('subscriber_list.id as subscriber_id','subscriber_list.bio as subscriber_bio','subscriber_list.office_belongs_to','u.name as subscriber_name','u.email',
+            'd.district_name','s.state_name','sg.sub_group_name','sg.id as sub_group_id','g.id as group_id','g.group_name','g.group_sub_type')        
+            ->get()->toArray();        
+            
+            if(isset($data['user_id']) && !empty($data['user_id'])){
+                $following = SubscriberFollowers::where('user_id',trim($data['user_id']))->where('is_deleted',0)->select('subscriber_id')->get()->toArray();
+                $subscriber_ids = array_column($following,'subscriber_id');
+                for($i=0;$i<count($subscribers_list);$i++){
+                    $subscribers_list[$i]['following'] = (in_array($subscribers_list[$i]['subscriber_id'], $subscriber_ids))?1:0;
+                }
+            }
+            
+            return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'success','message' => 'Subscribers List','subscribers_list'=>$subscribers_list),200);
+            
+        }catch (\Exception $e){
+            CommonHelper::saveException($e,'STORE',__FUNCTION__,__FILE__);
+            return response(array('httpStatus'=>200,"dateTime"=>time(),'status' => 'fail','error_message'=>$e->getMessage(),'message'=>'Error in Processing Request'),200);
+        }    
+    }
+    
+    function addSubscriberFollower(Request $request){
+        try{ 
+            $data = $request->all();
+            $validationRules = array('user_id'=>'required','subscriber_id'=>'required');
+            $attributes = array('user_id'=>'User','subscriber_id'=>'Subscriber');
+            
+            $validator = Validator::make($data,$validationRules,array(),$attributes);
+            if ($validator->fails()){ 
+                return response(array('httpStatus'=>200, "dateTime"=>time(), 'status'=>'fail', 'message'=>'Missing Required Fields', 'errors' => $validator->errors()),200);
+            }	
+            
+            $follow = SubscriberFollowers::where('subscriber_id',trim($data['subscriber_id']))->where('user_id',trim($data['user_id']))->first();
+            
+            if(empty($follow)){
+                $insertArray = ['subscriber_id'=>trim($data['subscriber_id']),'user_id'=>trim($data['user_id'])];
+                $follow = SubscriberFollowers::create($insertArray);
+            }else{
+                $updateArray = ['is_deleted'=>0];
+                SubscriberFollowers::where('id',$follow->id)->update($updateArray);
+            }
+            
+            return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'success','message' => 'Subscriber Follower added successfully','follow'=>$follow),200);
+            
+        }catch (\Exception $e){
+            CommonHelper::saveException($e,'STORE',__FUNCTION__,__FILE__);
+            return response(array('httpStatus'=>200,"dateTime"=>time(),'status' => 'fail','error_message'=>$e->getMessage(),'message'=>'Error in Processing Request'),200);
+        }    
+    }
+    
+    function deleteSubscriberFollower(Request $request){
+        try{ 
+            $data = $request->all();
+            $validationRules = array('user_id'=>'required','subscriber_id'=>'required');
+            $attributes = array('user_id'=>'User','subscriber_id'=>'Subscriber');
+            
+            $validator = Validator::make($data,$validationRules,array(),$attributes);
+            if ($validator->fails()){ 
+                return response(array('httpStatus'=>200, "dateTime"=>time(), 'status'=>'fail', 'message'=>'Missing Required Fields', 'errors' => $validator->errors()),200);
+            }	
+            
+            $updateArray = ['is_deleted'=>1];
+            SubscriberFollowers::where('subscriber_id',trim($data['subscriber_id']))->where('user_id',trim($data['user_id']))->update($updateArray);
+            
+            return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'success','message' => 'Subscriber Follower updated successfully'),200);
             
         }catch (\Exception $e){
             CommonHelper::saveException($e,'STORE',__FUNCTION__,__FILE__);

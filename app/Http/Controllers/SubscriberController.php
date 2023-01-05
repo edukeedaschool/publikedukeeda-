@@ -1009,4 +1009,90 @@ class SubscriberController extends Controller
             return response(array("httpStatus"=>500,"dateTime"=>time(),'status' => 'fail','message' =>$e->getMessage()),500);
         }  
     }
+    
+    public function getSubscribersList(Request $request){ 
+        try{
+            $data = $request->all();
+            $user = Auth::user();
+            $subscribers_list_person = $subscribers_list_org = [];
+            
+            $headers = CommonHelper::getAPIHeaders();
+            $query_string = 'user_id='.$user->id.'&'.$_SERVER['QUERY_STRING'];
+            $url = url('/api/subscribers/list?'.$query_string);
+            
+            $response = CommonHelper::processCURLRequest($url,'','','',$headers);//print_r($response);//exit;
+            $response = json_decode($response,true);
+            $subscribers_list = isset($response['subscribers_list'])?$response['subscribers_list']:[];
+            
+            for($i=0;$i<count($subscribers_list);$i++){
+                if($subscribers_list[$i]['group_sub_type'] == 'person'){
+                    $subscribers_list_person[] = $subscribers_list[$i];
+                }else{
+                    $subscribers_list_org[] = $subscribers_list[$i];
+                }
+            }
+            
+            return view('front/subscriber/subscriber_list',array('title'=>'Search Group','subscribers_person'=>$subscribers_list_person,'subscribers_org'=>$subscribers_list_org));
+            
+        }catch (\Exception $e){
+            \DB::rollBack();
+            return view('admin/page_error',array('message' =>$e->getMessage()));
+        }  
+    }
+    
+    function addSubscriberFollower(Request $request){
+        try{ 
+            $data = $request->all();
+            $user = Auth::user();
+            $validationRules = array('subscriber_id'=>'required');
+            $attributes = array('subscriber_id'=>'Subscriber');
+            
+            $validator = Validator::make($data,$validationRules,array(),$attributes);
+            if ($validator->fails()){ 
+                return response(array('httpStatus'=>200, "dateTime"=>time(), 'status'=>'fail', 'message'=>'Missing Required Fields', 'errors' => $validator->errors()),200);
+            }	
+            
+            $post_data = $data; 
+            $post_data['user_id'] = $user->id;
+            
+            $headers = CommonHelper::getAPIHeaders();
+            $url = url('/api/subscriber/follow');
+            $response = CommonHelper::processCURLRequest($url,json_encode($post_data),'','',$headers);
+            $response = json_decode($response,true);
+            
+            return $response;
+            
+        }catch (\Exception $e){
+            CommonHelper::saveException($e,'STORE',__FUNCTION__,__FILE__);
+            return response(array('httpStatus'=>200,"dateTime"=>time(),'status' => 'fail','error_message'=>$e->getMessage(),'message'=>'Error in Processing Request'),200);
+        }    
+    }
+    
+    function deleteSubscriberFollower(Request $request){
+        try{ 
+            $data = $request->all();
+            $user = Auth::user();
+            $validationRules = array('subscriber_id'=>'required');
+            $attributes = array('subscriber_id'=>'Subscriber');
+            
+            $validator = Validator::make($data,$validationRules,array(),$attributes);
+            if ($validator->fails()){ 
+                return response(array('httpStatus'=>200, "dateTime"=>time(), 'status'=>'fail', 'message'=>'Missing Required Fields', 'errors' => $validator->errors()),200);
+            }	
+            
+            $post_data = $data; 
+            $post_data['user_id'] = $user->id;
+            
+            $headers = CommonHelper::getAPIHeaders();
+            $url = url('/api/subscriber/unfollow');
+            $response = CommonHelper::processCURLRequest($url,json_encode($post_data),'','',$headers);
+            $response = json_decode($response,true);
+            
+            return $response;
+            
+        }catch (\Exception $e){
+            CommonHelper::saveException($e,'STORE',__FUNCTION__,__FILE__);
+            return response(array('httpStatus'=>200,"dateTime"=>time(),'status' => 'fail','error_message'=>$e->getMessage(),'message'=>'Error in Processing Request'),200);
+        }    
+    }
 }
