@@ -34,7 +34,7 @@
                 <?php $text = ($subscribers_person[$i]['following'] == 1)?'Unfollow':'Follow'; ?>           
                 <li>
                   <div class="d-flex align-items-center">
-                    <div> <a href="#">{{$subscribers_person[$i]['subscriber_name']}}</a>, {{$subscribers_person[$i]['subscriber_bio']}} </div> 
+                    <div> <a href="{{url('subscriber/profile/view/'.$subscribers_person[$i]['subscriber_id'])}}">{{$subscribers_person[$i]['subscriber_name']}}</a>, {{$subscribers_person[$i]['subscriber_bio']}} </div> 
                     <a href="javascript:;" onclick="followUnfollowSubscriber(this,{{$subscribers_person[$i]['subscriber_id']}});" class="ml-auto flwBtn {{$css_class}}">{{$text}}</a> 
                   </div>
                   <span><i class="fas fa-map-marker-alt"></i> {{$subscribers_person[$i]['district_name']}}, {{$subscribers_person[$i]['state_name']}}</span>
@@ -50,7 +50,7 @@
                     <?php $text = ($subscribers_org[$i]['following'] == 1)?'Unfollow':'Follow'; ?>               
                     <li>
                       <div class="d-flex align-items-center">
-                        <div > <a href="#">{{$subscribers_org[$i]['subscriber_name']}}</a>, {{$subscribers_org[$i]['subscriber_bio']}} </div> 
+                        <div > <a href="{{url('subscriber/profile/view/'.$subscribers_org[$i]['subscriber_id'])}}">{{$subscribers_org[$i]['subscriber_name']}}</a>, {{$subscribers_org[$i]['subscriber_bio']}} </div> 
                         <a href="javascript:;" onclick="followUnfollowSubscriber(this,{{$subscribers_org[$i]['subscriber_id']}});" class="ml-auto flwBtn {{$css_class}}">{{$text}}</a> 
                       </div>
                       <span><i class="fas fa-map-marker-alt"></i> {{$subscribers_org[$i]['district_name']}}, {{$subscribers_org[$i]['state_name']}}</span>

@@ -19,7 +19,7 @@
         <tbody>
             @for($i=0;$i<count($members_list);$i++)
                 <tr>
-                  <td>{{$members_list[$i]['team_member_name']}}</td>
+                  <td><a href="{{url('user/profile/view/'.$members_list[$i]['team_member_id'])}}">{{$members_list[$i]['team_member_name']}}</a></td>
                   <td>{{$members_list[$i]['representation_area']}}</td>
                   <td align="center" class="callIcon">
                     <a href="#"><i class="fas fa-envelope"></i></a> 

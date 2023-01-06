@@ -159,6 +159,8 @@ class SubscriberController extends Controller
                 return response(array('httpStatus'=>200, "dateTime"=>time(), 'status'=>'fail', 'message'=>'Subscriber already exists with this Username', 'errors' => 'Subscriber already exists with this Username'));
             }
             
+            \DB::beginTransaction();
+            
             $image_name = CommonHelper::uploadImage($request,$request->file('subscriberImage'),'images/user_images');
             
             $village = !empty($data['village'])?$data['village']:null;
@@ -202,10 +204,14 @@ class SubscriberController extends Controller
             $insertArray['user_id'] = $user_data->id;
             
             $subscriber = SubscriberList::create($insertArray);
+            
+            User::where('id',$user_data->id)->update(['subscriber_id'=>$subscriber->id]);
           
+            \DB::commit();
             return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'success','message' => 'Subscriber added successfully'),200);
             
         }catch (\Exception $e){
+            \DB::rollBack();
             return response(array("httpStatus"=>500,"dateTime"=>time(),'status' => 'fail','message' =>$e->getMessage().', '.$e->getLine()),500);
         }  
     }
@@ -1094,5 +1100,26 @@ class SubscriberController extends Controller
             CommonHelper::saveException($e,'STORE',__FUNCTION__,__FILE__);
             return response(array('httpStatus'=>200,"dateTime"=>time(),'status' => 'fail','error_message'=>$e->getMessage(),'message'=>'Error in Processing Request'),200);
         }    
+    }
+    
+    public function viewSubscriberProfile(Request $request,$subscriber_id){
+        try{
+            $data = $request->all();
+            $user = Auth::user();
+            
+            $headers = CommonHelper::getAPIHeaders();
+            $url = url('/api/subscriber/data/'.$subscriber_id);
+            
+            $response = CommonHelper::processCURLRequest($url,'','','',$headers);//print_r($response);
+            $response = json_decode($response,true);
+            $subscriber_data = isset($response['subscriber_data'])?$response['subscriber_data']:[];
+            
+            $params = ['title'=>'View Subscriber Profile','subscriber_data'=>$subscriber_data];
+            
+            return view('front/subscriber/subscriber_profile_view',$params);
+            
+        }catch (\Exception $e){
+            return view('front/page_error',array('message' =>$e->getMessage().', '.$e->getLine()));
+        }
     }
 }

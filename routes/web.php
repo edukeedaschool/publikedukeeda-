@@ -257,6 +257,12 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('/groups/list', [App\Http\Controllers\SubscriberController::class, 'getSubscribersList'])->name('getsubscriberslist');
     Route::post('/subscriber/follow', [App\Http\Controllers\SubscriberController::class, 'addSubscriberFollower'])->name('addsubscriberfollower');
     Route::post('/subscriber/unfollow', [App\Http\Controllers\SubscriberController::class, 'deleteSubscriberFollower'])->name('deletesubscriberfollower');
+    
+    Route::get('/user/profile/view/{userId}', [App\Http\Controllers\UserController::class, 'viewProfile'])->name('viewprofile');
+    Route::get('/subscriber/profile/view/{subscriberId}', [App\Http\Controllers\SubscriberController::class, 'viewSubscriberProfile'])->name('viewsubscriberprofile');
+    
+    Route::get('/subscriber/followers/{subscriberId}', [App\Http\Controllers\SubscriberController::class, 'listSubscriberFollowers'])->name('listsubscriberfollowers');
+    Route::get('/user/followers/{userId}', [App\Http\Controllers\UserController::class, 'listUserFollowers'])->name('listuserfollowers');
 });
 
 Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
@@ -264,6 +270,6 @@ Route::get('/user/login', [App\Http\Controllers\UserController::class, 'login'])
 Route::post('/user/login', [App\Http\Controllers\UserController::class, 'submitLogin'])->name('loginsubmit');
 Route::get('/user/signup', [App\Http\Controllers\UserController::class, 'signup'])->name('signup');
 Route::post('/user/signup', [App\Http\Controllers\UserController::class, 'submitSignup'])->name('submitsignup');
-Route::get('/user/profile/view/{userId}', [App\Http\Controllers\UserController::class, 'viewProfile'])->name('viewprofile');
+
 Route::get('/access-denied', [App\Http\Controllers\HomeController::class, 'accessDenied'])->name('access-denied');
 Route::any('/api-data', [App\Http\Controllers\UserController::class, 'getAPIData'])->name('getapidata');

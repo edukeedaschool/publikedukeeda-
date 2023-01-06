@@ -156,12 +156,26 @@ header{background-color: #fff; padding: 8px 0;min-height: 56px; box-shadow: 0 0 
 .confirmBtn{text-align: right;}
 .confirmBtn a{background: #ccc; color: #000; display: inline-block; padding: 5px 20px; font-weight: 500;border-radius:5px;}
 .confirmBtn a:hover,.confirmBtn a.active{background:rgb(29, 155, 240);color: #fff;}
-.userImg2 {
-  position: absolute;
-  right: 47px;
-  top: 90px;
-}
-.viewpdf{flex: 0 0 auto; display: contents;}
+.userImg2 {position: absolute;right: 47px;top: 90px;}
+.viewpdf{color: rgb(253, 124, 54);font-size: 12px; font-style: italic;margin-top:7px;}
+
+.userPropic{text-align: center;}
+.userPropic figure,.userPropic figure img{width:120px;height:120px;border-radius: 50%;display: inline-block;}
+.userPropic figcaption{font-size: 20px; font-weight: 500;margin-top: 12px;}
+.userEmail{padding: 0;}
+.userEmail li{padding-bottom:10px;}
+.form-horizontal input{border: none;background-color: none;}
+.form-horizontal hr{border-width: 5px; margin: 20px 0;}
+/* .form-horizontal input:disabled{background: none; height: auto;} */
+.form-horizontal label{margin-bottom: 0;}
+.form-control:disabled, .form-control[readonly]{background-color: none;}
+.editBtn{font-size: 14px;text-decoration: underline;font-weight: 500;}
+
+.following{padding: 0;}
+.following li{padding-bottom:15px;}
+.following li a{color: rgb(91, 91, 91);font-weight: 500; color: rgb(29, 155, 240);}
+.following li a.foBtn{background-color: rgb(29, 155, 240);padding: 7px 15px;display: inline-block;height: fit-content;border-radius: 25px;color: #fff;line-height: normal;}
+
 /*======== Media Queries for Mobile =========*/
 @media all and (max-width:1199px){
   body .container{min-width:100%;}
@@ -177,6 +191,8 @@ header{background-color: #fff; padding: 8px 0;min-height: 56px; box-shadow: 0 0 
 @media all and (max-width:767px){
   .submissionBtn{flex-wrap: wrap;}
   .choose h2{margin:0px 0 15px; font-size: 15px;}
+  .userImg2{right: 24px;top: 74px;}
+  .address1 ul li img {width: 40px;}
   
 
 }
@@ -192,3 +208,19 @@ header{background-color: #fff; padding: 8px 0;min-height: 56px; box-shadow: 0 0 
 
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

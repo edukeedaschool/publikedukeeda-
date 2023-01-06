@@ -34,6 +34,7 @@ use App\Models\SubscriberList;
 use App\Models\SubscriberPackage;
 use App\Models\TeamMembers;
 use App\Models\SubscriberFollowers;
+use App\Models\UserFollowers;
 use App\Helpers\CommonHelper;
 use Validator;
 use Illuminate\Validation\Rule;
@@ -189,7 +190,7 @@ class DataApiController extends Controller
             ->where('users.status',1)
             ->select('users.id','users.name','users.email','users.user_name','users.official_name','users.mobile_no','users.gender','users.dob','users.qualification','users.degree_year',
             'users.course_name','users.profession','users.major_identity','users.more_about_you','users.image','users.address_line1','users.postal_code','users.country','users.state',
-            'users.district','users.sub_district','users.village','cl.country_name','sl.state_name','dl.district_name','sd.sub_district_name','vl.village_name')
+            'users.district','users.sub_district','users.village','cl.country_name','sl.state_name','dl.district_name','sd.sub_district_name','vl.village_name','users.user_role','users.subscriber_id')
             ->first();
             
             if(empty($user_data)){
@@ -1177,6 +1178,108 @@ class DataApiController extends Controller
             SubscriberFollowers::where('subscriber_id',trim($data['subscriber_id']))->where('user_id',trim($data['user_id']))->update($updateArray);
             
             return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'success','message' => 'Subscriber Follower updated successfully'),200);
+            
+        }catch (\Exception $e){
+            CommonHelper::saveException($e,'STORE',__FUNCTION__,__FILE__);
+            return response(array('httpStatus'=>200,"dateTime"=>time(),'status' => 'fail','error_message'=>$e->getMessage(),'message'=>'Error in Processing Request'),200);
+        }    
+    }
+    
+    function getSubscriberData(Request $request,$subscriber_id){
+        try{ 
+            $data = $request->all();
+            
+            $subscriber_data = SubscriberList::join('users as u', 'u.id', '=', 'subscriber_list.user_id')
+            ->leftJoin('country_list as cl',function($join){$join->on('cl.id','=','u.country')->where('cl.is_deleted','=','0')->where('cl.status','=','1');})                
+            ->leftJoin('state_list as sl',function($join){$join->on('sl.id','=','u.state')->where('sl.is_deleted','=','0')->where('sl.status','=','1');})
+            ->leftJoin('district_list as dl',function($join){$join->on('dl.id','=','u.district')->where('dl.is_deleted','=','0')->where('dl.status','=','1');})   
+            ->leftJoin('political_party_list as ppl',function($join){$join->on('ppl.id','=','subscriber_list.political_party')->where('ppl.is_deleted','=','0')->where('ppl.status','=','1');})      
+            ->leftJoin('political_party_official_position as ppop',function($join){$join->on('ppop.id','=','subscriber_list.off_pos_pol_party')->where('ppop.is_deleted','=','0')->where('ppop.status','=','1');})      
+            ->leftJoin('representation_area_list as rep_area_pp',function($join){$join->on('rep_area_pp.id','=','subscriber_list.rep_area_off_party_pos')->where('rep_area_pp.is_deleted','=','0')->where('rep_area_pp.status','=','1');})      
+            ->leftJoin('elected_official_position as eop',function($join){$join->on('eop.id','=','subscriber_list.elec_off_pos_name')->where('eop.is_deleted','=','0')->where('eop.status','=','1');})      
+            ->leftJoin('representation_area_list as rep_area_eo',function($join){$join->on('rep_area_eo.id','=','subscriber_list.rep_area_off_party_pos')->where('rep_area_eo.is_deleted','=','0')->where('rep_area_eo.status','=','1');})      
+            ->join('sub_group_list as sg', 'sg.id', '=', 'subscriber_list.office_belongs_to')          
+            ->join('group_list as g', 'g.id', '=', 'sg.group_id')         
+            ->where('subscriber_list.id',$subscriber_id)          
+            ->where('subscriber_list.is_deleted',0)        
+            ->where('u.is_deleted',0)                
+            ->where('sg.is_deleted',0)        
+            ->where('g.is_deleted',0)                
+            ->where('subscriber_list.status',1)        
+            ->where('u.status',1)                
+            ->where('sg.status',1)        
+            ->where('g.status',1)               
+            ->select('subscriber_list.id as subscriber_id','subscriber_list.bio as subscriber_bio','subscriber_list.office_belongs_to','u.name as subscriber_name','u.email',
+            'u.gender','u.dob','u.mobile_no','u.image','u.address_line1','u.postal_code','dl.district_name','sl.state_name','cl.country_name','sg.sub_group_name','sg.id as sub_group_id','g.id as group_id','g.group_name',
+            'g.group_type','g.group_sub_type','ppl.party_name as pol_party_name','ppop.position_name as pol_party_position_name','rep_area_pp.representation_area as pol_party_representation_area',
+            'eop.position_name as elected_official_position_name','rep_area_eo.representation_area as elected_official_pol_party_representation_area','subscriber_list.key_identity1',
+            'subscriber_list.key_identity2','subscriber_list.org_name','subscriber_list.auth_person_name','subscriber_list.auth_person_designation','subscriber_list.bio as subscriber_bio')        
+            ->first();        
+            
+            $subscriber_data->image_url = (!empty($subscriber_data->image))?url('images/user_images/'.$subscriber_data->image):url('images/default_profile.png');
+            
+            return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'success','message' => 'Subscriber Data','subscriber_data'=>$subscriber_data),200);
+            
+        }catch (\Exception $e){
+            CommonHelper::saveException($e,'STORE',__FUNCTION__,__FILE__);
+            return response(array('httpStatus'=>200,"dateTime"=>time(),'status' => 'fail','error_message'=>$e->getMessage(),'message'=>'Error in Processing Request'),200);
+        }    
+    }
+    
+    function getSubscriberFollowers(Request $request,$subscriber_id){
+        try{ 
+            $data = $request->all();
+            
+            $subscriber_followers = SubscriberFollowers::join('users as u', 'u.id', '=', 'subscriber_followers.user_id')
+            ->where('subscriber_followers.subscriber_id',$subscriber_id)
+            ->where('subscriber_followers.is_deleted',0)
+            ->where('subscriber_followers.status',1)             
+            ->where('u.is_deleted',0)
+            ->where('u.status',1)     
+            ->select('subscriber_followers.subscriber_id','subscriber_followers.user_id as follower_id','u.name','u.email')        
+            ->get()->toArray();
+            
+            return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'success','message' => 'Subscriber Followers','subscriber_followers'=>$subscriber_followers),200);
+            
+        }catch (\Exception $e){
+            CommonHelper::saveException($e,'STORE',__FUNCTION__,__FILE__);
+            return response(array('httpStatus'=>200,"dateTime"=>time(),'status' => 'fail','error_message'=>$e->getMessage(),'message'=>'Error in Processing Request'),200);
+        }    
+    }
+    
+    function getUserFollowers(Request $request,$user_id){
+        try{ 
+            $data = $request->all();
+            
+            $user_followers = UserFollowers::join('users as u', 'u.id', '=', 'user_followers.follower_id')
+            ->where('user_followers.user_id',$user_id)
+            ->where('user_followers.is_deleted',0)
+            ->where('user_followers.status',1)             
+            ->where('u.is_deleted',0)
+            ->where('u.status',1)     
+            ->select('user_followers.user_id','user_followers.follower_id','u.name','u.email')        
+            ->get()->toArray();
+            
+            $user_following_users = UserFollowers::join('users as u', 'u.id', '=', 'user_followers.user_id')
+            ->where('user_followers.follower_id',$user_id)
+            ->where('user_followers.is_deleted',0)
+            ->where('user_followers.status',1)             
+            ->where('u.is_deleted',0)
+            ->where('u.status',1)     
+            ->select('user_followers.user_id','user_followers.follower_id','u.name','u.email')        
+            ->get()->toArray();
+            
+            /*$user_following_subscribers = SubscriberFollowers::join('users as u', 'u.id', '=', 'subscriber_followers.subscriber_id')
+            ->join('users as u1', 'u1.id', '=', 'u.id')        
+            ->where('subscriber_followers.user_id',$user_id)
+            ->where('subscriber_followers.is_deleted',0)
+            ->where('subscriber_followers.status',1)             
+            ->where('u.is_deleted',0)
+            ->where('u.status',1)     
+            ->select('subscriber_followers.subscriber_id','subscriber_followers.user_id as follower_id','u.name','u.email')        
+            ->get()->toArray();*/
+            
+            return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'success','message' => 'User Followers','user_followers'=>$user_followers),200);
             
         }catch (\Exception $e){
             CommonHelper::saveException($e,'STORE',__FUNCTION__,__FILE__);

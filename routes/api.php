@@ -51,8 +51,11 @@ Route::group(['middleware' => ['data_api']], function () {
     Route::get('/user/teams/{userId}', [App\Http\Controllers\DataApiController::class, 'getUserTeamsList'])->name('getuserteamslist');
     Route::get('/team/members/{subscriberId}', [App\Http\Controllers\DataApiController::class, 'getTeamMembersList'])->name('getteammemberslist');
     Route::get('/subscribers/list', [App\Http\Controllers\DataApiController::class, 'getSubscribersList'])->name('getsubscriberslist');
+    Route::get('/subscriber/data/{subscriberId}', [App\Http\Controllers\DataApiController::class, 'getSubscriberData'])->name('getsubscriberdata');
     Route::post('/subscriber/follow', [App\Http\Controllers\DataApiController::class, 'addSubscriberFollower'])->name('addsubscriberfollower');
     Route::post('/subscriber/unfollow', [App\Http\Controllers\DataApiController::class, 'deleteSubscriberFollower'])->name('deletesubscriberfollower');
+    Route::get('/subscriber/followers/{subscriberId}', [App\Http\Controllers\DataApiController::class, 'getSubscriberFollowers'])->name('getsubscriberfollowers');
+    Route::get('/user/followers/{userId}', [App\Http\Controllers\DataApiController::class, 'getUserFollowers'])->name('getuserfollowers');
     
     Route::post('/signup', [App\Http\Controllers\DataApiController::class, 'signup'])->name('signup');
     Route::post('/change-password', [App\Http\Controllers\DataApiController::class, 'changePassword'])->name('changepassword');

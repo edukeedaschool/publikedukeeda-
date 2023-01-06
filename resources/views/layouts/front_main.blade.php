@@ -81,7 +81,7 @@
             
             @if(isset($user_data->id) && !empty($user_data->id))
                 <div class="userName">
-                    <a href="">
+                    @if($user_data->user_role == 2)<a href="{{url('subscriber/profile/view/'.$user_data->subscriber_id)}}"> @else <a href="{{url('user/profile/view/'.$user_data->id)}}"> @endif
                     @if(isset($user_data->image) && !empty($user_data->image))  
                         <figure><img src="{{url('images/user_images/'.$user_data->image)}}" class="img-fluid"></figure>
                     @else

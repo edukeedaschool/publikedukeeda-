@@ -225,14 +225,14 @@ function getVillageList(sub_district_id,select_elem,error_elem,sel_val){
 
 function editUserProfile(profile_type,action){
     if(action == 'edit'){
-        $("#"+profile_type+"_div .form-control").attr('readonly',false);
+        $("#"+profile_type+"_div .form-control").attr('readonly',false).css('background-color','#fff');
         $("."+profile_type+"-edit").hide();
         $("."+profile_type+"-save").show();
         $("."+profile_type+"-cancel").show();
     }
     
     if(action == 'cancel'){
-        $("#"+profile_type+"_div .form-control").attr('readonly',true);
+        $("#"+profile_type+"_div .form-control").attr('readonly',true).css('background-color','#e9ecef');
         $("."+profile_type+"-edit").show();
         $("."+profile_type+"-save").hide();
         $("."+profile_type+"-cancel").hide();
@@ -259,7 +259,7 @@ function editUserProfile(profile_type,action){
                         $("#profileUpdateSuccessMessage").html(msg.message).show();
                         $("#profileUpdateErrorMessage,.invalid-feedback").html('').hide();
                         document.getElementById("profileUpdateSuccessMessage").scrollIntoView();
-                        $("#"+profile_type+"_div .form-control").attr('readonly',true);
+                        $("#"+profile_type+"_div .form-control").attr('readonly',true).css('background-color','#e9ecef');;
                         $("."+profile_type+"-edit").show();
                         $("."+profile_type+"-save").hide();
                         $("."+profile_type+"-cancel").hide();
@@ -319,7 +319,7 @@ $("#profile_image_form").on('submit', function(event){
 function editProfileImage(action){
     if(action == 'edit'){
         $("#edit_image_div").show();
-        $("#profile_image").val('');
+        $("#profile_image").val('').css('background-color','#fff');
         $(".image-edit").hide();
         $(".image-save,.image-cancel").show();
     }
@@ -328,5 +328,6 @@ function editProfileImage(action){
         $("#edit_image_div").hide();
         $(".image-edit").show();
         $(".image-save,.image-cancel").hide();
+        $("#profile_image").val('').css('background-color','#e9ecef');
     }
 }
