@@ -32,9 +32,11 @@ use App\Models\RepresentationAreaList;
 use App\Models\Submissions;
 use App\Models\SubscriberList;
 use App\Models\SubscriberPackage;
+use App\Models\SubscriberReview;
 use App\Models\TeamMembers;
 use App\Models\SubscriberFollowers;
 use App\Models\UserFollowers;
+use App\Models\ReviewOfficial;
 use App\Helpers\CommonHelper;
 use Validator;
 use Illuminate\Validation\Rule;
@@ -199,6 +201,34 @@ class DataApiController extends Controller
             }
             
             $user_data->image_url = (!empty($user_data->image))?url('images/user_images/'.$user_data->image):url('images/default_profile.png');
+            
+            $user_followers_count = UserFollowers::join('users as u', 'u.id', '=', 'user_followers.follower_id')
+            ->where('user_followers.user_id',$user_id)
+            ->where('user_followers.is_deleted',0)
+            ->where('user_followers.status',1)             
+            ->where('u.is_deleted',0)
+            ->where('u.status',1)    
+            ->count();        
+            
+            $user_following_users_count = UserFollowers::join('users as u', 'u.id', '=', 'user_followers.user_id')
+            ->where('user_followers.follower_id',$user_id)
+            ->where('user_followers.is_deleted',0)
+            ->where('user_followers.status',1)             
+            ->where('u.is_deleted',0)
+            ->where('u.status',1)    
+            ->count();        
+            
+            $user_following_subscribers_count = SubscriberFollowers::join('subscriber_list as s', 's.id', '=', 'subscriber_followers.subscriber_id')
+            ->join('users as u', 'u.id', '=', 's.user_id')        
+            ->where('subscriber_followers.user_id',$user_id)
+            ->where('subscriber_followers.is_deleted',0)
+            ->where('subscriber_followers.status',1)             
+            ->where('u.is_deleted',0)
+            ->where('u.status',1)     
+            ->count();
+            
+            $user_data->followers_count = $user_followers_count;
+            $user_data->following_count = $user_following_users_count+$user_following_subscribers_count;
             
             return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'success','message' => 'User Profile Data','user_data'=>$user_data),200);
             
@@ -950,10 +980,12 @@ class DataApiController extends Controller
             $file_name = CommonHelper::uploadImage($request,$request->file('detail_file'),'documents/submission_documents',false);
             
             $subscriber_data = SubscriberList::where('id',trim($data['subscriber_id']))->first();
+            $subscriber_review_data = SubscriberReview::where('subscriber_id',trim($data['subscriber_id']))->where('review_level_id',1)->where('is_deleted',0)->first();
+            $current_review_range = isset($subscriber_review_data->review_range_id)?$subscriber_review_data->review_range_id:null;
             
             $insertArray = ['sub_group_id'=>$subscriber_data->office_belongs_to,'place'=>null,'subscriber_id'=>trim($data['subscriber_id']),'submission_type'=>trim($data['submission_type_id']),
             'purpose'=>trim($data['purpose']),'nature'=>trim($data['nature']),'subject'=>trim($data['subject']),'summary'=>trim($data['summary']),'file'=>$file_name,
-            'user_id'=>trim($data['user_id'])];
+            'user_id'=>trim($data['user_id']),'current_review_range'=>$current_review_range];
             
             $submission = Submissions::create($insertArray);
             
@@ -1145,6 +1177,17 @@ class DataApiController extends Controller
                 return response(array('httpStatus'=>200, "dateTime"=>time(), 'status'=>'fail', 'message'=>'Missing Required Fields', 'errors' => $validator->errors()),200);
             }	
             
+            /*if($data['user_id'] == $data['subscriber_id']){
+                $errors['user_id'] = ['User and Subscriber must be different'];
+                return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'fail','message' => $errors['user_id'], 'errors' =>$errors),200);
+            }*/
+            
+            $user = User::where('id',trim($data['user_id']))->first();
+            if($user->user_role == 2){
+                $errors['user_id'] = ['Subscriber cannot follow Subscribers'];
+                return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'fail','message' => $errors['user_id'], 'errors' =>$errors),200);
+            }
+            
             $follow = SubscriberFollowers::where('subscriber_id',trim($data['subscriber_id']))->where('user_id',trim($data['user_id']))->first();
             
             if(empty($follow)){
@@ -1185,6 +1228,68 @@ class DataApiController extends Controller
         }    
     }
     
+    function addUserFollower(Request $request){
+        try{ 
+            $data = $request->all();
+            $validationRules = array('user_id'=>'required','follower_id'=>'required');
+            $attributes = array('user_id'=>'User','follower_id'=>'Follower');
+            
+            $validator = Validator::make($data,$validationRules,array(),$attributes);
+            if ($validator->fails()){ 
+                return response(array('httpStatus'=>200, "dateTime"=>time(), 'status'=>'fail', 'message'=>'Missing Required Fields', 'errors' => $validator->errors()),200);
+            }	
+            
+            if($data['user_id'] == $data['follower_id']){
+                $errors['user_id'] = ['User and Follower must be different'];
+                return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'fail','message' => $errors['user_id'], 'errors' =>$errors),200);
+            }
+            
+            $user = User::where('id',trim($data['user_id']))->first();
+            if($user->user_role == 2){
+                $errors['user_id'] = ['Subscriber cannot follow Users'];
+                return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'fail','message' => $errors['user_id'], 'errors' =>$errors),200);
+            }
+            
+            $follow = UserFollowers::where('follower_id',trim($data['follower_id']))->where('user_id',trim($data['user_id']))->first();
+            
+            if(empty($follow)){
+                $insertArray = ['follower_id'=>trim($data['follower_id']),'user_id'=>trim($data['user_id'])];
+                $follow = UserFollowers::create($insertArray);
+            }else{
+                $updateArray = ['is_deleted'=>0];
+                UserFollowers::where('id',$follow->id)->update($updateArray);
+            }
+            
+            return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'success','message' => 'User Follower added successfully','follow'=>$follow),200);
+            
+        }catch (\Exception $e){
+            CommonHelper::saveException($e,'STORE',__FUNCTION__,__FILE__);
+            return response(array('httpStatus'=>200,"dateTime"=>time(),'status' => 'fail','error_message'=>$e->getMessage(),'message'=>'Error in Processing Request'),200);
+        }    
+    }
+    
+    function deleteUserFollower(Request $request){
+        try{ 
+            $data = $request->all();
+            $validationRules = array('user_id'=>'required','follower_id'=>'required');
+            $attributes = array('user_id'=>'User','follower_id'=>'Follower');
+            
+            $validator = Validator::make($data,$validationRules,array(),$attributes);
+            if ($validator->fails()){ 
+                return response(array('httpStatus'=>200, "dateTime"=>time(), 'status'=>'fail', 'message'=>'Missing Required Fields', 'errors' => $validator->errors()),200);
+            }	
+            
+            $updateArray = ['is_deleted'=>1];
+            UserFollowers::where('follower_id',trim($data['follower_id']))->where('user_id',trim($data['user_id']))->update($updateArray);
+            
+            return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'success','message' => 'User Follower updated successfully'),200);
+            
+        }catch (\Exception $e){
+            CommonHelper::saveException($e,'STORE',__FUNCTION__,__FILE__);
+            return response(array('httpStatus'=>200,"dateTime"=>time(),'status' => 'fail','error_message'=>$e->getMessage(),'message'=>'Error in Processing Request'),200);
+        }    
+    }
+    
     function getSubscriberData(Request $request,$subscriber_id){
         try{ 
             $data = $request->all();
@@ -1218,6 +1323,16 @@ class DataApiController extends Controller
             
             $subscriber_data->image_url = (!empty($subscriber_data->image))?url('images/user_images/'.$subscriber_data->image):url('images/default_profile.png');
             
+            $subscriber_followers_count = SubscriberFollowers::join('users as u', 'u.id', '=', 'subscriber_followers.user_id')
+            ->where('subscriber_followers.subscriber_id',$subscriber_id)
+            ->where('subscriber_followers.is_deleted',0)
+            ->where('subscriber_followers.status',1)             
+            ->where('u.is_deleted',0)
+            ->where('u.status',1)    
+            ->count();        
+            
+            $subscriber_data->followers_count = $subscriber_followers_count;
+            
             return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'success','message' => 'Subscriber Data','subscriber_data'=>$subscriber_data),200);
             
         }catch (\Exception $e){
@@ -1231,13 +1346,28 @@ class DataApiController extends Controller
             $data = $request->all();
             
             $subscriber_followers = SubscriberFollowers::join('users as u', 'u.id', '=', 'subscriber_followers.user_id')
+            ->leftJoin('country_list as cl',function($join){$join->on('cl.id','=','u.country')->where('cl.is_deleted','=','0')->where('cl.status','=','1');})                
+            ->leftJoin('state_list as sl',function($join){$join->on('sl.id','=','u.state')->where('sl.is_deleted','=','0')->where('sl.status','=','1');})
+            ->leftJoin('district_list as dl',function($join){$join->on('dl.id','=','u.district')->where('dl.is_deleted','=','0')->where('dl.status','=','1');})           
             ->where('subscriber_followers.subscriber_id',$subscriber_id)
             ->where('subscriber_followers.is_deleted',0)
             ->where('subscriber_followers.status',1)             
             ->where('u.is_deleted',0)
             ->where('u.status',1)     
-            ->select('subscriber_followers.subscriber_id','subscriber_followers.user_id as follower_id','u.name','u.email')        
+            ->select('subscriber_followers.subscriber_id','subscriber_followers.user_id as follower_id','u.name','u.email','u.image','u.user_name','dl.district_name','sl.state_name','cl.country_name')        
             ->get()->toArray();
+            
+            for($i=0;$i<count($subscriber_followers);$i++){
+                $subscriber_followers[$i]['image_url'] = (!empty($subscriber_followers[$i]['image']))?url('images/user_images/'.$subscriber_followers[$i]['image']):url('images/default_profile.png');
+            }
+            
+            if(isset($data['user_id']) && !empty($data['user_id'])){
+                $following = UserFollowers::where('follower_id',trim($data['user_id']))->where('is_deleted',0)->where('status',1)->select('user_id')->get()->toArray();
+                $user_ids = array_column($following,'user_id');
+                for($i=0;$i<count($subscriber_followers);$i++){
+                    $subscriber_followers[$i]['following'] = (in_array($subscriber_followers[$i]['follower_id'], $user_ids))?1:0;
+                }
+            }
             
             return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'success','message' => 'Subscriber Followers','subscriber_followers'=>$subscriber_followers),200);
             
@@ -1252,34 +1382,105 @@ class DataApiController extends Controller
             $data = $request->all();
             
             $user_followers = UserFollowers::join('users as u', 'u.id', '=', 'user_followers.follower_id')
+            ->leftJoin('country_list as cl',function($join){$join->on('cl.id','=','u.country')->where('cl.is_deleted','=','0')->where('cl.status','=','1');})                
+            ->leftJoin('state_list as sl',function($join){$join->on('sl.id','=','u.state')->where('sl.is_deleted','=','0')->where('sl.status','=','1');})
+            ->leftJoin('district_list as dl',function($join){$join->on('dl.id','=','u.district')->where('dl.is_deleted','=','0')->where('dl.status','=','1');})        
             ->where('user_followers.user_id',$user_id)
             ->where('user_followers.is_deleted',0)
             ->where('user_followers.status',1)             
             ->where('u.is_deleted',0)
             ->where('u.status',1)     
-            ->select('user_followers.user_id','user_followers.follower_id','u.name','u.email')        
+            ->select('user_followers.user_id','user_followers.follower_id','u.name','u.email','u.image','u.user_name','dl.district_name','sl.state_name','cl.country_name')        
             ->get()->toArray();
             
+            for($i=0;$i<count($user_followers);$i++){
+                $user_followers[$i]['image_url'] = (!empty($user_followers[$i]['image']))?url('images/user_images/'.$user_followers[$i]['image']):url('images/default_profile.png');
+            }
+            
+            if(isset($data['user_id']) && !empty($data['user_id'])){
+                // list of users to which user_id is following
+                $following = UserFollowers::where('follower_id',trim($data['user_id']))->where('is_deleted',0)->where('status',1)->select('user_id')->get()->toArray();
+                $user_ids = array_column($following,'user_id');
+                for($i=0;$i<count($user_followers);$i++){
+                    $user_followers[$i]['following'] = (in_array($user_followers[$i]['follower_id'], $user_ids))?1:0;
+                }
+            }
+            
             $user_following_users = UserFollowers::join('users as u', 'u.id', '=', 'user_followers.user_id')
+            ->leftJoin('country_list as cl',function($join){$join->on('cl.id','=','u.country')->where('cl.is_deleted','=','0')->where('cl.status','=','1');})                
+            ->leftJoin('state_list as sl',function($join){$join->on('sl.id','=','u.state')->where('sl.is_deleted','=','0')->where('sl.status','=','1');})
+            ->leftJoin('district_list as dl',function($join){$join->on('dl.id','=','u.district')->where('dl.is_deleted','=','0')->where('dl.status','=','1');})        
             ->where('user_followers.follower_id',$user_id)
             ->where('user_followers.is_deleted',0)
             ->where('user_followers.status',1)             
             ->where('u.is_deleted',0)
             ->where('u.status',1)     
-            ->select('user_followers.user_id','user_followers.follower_id','u.name','u.email')        
+            ->select('user_followers.user_id','user_followers.follower_id','u.name','u.email','u.image','u.user_name','dl.district_name','sl.state_name','cl.country_name')        
             ->get()->toArray();
             
-            /*$user_following_subscribers = SubscriberFollowers::join('users as u', 'u.id', '=', 'subscriber_followers.subscriber_id')
-            ->join('users as u1', 'u1.id', '=', 'u.id')        
+            for($i=0;$i<count($user_following_users);$i++){
+                $user_following_users[$i]['image_url'] = (!empty($user_following_users[$i]['image']))?url('images/user_images/'.$user_following_users[$i]['image']):url('images/default_profile.png');
+            }
+            
+            if(isset($data['user_id']) && !empty($data['user_id'])){
+                // list of users to which user_id is following
+                $following = UserFollowers::where('follower_id',trim($data['user_id']))->where('is_deleted',0)->where('status',1)->select('user_id')->get()->toArray();
+                $user_ids = array_column($following,'user_id');
+                for($i=0;$i<count($user_following_users);$i++){
+                    $user_following_users[$i]['following'] = (in_array($user_following_users[$i]['user_id'], $user_ids))?1:0;
+                }
+            }
+            
+            $user_following_subscribers = SubscriberFollowers::join('subscriber_list as s', 's.id', '=', 'subscriber_followers.subscriber_id')
+            ->join('users as u', 'u.id', '=', 's.user_id')        
+            ->leftJoin('country_list as cl',function($join){$join->on('cl.id','=','u.country')->where('cl.is_deleted','=','0')->where('cl.status','=','1');})                
+            ->leftJoin('state_list as sl',function($join){$join->on('sl.id','=','u.state')->where('sl.is_deleted','=','0')->where('sl.status','=','1');})
+            ->leftJoin('district_list as dl',function($join){$join->on('dl.id','=','u.district')->where('dl.is_deleted','=','0')->where('dl.status','=','1');})        
+            //->join('users as u1', 'u1.id', '=', 'u.id')        
             ->where('subscriber_followers.user_id',$user_id)
             ->where('subscriber_followers.is_deleted',0)
             ->where('subscriber_followers.status',1)             
             ->where('u.is_deleted',0)
             ->where('u.status',1)     
-            ->select('subscriber_followers.subscriber_id','subscriber_followers.user_id as follower_id','u.name','u.email')        
-            ->get()->toArray();*/
+            ->select('subscriber_followers.subscriber_id','subscriber_followers.user_id','u.name','u.email','u.image','u.user_name','dl.district_name','sl.state_name','cl.country_name')        
+            ->get()->toArray();
             
-            return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'success','message' => 'User Followers','user_followers'=>$user_followers),200);
+            for($i=0;$i<count($user_following_subscribers);$i++){
+                $user_following_subscribers[$i]['image_url'] = (!empty($user_following_subscribers[$i]['image']))?url('images/user_images/'.$user_following_subscribers[$i]['image']):url('images/default_profile.png');
+            }
+            
+            if(isset($data['user_id']) && !empty($data['user_id'])){
+                // list of subscribers to which user_id is following
+                $following = SubscriberFollowers::where('user_id',trim($data['user_id']))->where('is_deleted',0)->where('status',1)->select('subscriber_id')->get()->toArray();
+                $subscriber_ids = array_column($following,'subscriber_id');
+                for($i=0;$i<count($user_following_subscribers);$i++){
+                    $user_following_subscribers[$i]['following'] = (in_array($user_following_subscribers[$i]['subscriber_id'], $subscriber_ids))?1:0;
+                }
+            }
+            
+            return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'success','message' => 'User Followers','user_followers'=>$user_followers,'user_following_users'=>$user_following_users,'user_following_subscribers'=>$user_following_subscribers),200);
+            
+        }catch (\Exception $e){
+            CommonHelper::saveException($e,'STORE',__FUNCTION__,__FILE__);
+            return response(array('httpStatus'=>200,"dateTime"=>time(),'status' => 'fail','error_message'=>$e->getMessage(),'message'=>'Error in Processing Request'),200);
+        }    
+    }
+    
+    function getReviewerSubmissionsList(Request $request,$user_id){
+        try{ 
+            $data = $request->all();
+            $review_official_data =  ReviewOfficial::where('user_id',$user_id)->where('is_deleted',0)->first();
+            $subscriber_review_data = SubscriberReview::where('id',$review_official_data->subscriber_review_id)->where('is_deleted',0)->first();
+            $review_range_id = $subscriber_review_data->review_range_id;
+            
+            $submissions = Submissions::where('subscriber_id',$review_official_data->subscriber_id)
+            ->where('current_review_range',$review_range_id)
+            ->wherein('submission_status',['pending','forwarded','closed'])        
+            ->where('is_deleted',0)
+            ->where('status',1)       
+            ->get()->toArray();        
+            
+            return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'success','message' => 'Subscriber Followers','subscriber_followers'=>''),200);
             
         }catch (\Exception $e){
             CommonHelper::saveException($e,'STORE',__FUNCTION__,__FILE__);

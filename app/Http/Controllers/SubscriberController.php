@@ -1122,4 +1122,26 @@ class SubscriberController extends Controller
             return view('front/page_error',array('message' =>$e->getMessage().', '.$e->getLine()));
         }
     }
+    
+    public function listSubscriberFollowers(Request $request,$subscriber_id){
+        try{
+            $data = $request->all();
+            $user = Auth::user();
+            
+            $headers = CommonHelper::getAPIHeaders();
+            $query_string = 'user_id='.$user->id.'&'.$_SERVER['QUERY_STRING'];
+            $url = url('/api/subscriber/followers/'.$subscriber_id.'?'.$query_string);
+            
+            $response = CommonHelper::processCURLRequest($url,'','','',$headers);//print_r($response);
+            $response = json_decode($response,true);
+            $subscriber_followers = isset($response['subscriber_followers'])?$response['subscriber_followers']:[];
+            
+            $params = ['title'=>'View Subscriber Followers','subscriber_followers'=>$subscriber_followers];
+            
+            return view('front/subscriber/subscriber_followers_list',$params);
+            
+        }catch (\Exception $e){
+            return view('front/page_error',array('message' =>$e->getMessage().', '.$e->getLine()));
+        }
+    }
 }

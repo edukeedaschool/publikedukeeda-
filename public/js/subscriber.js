@@ -630,7 +630,7 @@ function followUnfollowSubscriber(elem,subscriber_id){
         success:function(msg){
             if(objectPropertyExists(msg,'status')){
                 if(msg.status == 'fail'){
-                    var errors = getResponseErrors(msg,'<br/>','error_validation_');
+                    var errors = getResponseErrors(msg,'<br/>','');
                     if(errors != ''){
                         $("#followErrorMessage").html(errors).show();
                     } 

@@ -54,6 +54,8 @@ Route::group(['middleware' => ['data_api']], function () {
     Route::get('/subscriber/data/{subscriberId}', [App\Http\Controllers\DataApiController::class, 'getSubscriberData'])->name('getsubscriberdata');
     Route::post('/subscriber/follow', [App\Http\Controllers\DataApiController::class, 'addSubscriberFollower'])->name('addsubscriberfollower');
     Route::post('/subscriber/unfollow', [App\Http\Controllers\DataApiController::class, 'deleteSubscriberFollower'])->name('deletesubscriberfollower');
+    Route::post('/user/follow', [App\Http\Controllers\DataApiController::class, 'addUserFollower'])->name('adduserfollower');
+    Route::post('/user/unfollow', [App\Http\Controllers\DataApiController::class, 'deleteUserFollower'])->name('deleteuserfollower');
     Route::get('/subscriber/followers/{subscriberId}', [App\Http\Controllers\DataApiController::class, 'getSubscriberFollowers'])->name('getsubscriberfollowers');
     Route::get('/user/followers/{userId}', [App\Http\Controllers\DataApiController::class, 'getUserFollowers'])->name('getuserfollowers');
     
@@ -61,6 +63,7 @@ Route::group(['middleware' => ['data_api']], function () {
     Route::post('/change-password', [App\Http\Controllers\DataApiController::class, 'changePassword'])->name('changepassword');
     Route::get('/profile/data/{userId}', [App\Http\Controllers\DataApiController::class, 'getProfileData'])->name('getprofiledata');
     Route::post('/profile/update', [App\Http\Controllers\DataApiController::class, 'updateProfileData'])->name('updateprofiledata');
+    Route::get('/reviewer/submissions/list/{userId}', [App\Http\Controllers\DataApiController::class, 'getReviewerSubmissionsList'])->name('getreviewersubmissionslist');
 });
 
 Route::post('/profile/update-image', [App\Http\Controllers\DataApiController::class, 'updateProfileImage'])->name('updateprofileimage');

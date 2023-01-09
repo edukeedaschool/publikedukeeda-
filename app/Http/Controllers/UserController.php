@@ -490,7 +490,6 @@ class UserController extends Controller
     public function getUserData(Request $request,$email){
         try{
             $data = $request->all();
-            
             $user_data = User::where('email',$email)->first();   
            
             return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'success','message' => 'User Data','user_data'=>$user_data),200);
@@ -499,6 +498,87 @@ class UserController extends Controller
             \DB::rollBack();
             return response(array("httpStatus"=>500,"dateTime"=>time(),'status' => 'fail','message' =>$e->getMessage()),500);
         }  
+    }
+    
+    public function listUserFollowers(Request $request,$user_id){
+        try{
+            $data = $request->all();
+            $user = Auth::user();
+            
+            $headers = CommonHelper::getAPIHeaders();
+            $query_string = 'user_id='.$user->id.'&'.$_SERVER['QUERY_STRING'];
+            $url = url('/api/user/followers/'.$user_id.'?'.$query_string);
+            
+            $response = CommonHelper::processCURLRequest($url,'','','',$headers);//print_r($response);
+            $response = json_decode($response,true);
+            
+            $user_followers = isset($response['user_followers'])?$response['user_followers']:[];
+            $user_following_users = isset($response['user_following_users'])?$response['user_following_users']:[];
+            $user_following_subscribers = isset($response['user_following_subscribers'])?$response['user_following_subscribers']:[];
+            
+            $params = ['title'=>'View User Followers','user_followers'=>$user_followers,'user_following_users'=>$user_following_users,'user_following_subscribers'=>$user_following_subscribers];
+            
+            return view('front/user/user_followers_list',$params);
+            
+        }catch (\Exception $e){
+            return view('front/page_error',array('message' =>$e->getMessage().', '.$e->getLine()));
+        }
+    }
+    
+    function addUserFollower(Request $request){
+        try{ 
+            $data = $request->all();
+            $user = Auth::user();
+            $validationRules = array('user_id'=>'required');
+            $attributes = array('user_id'=>'User');
+            
+            $validator = Validator::make($data,$validationRules,array(),$attributes);
+            if ($validator->fails()){ 
+                return response(array('httpStatus'=>200, "dateTime"=>time(), 'status'=>'fail', 'message'=>'Missing Required Fields', 'errors' => $validator->errors()),200);
+            }	
+            
+            $post_data = $data; 
+            $post_data['follower_id'] = $user->id;
+            
+            $headers = CommonHelper::getAPIHeaders();
+            $url = url('/api/user/follow');
+            $response = CommonHelper::processCURLRequest($url,json_encode($post_data),'','',$headers);
+            $response = json_decode($response,true);
+            
+            return $response;
+            
+        }catch (\Exception $e){
+            CommonHelper::saveException($e,'STORE',__FUNCTION__,__FILE__);
+            return response(array('httpStatus'=>200,"dateTime"=>time(),'status' => 'fail','error_message'=>$e->getMessage(),'message'=>'Error in Processing Request'),200);
+        }    
+    }
+    
+    function deleteUserFollower(Request $request){
+        try{ 
+            $data = $request->all();
+            $user = Auth::user();
+            $validationRules = array('user_id'=>'required');
+            $attributes = array('user_id'=>'User');
+            
+            $validator = Validator::make($data,$validationRules,array(),$attributes);
+            if ($validator->fails()){ 
+                return response(array('httpStatus'=>200, "dateTime"=>time(), 'status'=>'fail', 'message'=>'Missing Required Fields', 'errors' => $validator->errors()),200);
+            }	
+            
+            $post_data = $data; 
+            $post_data['follower_id'] = $user->id;
+            
+            $headers = CommonHelper::getAPIHeaders();
+            $url = url('/api/user/unfollow');
+            $response = CommonHelper::processCURLRequest($url,json_encode($post_data),'','',$headers);
+            $response = json_decode($response,true);
+            
+            return $response;
+            
+        }catch (\Exception $e){
+            CommonHelper::saveException($e,'STORE',__FUNCTION__,__FILE__);
+            return response(array('httpStatus'=>200,"dateTime"=>time(),'status' => 'fail','error_message'=>$e->getMessage(),'message'=>'Error in Processing Request'),200);
+        }    
     }
     
 }

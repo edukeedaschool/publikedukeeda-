@@ -16,9 +16,8 @@
               </ul>
               <hr>
               <ul class="mt-4 following text-left">
-                <li><a href="" class="foBtn">Follow</a></li>
-                <li><a href="">Following 15</a></li>
-                <li><a href="">Followers 250</a></li>
+                <li><a href="#" class="foBtn">Follow</a></li>
+                <li><a href="{{url('subscriber/followers/'.$subscriber_data['subscriber_id'])}}">Followers: {{$subscriber_data['followers_count']}}</a></li>
               </ul>
 
             </div>

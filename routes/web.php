@@ -258,11 +258,15 @@ Route::group(['middleware' => ['auth']], function () {
     Route::post('/subscriber/follow', [App\Http\Controllers\SubscriberController::class, 'addSubscriberFollower'])->name('addsubscriberfollower');
     Route::post('/subscriber/unfollow', [App\Http\Controllers\SubscriberController::class, 'deleteSubscriberFollower'])->name('deletesubscriberfollower');
     
+    Route::post('/user/follow', [App\Http\Controllers\UserController::class, 'addUserFollower'])->name('adduserfollower');
+    Route::post('/user/unfollow', [App\Http\Controllers\UserController::class, 'deleteUserFollower'])->name('deleteuserfollower');
+    
     Route::get('/user/profile/view/{userId}', [App\Http\Controllers\UserController::class, 'viewProfile'])->name('viewprofile');
     Route::get('/subscriber/profile/view/{subscriberId}', [App\Http\Controllers\SubscriberController::class, 'viewSubscriberProfile'])->name('viewsubscriberprofile');
     
     Route::get('/subscriber/followers/{subscriberId}', [App\Http\Controllers\SubscriberController::class, 'listSubscriberFollowers'])->name('listsubscriberfollowers');
     Route::get('/user/followers/{userId}', [App\Http\Controllers\UserController::class, 'listUserFollowers'])->name('listuserfollowers');
+    Route::get('/reviewer/submissions/list', [App\Http\Controllers\SubmissionController::class, 'reviewerSubmissionsList'])->name('reviewersubmissionslist');
 });
 
 Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
