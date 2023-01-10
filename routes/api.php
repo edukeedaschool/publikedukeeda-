@@ -63,7 +63,8 @@ Route::group(['middleware' => ['data_api']], function () {
     Route::post('/change-password', [App\Http\Controllers\DataApiController::class, 'changePassword'])->name('changepassword');
     Route::get('/profile/data/{userId}', [App\Http\Controllers\DataApiController::class, 'getProfileData'])->name('getprofiledata');
     Route::post('/profile/update', [App\Http\Controllers\DataApiController::class, 'updateProfileData'])->name('updateprofiledata');
-    Route::get('/reviewer/submissions/list/{userId}', [App\Http\Controllers\DataApiController::class, 'getReviewerSubmissionsList'])->name('getreviewersubmissionslist');
+    Route::get('/reviewer/submissions/list/{reviewerId}', [App\Http\Controllers\DataApiController::class, 'getReviewerSubmissionsList'])->name('getreviewersubmissionslist');
+    Route::get('/submissions/list', [App\Http\Controllers\DataApiController::class, 'getSubmissionsList'])->name('getsubmissionslist');
 });
 
 Route::post('/profile/update-image', [App\Http\Controllers\DataApiController::class, 'updateProfileImage'])->name('updateprofileimage');

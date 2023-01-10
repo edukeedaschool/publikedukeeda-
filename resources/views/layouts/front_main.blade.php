@@ -63,7 +63,11 @@
                 @for($i=0;$i<count($user_teams);$i++)
                     <li><a href="{{url('team/members/'.$user_teams[$i]['subscriber_id'])}}"><i class="fas fa-users"></i> Team {{$user_teams[$i]['subscriber_name']}}</a></li>
                 @endfor    
-                <li><a href="javascript:;"><i class="fas fa-star"></i> Submissions for review</a></li>
+                
+                @if($user_data->user_role == 5)
+                    <li><a href="{{url('reviewer/submissions/list')}}"><i class="fas fa-star"></i> Submissions for review</a></li>
+                @endif
+                
                 <li><a href="{{url('groups/list')}}"><i class="fas fa-search"></i> Search Group</a></li>
                 @if(isset($user_data->id) && !empty($user_data->id) )
                     @if($user_data->user_role == 1)

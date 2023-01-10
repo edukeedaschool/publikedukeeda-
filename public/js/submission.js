@@ -161,3 +161,36 @@ function submitAddSubmissionConfirm(){
         }
     });
 }
+
+function submitSubmissionAction(){
+    $("#submissionActionErrorMessage,#submissionActionSuccessMessage,.invalid-feedback").html('').hide();
+    
+    var form_data = $("#submissionActionForm").serialize();
+    ajaxSetup();
+
+    $.ajax({
+        url:ROOT_PATH+"/submission/status/update",
+        method:"POST",
+        data:form_data,
+        success:function(msg){
+            if(objectPropertyExists(msg,'status')){
+                if(msg.status == 'fail'){
+                    var errors = getResponseErrors(msg,'<br/>','error_validation_');
+                    if(errors != ''){
+                        $("#submissionActionErrorMessage").html(errors).show();
+                    } 
+                }else{ 
+                    $("#submissionActionSuccessMessage").html(msg.message).show();
+                    $("#submissionActionErrorMessage,.invalid-feedback").html('').hide();
+                    
+                    var url = ROOT_PATH+"/";
+                    setTimeout(function(){  window.location.href = url; }, 1000);
+                }
+            }else{
+                displayResponseError(msg,'submissionActionErrorMessage');
+            }
+        },error:function(obj,status,error){
+            $("#submissionActionErrorMessage").html('Error in processing request').show();
+        }
+    });
+}

@@ -540,4 +540,9 @@ class CommonHelper
     public static function getSubscriberData($user_id){
         return SubscriberList::where('user_id',$user_id)->where('is_deleted',0)->first();
     }
+    
+    public static function getSubmissionStatusName($status){
+        $status_list = ['under_review'=>'Under Review','under_review_forwarded'=>'Review Forwarded','review_completed'=>'Review Completed','closed'=>'Closed'];
+        return isset($status_list[$status])?$status_list[$status]:'';
+    }
 }

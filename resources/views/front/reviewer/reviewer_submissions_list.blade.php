@@ -3,22 +3,23 @@
 @section('content')
 <div class="mainCenter">
     <div class="comtBox">
-        <div class="d-flex align-items-center">
-            <figure><img src="{{url('images/user.jpg')}}" class="img-fluid"></figure>
-            <textarea name="" id="" cols="30" rows="10">Want to connect & submit suggestion/request?</textarea>
-        </div>
-        @if($user->user_role == 3)
-            <a href="{{url('submission/subscriber/add')}}">Click Here</a>
-        @endif
+      <div class="d-flex align-items-center">
+        
+      </div>
+      
     </div>
     <div class="socialFeed">
       <ul class="nav nav-fill navtop">
         <li class="nav-item">
-          <a class="nav-link active" href="#openSub" data-toggle="tab">Open Submissions</a>
+          <a class="nav-link active" href="#openSub" data-toggle="tab">Pending</a>
         </li>
         <li>/</li>
         <li class="nav-item">
-          <a class="nav-link" href="#yourSub" data-toggle="tab">Your Submissions</a>
+          <a class="nav-link" href="#yourSub" data-toggle="tab">Forward</a>
+        </li>
+        <li>/</li>
+        <li class="nav-item">
+          <a class="nav-link" href="#yourSub" data-toggle="tab">Closed</a>
         </li>
       </ul>
       <hr>

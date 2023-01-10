@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
+use App\Helpers\CommonHelper;
 
 class HomeController extends Controller
 {
@@ -43,7 +44,14 @@ class HomeController extends Controller
                 return redirect('user/login');
             }
             
-            return view('home',array('user'=>$user,'title'=>'Home Page'));
+            $headers = CommonHelper::getAPIHeaders();
+            $url = url('/api/submissions/list');
+            $response = CommonHelper::processCURLRequest($url,'','','',$headers);//print_r($response);
+            $response = json_decode($response,true);
+            
+            $submissions = isset($response['submissions'])?$response['submissions']:[];
+            
+            return view('home',array('user'=>$user,'title'=>'Home Page','submissions'=>$submissions));
          
         }catch (\Exception $e){
             return view('admin/page_error',array('message' =>$e->getMessage()));

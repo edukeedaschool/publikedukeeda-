@@ -267,6 +267,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('/subscriber/followers/{subscriberId}', [App\Http\Controllers\SubscriberController::class, 'listSubscriberFollowers'])->name('listsubscriberfollowers');
     Route::get('/user/followers/{userId}', [App\Http\Controllers\UserController::class, 'listUserFollowers'])->name('listuserfollowers');
     Route::get('/reviewer/submissions/list', [App\Http\Controllers\SubmissionController::class, 'reviewerSubmissionsList'])->name('reviewersubmissionslist');
+    Route::get('/submission/detail/{submissionId}', [App\Http\Controllers\SubmissionController::class, 'viewSubmissionDetail'])->name('viewsubmissiondetail');
 });
 
 Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('home');

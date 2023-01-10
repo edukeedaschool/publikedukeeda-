@@ -37,6 +37,7 @@ use App\Models\TeamMembers;
 use App\Models\SubscriberFollowers;
 use App\Models\UserFollowers;
 use App\Models\ReviewOfficial;
+use App\Models\SubmissionForwardComments;
 use App\Helpers\CommonHelper;
 use Validator;
 use Illuminate\Validation\Rule;
@@ -74,7 +75,7 @@ class DataApiController extends Controller
             
             if(Auth::attempt(['email' =>$data['email'], 'password' =>$data['password'],'status'=>1,'is_deleted'=>0])) {
                 // Fetch user details from email
-                $user_data = User::where('email',trim($data['email']))->wherein('user_role',[1,2,3,4])->where('is_deleted',0)->where('status',1)->select('id','name','api_token','api_token_created_at','email','user_name','user_role')->first();
+                $user_data = User::where('email',trim($data['email']))->wherein('user_role',[1,2,3,4,5])->where('is_deleted',0)->where('status',1)->select('id','name','api_token','api_token_created_at','email','user_name','user_role')->first();
                 
                 if($user_data->user_role == 4){
                     if(!empty($user_data->api_token) && (time()-strtotime($user_data->api_token_created_at))/3600 <= 240){
@@ -1043,7 +1044,7 @@ class DataApiController extends Controller
             
             $submission_id = trim($data['submission_id']);
             
-            $updateArray = ['submission_status'=>'completed'];
+            $updateArray = ['submission_date'=>date('Y/m/d H:i:s')];
             
             $submission = Submissions::where('id',$submission_id)->update($updateArray);
             
@@ -1466,21 +1467,58 @@ class DataApiController extends Controller
         }    
     }
     
-    function getReviewerSubmissionsList(Request $request,$user_id){
+    function getReviewerSubmissionsList(Request $request,$reviewer_id){
         try{ 
             $data = $request->all();
-            $review_official_data =  ReviewOfficial::where('user_id',$user_id)->where('is_deleted',0)->first();
+            $review_official_data = ReviewOfficial::where('id',$reviewer_id)->where('is_deleted',0)->first(); //ReviewOfficial::where('user_id',$user_id)->where('is_deleted',0)->first();
             $subscriber_review_data = SubscriberReview::where('id',$review_official_data->subscriber_review_id)->where('is_deleted',0)->first();
             $review_range_id = $subscriber_review_data->review_range_id;
             
-            $submissions = Submissions::where('subscriber_id',$review_official_data->subscriber_id)
-            ->where('current_review_range',$review_range_id)
-            ->wherein('submission_status',['pending','forwarded','closed'])        
-            ->where('is_deleted',0)
-            ->where('status',1)       
+            $submissions = Submissions::join('users as u', 'u.id', '=', 'submissions.user_id')        
+            ->where('submissions.subscriber_id',$review_official_data->subscriber_id)
+            ->where('submissions.current_review_range',$review_range_id)
+            ->wherein('submissions.submission_status',['under_review','under_review_forwarded'])        
+            ->where('submissions.is_deleted',0)
+            ->where('submissions.status',1)       
+            ->select('submissions.*','u.name','u.image as user_profile_image','u.user_name')           
+            ->orderBy('submissions.id','DESC')        
             ->get()->toArray();        
             
-            return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'success','message' => 'Subscriber Followers','subscriber_followers'=>''),200);
+            for($i=0;$i<count($submissions);$i++){
+                $submissions[$i]['user_profile_image_url'] = (!empty($submissions[$i]['user_profile_image']))?url('images/user_images/'.$submissions[$i]['user_profile_image']):url('images/default_profile.png');
+                $submissions[$i]['file_url'] = (!empty($submissions[$i]['file']))?url('documents/submission_documents/'.$submissions[$i]['file']):'';
+                $submissions[$i]['submission_status_name'] = CommonHelper::getSubmissionStatusName($submissions[$i]['submission_status']);
+            }
+            
+            return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'success','message' => 'Submissions List','submissions'=>$submissions),200);
+            
+        }catch (\Exception $e){
+            CommonHelper::saveException($e,'STORE',__FUNCTION__,__FILE__);
+            return response(array('httpStatus'=>200,"dateTime"=>time(),'status' => 'fail','error_message'=>$e->getMessage(),'message'=>'Error in Processing Request'),200);
+        }    
+    }
+    
+    function getSubmissionsList(Request $request){
+        try{ 
+            $data = $request->all();
+            
+            $submissions = Submissions::join('users as u', 'u.id', '=', 'submissions.user_id')        
+            //->where('submissions.subscriber_id',$review_official_data->subscriber_id)
+            //->where('submissions.current_review_range',$review_range_id)
+            //->wherein('submissions.submission_status',['under_review','under_review_forwarded','closed','completed'])        
+            ->where('submissions.is_deleted',0)
+            ->where('submissions.status',1)       
+            ->select('submissions.*','u.name','u.image as user_profile_image','u.user_name')           
+            ->orderBy('submissions.id','DESC')        
+            ->get()->toArray();        
+            
+            for($i=0;$i<count($submissions);$i++){
+                $submissions[$i]['user_profile_image_url'] = (!empty($submissions[$i]['user_profile_image']))?url('images/user_images/'.$submissions[$i]['user_profile_image']):url('images/default_profile.png');
+                $submissions[$i]['file_url'] = (!empty($submissions[$i]['file']))?url('documents/submission_documents/'.$submissions[$i]['file']):'';
+                $submissions[$i]['submission_status_name'] = CommonHelper::getSubmissionStatusName($submissions[$i]['submission_status']);
+            }
+            
+            return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'success','message' => 'Submissions List','submissions'=>$submissions),200);
             
         }catch (\Exception $e){
             CommonHelper::saveException($e,'STORE',__FUNCTION__,__FILE__);

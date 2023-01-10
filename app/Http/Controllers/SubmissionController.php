@@ -208,5 +208,43 @@ class SubmissionController extends Controller
             return response(array("httpStatus"=>500,"dateTime"=>time(),'status' => 'fail','message' =>$e->getMessage()),500);
         }
     }
+    
+    public function reviewerSubmissionsList(Request $request){
+        try{
+            $data = $request->all();
+            $user = Auth::user();
+            
+            $headers = CommonHelper::getAPIHeaders();
+            $url = url('/api/reviewer/submissions/list/'.$user->reviewer_id);
+            $response = CommonHelper::processCURLRequest($url,'','','',$headers);//print_r($response);
+            $response = json_decode($response,true);
+            
+            $submissions = isset($response['submissions'])?$response['submissions']:[];
+            
+            return view('front/reviewer/reviewer_submissions_list',array('user'=>$user,'title'=>'Reviewer Submissions','submissions'=>$submissions));
+         
+        }catch (\Exception $e){
+            return view('admin/page_error',array('message' =>$e->getMessage()));
+        }
+    }
+    
+    public function viewSubmissionDetail(Request $request,$submission_id){
+        try{
+            $data = $request->all();
+            $user = Auth::user();
+            
+            $headers = CommonHelper::getAPIHeaders();
+            $url = url('/api/submission/data/'.$submission_id);
+            $response = CommonHelper::processCURLRequest($url,'','','',$headers);//print_r($response);
+            $response = json_decode($response,true);
+            
+            $submission_data = isset($response['submission_data'])?$response['submission_data']:[];
+            
+            return view('front/submission/view_submission_detail',array('user'=>$user,'title'=>'Submission Detail','submission_data'=>$submission_data));
+         
+        }catch (\Exception $e){
+            return view('admin/page_error',array('message' =>$e->getMessage()));
+        }
+    }
 
 }

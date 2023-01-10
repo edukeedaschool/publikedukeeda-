@@ -774,7 +774,7 @@ class SubscriberController extends Controller
             
             if(empty($user_data)){
                 $insertArray = array('name'=>trim($data['officialName']),'email'=>trim($data['emailAddress']),'mobile_no'=>trim($data['mobileNumber']),'gender'=>trim($data['gender']),
-                'dob'=>trim($data['DOB']),'user_role'=>3,'password'=>Hash::make('12345678'),'user_name'=>trim($data['user_Name']),'official_name'=>trim($data['officialName']));
+                'dob'=>trim($data['DOB']),'user_role'=>5,'password'=>Hash::make('12345678'),'user_name'=>trim($data['user_Name']),'official_name'=>trim($data['officialName']));
                 
                 $user_exists = User::where('email',trim($data['emailAddress']))->where('is_deleted',0)->first();
                 if(!empty($user_exists)){
@@ -794,9 +794,9 @@ class SubscriberController extends Controller
                 return response(array('httpStatus'=>200, "dateTime"=>time(), 'status'=>'fail', 'message'=>'User already added as Review Official', 'errors' => 'User already added as Review Official'));
             }
             
-            if($user_data->user_role != 3){
+            /*if($user_data->user_role != 3){
                 return response(array('httpStatus'=>200, "dateTime"=>time(), 'status'=>'fail', 'message'=>'User Type is not General User', 'errors' => 'User Type is not General User'));
-            }
+            }*/
             
             $insertArray = array('user_id'=>$user_data->id,'subscriber_review_id'=>trim($data['subscriber_review_id']),'subscriber_id'=>$subscriber_data->id,'status'=>$data['reviewOfficialStatus']);
             
@@ -808,6 +808,9 @@ class SubscriberController extends Controller
             }
             
             $reviewOfficial = ReviewOfficial::create($insertArray);
+            
+            $updateArray = ['reviewer_id'=>$reviewOfficial->id];
+            User::where('id',$user_data->id)->update($updateArray);
           
             return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'success','message' => 'Review Official added successfully'),200);
             
