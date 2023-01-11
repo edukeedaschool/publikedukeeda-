@@ -58,6 +58,9 @@ Route::group(['middleware' => ['data_api']], function () {
     Route::post('/user/unfollow', [App\Http\Controllers\DataApiController::class, 'deleteUserFollower'])->name('deleteuserfollower');
     Route::get('/subscriber/followers/{subscriberId}', [App\Http\Controllers\DataApiController::class, 'getSubscriberFollowers'])->name('getsubscriberfollowers');
     Route::get('/user/followers/{userId}', [App\Http\Controllers\DataApiController::class, 'getUserFollowers'])->name('getuserfollowers');
+    Route::post('/submission/status/update', [App\Http\Controllers\DataApiController::class, 'updateSubmissionStatus'])->name('updatesubmissionstatus');
+    Route::post('/user/message/add', [App\Http\Controllers\DataApiController::class, 'addUserMessage'])->name('addusermessage');
+    Route::get('/user/message/list/{userId}', [App\Http\Controllers\DataApiController::class, 'getUserMessageList'])->name('getusermessagelist');
     
     Route::post('/signup', [App\Http\Controllers\DataApiController::class, 'signup'])->name('signup');
     Route::post('/change-password', [App\Http\Controllers\DataApiController::class, 'changePassword'])->name('changepassword');
@@ -65,6 +68,9 @@ Route::group(['middleware' => ['data_api']], function () {
     Route::post('/profile/update', [App\Http\Controllers\DataApiController::class, 'updateProfileData'])->name('updateprofiledata');
     Route::get('/reviewer/submissions/list/{reviewerId}', [App\Http\Controllers\DataApiController::class, 'getReviewerSubmissionsList'])->name('getreviewersubmissionslist');
     Route::get('/submissions/list', [App\Http\Controllers\DataApiController::class, 'getSubmissionsList'])->name('getsubmissionslist');
+    Route::get('/reviewer/data/{reviewerId}', [App\Http\Controllers\DataApiController::class, 'getReviewerData'])->name('getreviewerdata');
+    
+    
 });
 
 Route::post('/profile/update-image', [App\Http\Controllers\DataApiController::class, 'updateProfileImage'])->name('updateprofileimage');

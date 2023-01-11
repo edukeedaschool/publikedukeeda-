@@ -38,6 +38,7 @@ use App\Models\SubscriberFollowers;
 use App\Models\UserFollowers;
 use App\Models\ReviewOfficial;
 use App\Models\SubmissionForwardComments;
+use App\Models\UserMessages;
 use App\Helpers\CommonHelper;
 use Validator;
 use Illuminate\Validation\Rule;
@@ -982,11 +983,23 @@ class DataApiController extends Controller
             
             $subscriber_data = SubscriberList::where('id',trim($data['subscriber_id']))->first();
             $subscriber_review_data = SubscriberReview::where('subscriber_id',trim($data['subscriber_id']))->where('review_level_id',1)->where('is_deleted',0)->first();
+            
+            if(empty($subscriber_review_data)){
+                return response(array('httpStatus'=>200, "dateTime"=>time(), 'status'=>'fail', 'message'=>'Subscriber Review Data not available', 'errors' => 'Subscriber Review Data not available'),200);
+            }
+                
             $current_review_range = isset($subscriber_review_data->review_range_id)?$subscriber_review_data->review_range_id:null;
+            $current_review_level = isset($subscriber_review_data->review_level_id)?$subscriber_review_data->review_level_id:null;
+            
+            $review_official = ReviewOfficial::where('subscriber_id',trim($data['subscriber_id']))->where('subscriber_review_id',$subscriber_review_data->id)->where('is_deleted',0)->first();
+            
+            if(empty($review_official)){
+                return response(array('httpStatus'=>200, "dateTime"=>time(), 'status'=>'fail', 'message'=>'Review Official not available', 'errors' => 'Review Official not available'),200);
+            }
             
             $insertArray = ['sub_group_id'=>$subscriber_data->office_belongs_to,'place'=>null,'subscriber_id'=>trim($data['subscriber_id']),'submission_type'=>trim($data['submission_type_id']),
             'purpose'=>trim($data['purpose']),'nature'=>trim($data['nature']),'subject'=>trim($data['subject']),'summary'=>trim($data['summary']),'file'=>$file_name,
-            'user_id'=>trim($data['user_id']),'current_review_range'=>$current_review_range];
+            'user_id'=>trim($data['user_id']),'current_review_range'=>$current_review_range,'current_review_level'=>$current_review_level,'reviewer_id'=>$review_official->id];
             
             $submission = Submissions::create($insertArray);
             
@@ -1010,7 +1023,7 @@ class DataApiController extends Controller
             ->leftJoin('country_list as c', 'c.id', '=', 'u2.country')                     
             ->leftJoin('state_list as s', 's.id', '=', 'u2.state')                             
             ->leftJoin('district_list as dl', 'dl.id', '=', 'u2.district')               
-            ->leftJoin('sub_district_list as sd', 'sd.id', '=', 'u2.sub_district')          
+            ->leftJoin('sub_district_list as sd', 'sd.id', '=', 'u2.sub_district')       
             ->where('submissions.id',$submission_id)                
             ->where('submissions.is_deleted',0)        
             ->where('sl.is_deleted',0)                
@@ -1027,10 +1040,39 @@ class DataApiController extends Controller
             if(!empty($submission_data)){
                 $submission_data->submitted_by_profile_image_url = (!empty($submission_data->submitted_by_profile_image))?url('images/user_images/'.$submission_data->submitted_by_profile_image):url('images/default_profile.png');
                 $submission_data->file_url = (!empty($submission_data->file))?url('documents/submission_documents/'.$submission_data->file):'';
+                $submission_data->submission_status_name = CommonHelper::getSubmissionStatusName($submission_data->submission_status);
+                
+                if(!empty($submission_data->reviewer_id) && ($submission_data->submission_status == 'closed' || $submission_data->submission_status == 'review_completed')){
+                    $reviewer_data = ReviewOfficial::join('users as u', 'u.id', '=', 'review_official.user_id')
+                    ->join('subscriber_review as sr', 'sr.id', '=', 'review_official.subscriber_review_id')         
+                    ->join('review_level as rl', 'rl.id', '=', 'sr.review_level_id')                 
+                    ->where('review_official.id',$submission_data->reviewer_id)          
+                    ->where('review_official.is_deleted',0)        
+                    ->where('u.is_deleted',0)                
+                    ->where('sr.is_deleted',0)        
+                    ->where('review_official.status',1)        
+                    ->where('u.status',1)                
+                    ->where('sr.status',1)        
+                    ->select('u.name as reviewer_name','rl.review_level','rl.designation')        
+                    ->first();        
+                    
+                    $submission_data->reviewer_name = $reviewer_data->reviewer_name;
+                    $submission_data->review_level = $reviewer_data->review_level;
+                    $submission_data->reviewer_designation = $reviewer_data->designation;
+                }
             }
             
+            $review_comments = SubmissionForwardComments::join('review_official as r1', 'r1.id', '=', 'submission_forward_comments.reviewer_id_from')
+            ->join('users as u1', 'u1.id', '=', 'r1.user_id')       
+            ->join('review_official as r2', 'r2.id', '=', 'submission_forward_comments.reviewer_id_to')        
+            ->join('users as u2', 'u2.id', '=', 'r2.user_id')      
+            ->join('review_level as rl1', 'rl1.id', '=', 'submission_forward_comments.review_level_id_from')          
+            ->join('review_level as rl2', 'rl2.id', '=', 'submission_forward_comments.review_level_id_to')  
+            ->select('submission_forward_comments.*','u1.name as from_name','u2.name as to_name','rl1.designation as from_designation','rl2.designation as to_designation')        
+            ->get()->toArray();              
+            
             //print_r($submission_data);
-            return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'success','message' => 'Submission Data','submission_data'=>$submission_data),200);
+            return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'success','message' => 'Submission Data','submission_data'=>$submission_data,'review_comments'=>$review_comments),200);
             
         }catch (\Exception $e){
             CommonHelper::saveException($e,'STORE',__FUNCTION__,__FILE__);
@@ -1342,6 +1384,36 @@ class DataApiController extends Controller
         }    
     }
     
+    function getReviewerData(Request $request,$reviewer_id){
+        try{ 
+            $data = $request->all();
+            
+            $reviewer_data = ReviewOfficial::join('users as u', 'u.id', '=', 'review_official.user_id')
+            ->leftJoin('country_list as cl',function($join){$join->on('cl.id','=','u.country')->where('cl.is_deleted','=','0')->where('cl.status','=','1');})                
+            ->leftJoin('state_list as sl',function($join){$join->on('sl.id','=','u.state')->where('sl.is_deleted','=','0')->where('sl.status','=','1');})
+            ->leftJoin('district_list as dl',function($join){$join->on('dl.id','=','u.district')->where('dl.is_deleted','=','0')->where('dl.status','=','1');})   
+            ->join('subscriber_review as sr', 'sr.id', '=', 'review_official.subscriber_review_id')         
+            ->where('review_official.id',$reviewer_id)          
+            ->where('review_official.is_deleted',0)        
+            ->where('u.is_deleted',0)                
+            ->where('sr.is_deleted',0)        
+            ->where('review_official.status',1)        
+            ->where('u.status',1)                
+            ->where('sr.status',1)        
+            ->select('review_official.id as reviewer_id','u.name as reviewer_name','u.email','u.gender','u.dob','u.mobile_no','u.image','u.address_line1','u.postal_code',
+            'dl.district_name','sl.state_name','cl.country_name','sr.review_level_id','sr.review_range_id')        
+            ->first();        
+            
+            $reviewer_data->image_url = (!empty($reviewer_data->image))?url('images/user_images/'.$reviewer_data->image):url('images/default_profile.png');
+            
+            return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'success','message' => 'Subscriber Data','reviewer_data'=>$reviewer_data),200);
+            
+        }catch (\Exception $e){
+            CommonHelper::saveException($e,'STORE',__FUNCTION__,__FILE__);
+            return response(array('httpStatus'=>200,"dateTime"=>time(),'status' => 'fail','error_message'=>$e->getMessage(),'message'=>'Error in Processing Request'),200);
+        }    
+    }
+    
     function getSubscriberFollowers(Request $request,$subscriber_id){
         try{ 
             $data = $request->all();
@@ -1519,6 +1591,139 @@ class DataApiController extends Controller
             }
             
             return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'success','message' => 'Submissions List','submissions'=>$submissions),200);
+            
+        }catch (\Exception $e){
+            CommonHelper::saveException($e,'STORE',__FUNCTION__,__FILE__);
+            return response(array('httpStatus'=>200,"dateTime"=>time(),'status' => 'fail','error_message'=>$e->getMessage(),'message'=>'Error in Processing Request'),200);
+        }    
+    }
+    
+    function updateSubmissionStatus(Request $request){
+        try{ 
+            $data = $request->all();
+            $updateArray = [];
+            
+            $validationRules = array('submission_id'=>'required|integer','submission_status'=>'required','comments'=>'required');
+            $attributes = array('submission_id'=>'Submission');
+            
+            $validator = Validator::make($data,$validationRules,array(),$attributes);
+            if ($validator->fails()){ 
+                return response(array('httpStatus'=>200, "dateTime"=>time(), 'status'=>'fail', 'message'=>'Missing Required Fields', 'errors' => $validator->errors()),200);
+            }	
+            
+            $submission_id = trim($data['submission_id']);
+            
+            $submission_data = Submissions::where('id',$submission_id)->first();
+            
+            if($submission_data->submission_status == 'closed' || $submission_data->submission_status == 'review_completed'){
+                return response(array('httpStatus'=>200, "dateTime"=>time(), 'status'=>'fail', 'message'=>'Submission Status is already Review Completed/Closed', 'errors' => 'Submission Status is already Review Completed/Closed'),200);
+            }
+            
+            \DB::beginTransaction();
+            
+            if($data['submission_status'] == 'review_completed'){
+                $updateArray = ['submission_status'=>trim($data['submission_status']),'review_completed_comments'=>trim($data['comments']),'close_date'=>date('Y/m/d H:i:s')];
+            }elseif($data['submission_status'] == 'closed'){
+                $updateArray = ['submission_status'=>trim($data['submission_status']),'close_comments'=>trim($data['comments']),'close_date'=>date('Y/m/d H:i:s')];
+            }elseif($data['submission_status'] == 'under_review_forwarded'){
+                $updateArray = ['submission_status'=>trim($data['submission_status'])];
+                
+                $subscriber_review_data = SubscriberReview::where('subscriber_id',$submission_data->subscriber_id)->where('review_level_id','>',$submission_data->current_review_level)->where('is_deleted',0)->first();
+                
+                if(empty($subscriber_review_data)){
+                    return response(array('httpStatus'=>200, "dateTime"=>time(), 'status'=>'fail', 'message'=>'Reviewer Next level not available', 'errors' => 'Reviewer Next level not available'),200);
+                }
+                
+                $updateArray['current_review_range'] = $subscriber_review_data->review_range_id;
+                $updateArray['current_review_level'] = $subscriber_review_data->review_level_id;
+                
+                $review_official = ReviewOfficial::where('subscriber_id',$submission_data->subscriber_id)->where('subscriber_review_id',$subscriber_review_data->id)->where('is_deleted',0)->first();
+                
+                if(empty($review_official)){
+                    return response(array('httpStatus'=>200, "dateTime"=>time(), 'status'=>'fail', 'message'=>'Review Official not available', 'errors' => 'Review Official not available'),200);
+                }
+                
+                $updateArray['reviewer_id'] = $review_official->id;
+                
+                $commentInsertArray = ['review_level_id_from'=>$submission_data->current_review_level,'review_level_id_to'=>$subscriber_review_data->review_level_id,
+                'reviewer_id_from'=>$submission_data->reviewer_id,'reviewer_id_to'=>$review_official->id,'forward_date'=>date('Y/m/d H:i:s'),'comments'=>trim($data['comments'])];
+                
+                SubmissionForwardComments::create($commentInsertArray);
+            }
+            
+            Submissions::where('id',$submission_id)->update($updateArray);
+            
+            \DB::commit();
+            
+            return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'success','message' => 'Submission updated successfully'),200);
+            
+        }catch (\Exception $e){
+            \DB::rollBack();
+            CommonHelper::saveException($e,'STORE',__FUNCTION__,__FILE__);
+            return response(array('httpStatus'=>200,"dateTime"=>time(),'status' => 'fail','error_message'=>$e->getMessage(),'message'=>'Error in Processing Request'),200);
+        }    
+    }
+    
+    function addUserMessage(Request $request){
+        try{ 
+            $data = $request->all();
+            
+            $validationRules = array('from_id'=>'required|integer','to_id'=>'required|integer','message'=>'required');
+            $attributes = array();
+            
+            $validator = Validator::make($data,$validationRules,array(),$attributes);
+            if ($validator->fails()){ 
+                return response(array('httpStatus'=>200, "dateTime"=>time(), 'status'=>'fail', 'message'=>'Missing Required Fields', 'errors' => $validator->errors()),200);
+            }	
+            
+            if(trim($data['from_id']) == trim($data['to_id'])){
+                return response(array('httpStatus'=>200, "dateTime"=>time(), 'status'=>'fail', 'message'=>'Message From and To should be different', 'errors' => 'Message From and To should be different'),200);
+            }
+            
+            $from_user = User::where('id',trim($data['from_id']))->where('is_deleted',0)->where('status',1)->first();
+            if(empty($from_user)){
+                return response(array('httpStatus'=>200, "dateTime"=>time(), 'status'=>'fail', 'message'=>'From User does not exists', 'errors' => 'From User does not exists'),200);
+            }
+            
+            $to_user = User::where('id',trim($data['to_id']))->where('is_deleted',0)->where('status',1)->first();
+            if(empty($to_user)){
+                return response(array('httpStatus'=>200, "dateTime"=>time(), 'status'=>'fail', 'message'=>'To User does not exists', 'errors' => 'To User does not exists'),200);
+            }
+            
+            $insertArray = ['from_id'=>trim($data['from_id']),'to_id'=>trim($data['to_id']),'message'=>trim($data['message'])];
+            
+            $message = UserMessages::create($insertArray);
+            
+            return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'success','message' => 'Message added successfully','message_data'=>$message),200);
+            
+        }catch (\Exception $e){
+            CommonHelper::saveException($e,'STORE',__FUNCTION__,__FILE__);
+            return response(array('httpStatus'=>200,"dateTime"=>time(),'status' => 'fail','error_message'=>$e->getMessage(),'message'=>'Error in Processing Request'),200);
+        }    
+    }
+    
+    function getUserMessageList(Request $request,$user_id){
+        try{ 
+            $data = $request->all();
+            
+            $message_list = UserMessages::join('users as u1', 'u1.id', '=', 'user_messages.from_id')    
+            ->join('users as u2', 'u2.id', '=', 'user_messages.to_id')   
+            ->where('user_messages.is_deleted',0)        
+            ->where('u1.is_deleted',0)   
+            ->where('u2.is_deleted',0)           
+            ->where('u1.status',1)   
+            ->where('u2.status',1)     
+            ->select('user_messages.*','u1.name as from_name','u1.image as from_profile_image','u1.user_name as from_user_name',
+            'u2.name as to_name','u2.image as to_profile_image','u2.user_name as to_user_name')           
+            ->orderBy('user_messages.id','DESC')        
+            ->get()->toArray();                
+            
+            for($i=0;$i<count($message_list);$i++){
+                $message_list[$i]['from_profile_image_url'] = (!empty($message_list[$i]['from_profile_image']))?url('images/user_images/'.$message_list[$i]['from_profile_image']):url('images/default_profile.png');
+                $message_list[$i]['to_profile_image_url'] = (!empty($message_list[$i]['to_profile_image']))?url('images/user_images/'.$message_list[$i]['to_profile_image']):url('images/default_profile.png');
+            }
+                    
+            return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'success','message' => 'Message List','message_list'=>$message_list),200);
             
         }catch (\Exception $e){
             CommonHelper::saveException($e,'STORE',__FUNCTION__,__FILE__);

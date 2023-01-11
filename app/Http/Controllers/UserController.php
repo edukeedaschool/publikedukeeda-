@@ -581,4 +581,42 @@ class UserController extends Controller
         }    
     }
     
+    function createUserMessage(Request $request,$to_user_id){
+        try{
+            $data = $request->all();
+            
+            $headers = CommonHelper::getAPIHeaders();
+            $url = url('/api/profile/data/'.$to_user_id);
+            $response = CommonHelper::processCURLRequest($url,'','','',$headers);//print_r($response);
+            $response = json_decode($response,true);
+            
+            $to_user_data = isset($response['user_data'])?$response['user_data']:[];
+            
+            return view('front/user/user_message_create',array('title'=>'Create Message','to_user_data'=>$to_user_data));
+         
+        }catch (\Exception $e){
+            return view('admin/page_error',array('message' =>$e->getMessage()));
+        }
+    }
+    
+    function saveUserMessage(Request $request){
+        try{ 
+            $data = $request->all();
+            $user = Auth::user();
+            
+            $post_data = $data; 
+            $post_data['from_id'] = $user->id;//print_r($post_data);exit;
+            
+            $headers = CommonHelper::getAPIHeaders();
+            $url = url('/api/user/message/add');
+            $response = CommonHelper::processCURLRequest($url,json_encode($post_data),'','',$headers);
+            $response = json_decode($response,true);
+            
+            return $response;
+            
+        }catch (\Exception $e){
+            CommonHelper::saveException($e,'STORE',__FUNCTION__,__FILE__);
+            return response(array('httpStatus'=>200,"dateTime"=>time(),'status' => 'fail','error_message'=>$e->getMessage(),'message'=>'Error in Processing Request'),200);
+        }    
+    }
 }

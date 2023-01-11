@@ -34,12 +34,22 @@
                 @endif
                 <p class="viewpdf"><a target="_blank" href="{{$submission_data['file_url']}}">View Image/PDF</a></p>
             </li>
-            <li><span>Status -</span> Under review </li>
-            <li><span>Reviewers Comments -</span>  </li>
+            <li><span>Status -</span> {{$submission_data['submission_status_name']}} </li>
+            <li style="display: block;"><span>Reviewers Comments -</span>
+                @for($i=0;$i<count($review_comments);$i++)
+                    <p>Comment by {{$review_comments[$i]['from_name']}} {{$review_comments[$i]['from_designation']}} on {{date('d-m-Y',strtotime($review_comments[$i]['forward_date']))}} </p>
+                    <p>{{$review_comments[$i]['comments']}}</p>
+                @endfor
+                
+                @if(in_array($submission_data['submission_status'],['closed','review_completed']))
+                    <p>Comment by {{$submission_data['reviewer_name']}} {{$submission_data['reviewer_designation']}} on {{date('d-m-Y',strtotime($submission_data['close_date']))}} </p>
+                    <p>{{(!empty($submission_data['close_comments']))?$submission_data['close_comments']:$submission_data['review_completed_comments']}}</p>
+                @endif
+            </li>
         </ul>
       </div>
         
-        @if(in_array($submission_data['submission_status'],['under_review','under_review_forwarded']) && $user->user_role == 5 )
+        @if(in_array($submission_data['submission_status'],['under_review','under_review_forwarded']) && $user->user_role == 5 && $reviewer_data['review_range_id'] == $submission_data['current_review_range'])
             <div class="confirmBtn">
                 <!--<a href="">Under Progress</a>-->
                 <a href="javascript:;" onclick="$('#submission_action_dialog').modal('show');" class="active">Action</a>
@@ -77,7 +87,7 @@
                             <div class="form-row">
                                 <div class="form-group col-md-9">
                                     <label>Comments</label>
-                                    <textarea id="action_comments" type="text" class="form-control" name="action_comments" value="" maxlength="1000"></textarea>
+                                    <textarea id="comments" type="text" class="form-control" name="comments" value="" maxlength="1000"></textarea>
                                     <div class="invalid-feedback" id="error_validation_action_comments"></div>
                                 </div>
                             </div>    
@@ -85,6 +95,7 @@
                         <div class="modal-footer center-footer">
                             <button type="button" id="submission_action_cancel" name="submission_action_cancel" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
                             <button type="button" id ="submission_action_submit" name="submission_action_submit" class="btn btn-dialog" onclick="submitSubmissionAction();">Submit</button>
+                            <input type="hidden" name="submission_id" id="submission_id" value="{{$submission_data['id']}}">
                         </div>
                     </form>
                 </div>

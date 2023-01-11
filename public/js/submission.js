@@ -175,7 +175,7 @@ function submitSubmissionAction(){
         success:function(msg){
             if(objectPropertyExists(msg,'status')){
                 if(msg.status == 'fail'){
-                    var errors = getResponseErrors(msg,'<br/>','error_validation_');
+                    var errors = getResponseErrors(msg,'<br/>','');
                     if(errors != ''){
                         $("#submissionActionErrorMessage").html(errors).show();
                     } 

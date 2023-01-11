@@ -268,6 +268,10 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('/user/followers/{userId}', [App\Http\Controllers\UserController::class, 'listUserFollowers'])->name('listuserfollowers');
     Route::get('/reviewer/submissions/list', [App\Http\Controllers\SubmissionController::class, 'reviewerSubmissionsList'])->name('reviewersubmissionslist');
     Route::get('/submission/detail/{submissionId}', [App\Http\Controllers\SubmissionController::class, 'viewSubmissionDetail'])->name('viewsubmissiondetail');
+    Route::post('/submission/status/update', [App\Http\Controllers\SubmissionController::class, 'updateSubmissionStatus'])->name('updatesubmissionstatus');
+    Route::get('/user/message/create/{userId}', [App\Http\Controllers\UserController::class, 'createUserMessage'])->name('createusermessage');
+    Route::post('/user/message/save', [App\Http\Controllers\UserController::class, 'saveUserMessage'])->name('saveusermessage');
+    Route::get('/user/message/list', [App\Http\Controllers\UserController::class, 'listUserMessages'])->name('listusermessages');
 });
 
 Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('home');

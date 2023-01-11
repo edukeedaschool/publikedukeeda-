@@ -232,6 +232,7 @@ class SubmissionController extends Controller
         try{
             $data = $request->all();
             $user = Auth::user();
+            $reviewer_data = [];
             
             $headers = CommonHelper::getAPIHeaders();
             $url = url('/api/submission/data/'.$submission_id);
@@ -239,11 +240,38 @@ class SubmissionController extends Controller
             $response = json_decode($response,true);
             
             $submission_data = isset($response['submission_data'])?$response['submission_data']:[];
+            $review_comments = isset($response['review_comments'])?$response['review_comments']:[];
             
-            return view('front/submission/view_submission_detail',array('user'=>$user,'title'=>'Submission Detail','submission_data'=>$submission_data));
+            if($user->user_role == 5){
+                $url = url('/api/reviewer/data/'.$user->reviewer_id);
+                $response = CommonHelper::processCURLRequest($url,'','','',$headers);//print_r($response);
+                $response = json_decode($response,true);
+                $reviewer_data = isset($response['reviewer_data'])?$response['reviewer_data']:[];
+            }
+            
+            return view('front/submission/view_submission_detail',array('user'=>$user,'title'=>'Submission Detail','submission_data'=>$submission_data,'review_comments'=>$review_comments,'reviewer_data'=>$reviewer_data));
          
         }catch (\Exception $e){
             return view('admin/page_error',array('message' =>$e->getMessage()));
+        }
+    }
+    
+    public function updateSubmissionStatus(Request $request){
+        try{
+            $data = $request->all();
+            $user = Auth::user();
+            
+            $headers = CommonHelper::getAPIHeaders();
+            $url = url('/api/submission/status/update');
+            $post_data = $data;
+            $response = CommonHelper::processCURLRequest($url,json_encode($post_data),'','',$headers);//print_r($response);exit;
+            $response = json_decode($response,true);
+            
+            return $response;
+         
+        }catch (\Exception $e){
+            \DB::rollBack();
+            return response(array("httpStatus"=>500,"dateTime"=>time(),'status' => 'fail','message' =>$e->getMessage()),500);
         }
     }
 

@@ -15,6 +15,6 @@ class Submissions extends Model
      *
      * @var array<int, string>
      */
-    protected $fillable = ['sub_group_id','place','subscriber_id','submission_type','purpose','nature','subject','summary','file','user_id','submission_status','current_review_range','submission_date','reviewer_id','close_comments','review_completed_comments','status','is_deleted'];
+    protected $fillable = ['sub_group_id','place','subscriber_id','submission_type','purpose','nature','subject','summary','file','user_id','submission_status','current_review_level','current_review_range','submission_date','reviewer_id','close_comments','review_completed_comments','close_date','status','is_deleted'];
 
 }

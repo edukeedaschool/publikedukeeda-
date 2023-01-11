@@ -40,14 +40,14 @@
                     </div>
                     <div class="d-flex justify-content-between">
                         <a href="{{url('submission/detail/'.$submissions[$i]['id'])}}">View details</a>
-                        <p>Under review </p>
+                        <p>{{$submissions[$i]['submission_status_name']}} </p>
                     </div>
-                    <hr>
+                    <!--<hr>
                     <ul class="shareList">
                       <li><a href=""><i class="fas fa-comments"></i> <span>30</span></a></li>
                       <li><a href=""><i class="fas fa-thumbs-up"></i> <span>50</span></a></li>
                       <li><a href=""><i class="fas fa-share"></i></a></li>
-                    </ul>
+                    </ul>-->
 
                   </div>
                 </div>

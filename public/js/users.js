@@ -189,3 +189,35 @@ function followUnfollowUser(elem,user_id){
         }
     });
 }
+
+function saveUserMessage(){
+    $("#saveMessageErrorMessage,#saveMessageSuccessMessage,.invalid-feedback").html('').hide();
+    var form_data = $("#saveMessageForm").serialize();
+    ajaxSetup();
+
+    $.ajax({
+        url:ROOT_PATH+"/user/message/save",
+        method:"POST",
+        data:form_data,
+        success:function(msg){
+            if(objectPropertyExists(msg,'status')){
+                if(msg.status == 'fail'){
+                    var errors = getResponseErrors(msg,'<br/>','error_validation_');
+                    if(errors != ''){
+                        $("#saveMessageErrorMessage").html(errors).show();
+                    } 
+                }else{ 
+                    $("#saveMessageSuccessMessage").html(msg.message).show();
+                    $("#saveMessageErrorMessage,.invalid-feedback").html('').hide();
+                    
+                    var url = ROOT_PATH+"/user/message/list";
+                    setTimeout(function(){  window.location.href = url; }, 1000);
+                }
+            }else{
+                displayResponseError(msg,'saveMessageErrorMessage');
+            }
+        },error:function(obj,status,error){
+            $("#saveMessageErrorMessage").html('Error in processing request').show();
+        }
+    });
+}
