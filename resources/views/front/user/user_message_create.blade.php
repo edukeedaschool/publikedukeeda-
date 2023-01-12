@@ -7,6 +7,7 @@
         <div class="alert alert-danger alert-dismissible elem-hidden"  id="saveMessageErrorMessage"></div>
         
         <form class="form-horizontal" action="" method="post" name="saveMessageForm" id="saveMessageForm">
+            <h2 class="mt-3 justify-content-between d-flex">Create Message</h2>
             <div class="form-group">
                 <label class="control-label mt-3" for="Subject"><b>To</b></label><br/>
                 <img src="{{$to_user_data['image_url']}}" class="img-thumbnail" style="max-width:75px; ">

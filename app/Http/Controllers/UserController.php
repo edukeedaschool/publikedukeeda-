@@ -189,13 +189,13 @@ class UserController extends Controller
             
             $headers = CommonHelper::getAPIHeaders();
             
-            $url = url('/api/profile/data/'.$user_id);
+            $url = url('/api/profile/data/'.$user_id.'?user_id='.$user->id);
             $postData = [];
-            $response = CommonHelper::processCURLRequest($url,$postData,'','',$headers);
+            $response = CommonHelper::processCURLRequest($url,$postData,'','',$headers);//print_r($response);
             $response = json_decode($response,true);
             $user_profile = $response['user_data'];
             
-            $params = ['title'=>'View User Profile','user_profile'=>$user_profile];
+            $params = ['title'=>'View User Profile','user_profile'=>$user_profile,'user'=>$user];
             
             return view('front/user/profile_view',$params);
             
@@ -618,5 +618,24 @@ class UserController extends Controller
             CommonHelper::saveException($e,'STORE',__FUNCTION__,__FILE__);
             return response(array('httpStatus'=>200,"dateTime"=>time(),'status' => 'fail','error_message'=>$e->getMessage(),'message'=>'Error in Processing Request'),200);
         }    
+    }
+    
+    function listUserMessages(Request $request){
+        try{
+            $data = $request->all();
+            $user = Auth::user();
+            
+            $headers = CommonHelper::getAPIHeaders();
+            $url = url('/api/user/message/list/'.$user->id);
+            $response = CommonHelper::processCURLRequest($url,'','','',$headers);//print_r($response);
+            $response = json_decode($response,true);
+            
+            $message_list = isset($response['message_list'])?$response['message_list']:[];
+            
+            return view('front/user/user_message_list',array('title'=>'User Messages','message_list'=>$message_list));
+         
+        }catch (\Exception $e){
+            return view('admin/page_error',array('message' =>$e->getMessage()));
+        }
     }
 }

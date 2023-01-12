@@ -183,6 +183,7 @@ class DataApiController extends Controller
     function getProfileData(Request $request,$user_id){
         try{ 
             $data = $request->all();
+            $is_following = 0;
             
             $user_data = User::leftJoin('country_list as cl',function($join){$join->on('cl.id','=','users.country')->where('cl.is_deleted','=','0')->where('cl.status','=','1');})                
             ->leftJoin('state_list as sl',function($join){$join->on('sl.id','=','users.state')->where('sl.is_deleted','=','0')->where('sl.status','=','1');})
@@ -229,8 +230,14 @@ class DataApiController extends Controller
             ->where('u.status',1)     
             ->count();
             
+            if(isset($data['user_id']) && !empty($data['user_id'])){
+                $following_data = UserFollowers::where('user_id',$user_id)->where('follower_id',$data['user_id'])->where('is_deleted',0)->where('status',1)->first();
+                $is_following = (!empty($following_data))?1:0;
+            }
+            
             $user_data->followers_count = $user_followers_count;
             $user_data->following_count = $user_following_users_count+$user_following_subscribers_count;
+            $user_data->is_following = $is_following;
             
             return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'success','message' => 'User Profile Data','user_data'=>$user_data),200);
             
@@ -1336,6 +1343,7 @@ class DataApiController extends Controller
     function getSubscriberData(Request $request,$subscriber_id){
         try{ 
             $data = $request->all();
+            $is_following = 0;
             
             $subscriber_data = SubscriberList::join('users as u', 'u.id', '=', 'subscriber_list.user_id')
             ->leftJoin('country_list as cl',function($join){$join->on('cl.id','=','u.country')->where('cl.is_deleted','=','0')->where('cl.status','=','1');})                
@@ -1361,7 +1369,7 @@ class DataApiController extends Controller
             'u.gender','u.dob','u.mobile_no','u.image','u.address_line1','u.postal_code','dl.district_name','sl.state_name','cl.country_name','sg.sub_group_name','sg.id as sub_group_id','g.id as group_id','g.group_name',
             'g.group_type','g.group_sub_type','ppl.party_name as pol_party_name','ppop.position_name as pol_party_position_name','rep_area_pp.representation_area as pol_party_representation_area',
             'eop.position_name as elected_official_position_name','rep_area_eo.representation_area as elected_official_pol_party_representation_area','subscriber_list.key_identity1',
-            'subscriber_list.key_identity2','subscriber_list.org_name','subscriber_list.auth_person_name','subscriber_list.auth_person_designation','subscriber_list.bio as subscriber_bio')        
+            'subscriber_list.key_identity2','subscriber_list.org_name','subscriber_list.auth_person_name','subscriber_list.auth_person_designation','subscriber_list.bio as subscriber_bio','u.id as user_id')        
             ->first();        
             
             $subscriber_data->image_url = (!empty($subscriber_data->image))?url('images/user_images/'.$subscriber_data->image):url('images/default_profile.png');
@@ -1374,7 +1382,13 @@ class DataApiController extends Controller
             ->where('u.status',1)    
             ->count();        
             
+            if(isset($data['user_id']) && !empty($data['user_id'])){
+                $following_data = SubscriberFollowers::where('subscriber_id',$subscriber_id)->where('user_id',$data['user_id'])->where('is_deleted',0)->where('status',1)->first();
+                $is_following = (!empty($following_data))?1:0;
+            }
+            
             $subscriber_data->followers_count = $subscriber_followers_count;
+            $subscriber_data->is_following = $is_following;
             
             return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'success','message' => 'Subscriber Data','subscriber_data'=>$subscriber_data),200);
             
@@ -1573,12 +1587,39 @@ class DataApiController extends Controller
     function getSubmissionsList(Request $request){
         try{ 
             $data = $request->all();
+            $where_str = '';
             
-            $submissions = Submissions::join('users as u', 'u.id', '=', 'submissions.user_id')        
-            //->where('submissions.subscriber_id',$review_official_data->subscriber_id)
-            //->where('submissions.current_review_range',$review_range_id)
-            //->wherein('submissions.submission_status',['under_review','under_review_forwarded','closed','completed'])        
-            ->where('submissions.is_deleted',0)
+            $submissions = Submissions::join('users as u', 'u.id', '=', 'submissions.user_id');   
+            
+            // Feed / Your submissions,  Feed - All submission,  Your submission - Only my submissions 
+            // For Subscriber, All submission / Pending / Closed,  Pending - Under Review,  Closed - Closed submissions
+            // For general user: All submissions are submissions which are posted by users which this user follows and subscriber to which this user follows
+            // For subscriber: All submissions are submissions whose subscriber is this subscriber
+                    
+            // if logged in user is general user
+            if(isset($data['user_id']) && !empty($data['user_id'])){
+                $user_following_users = UserFollowers::where('follower_id',$data['user_id'])->where('status',1)->where('is_deleted',0)->select('user_id')->get()->toArray();  
+                $user_following_users = array_column($user_following_users,'user_id');
+                $user_following_users = array_merge($user_following_users,[$data['user_id']]);
+                $where_str = "(submissions.user_id IN(".implode(',',$user_following_users).")";
+                
+                $user_following_subscribers = SubscriberFollowers::where('user_id',$data['user_id'])->where('status',1)->where('is_deleted',0)->select('subscriber_id')->get()->toArray(); 
+                $user_following_subscribers = array_column($user_following_subscribers,'subscriber_id');
+                if(!empty($user_following_subscribers)){
+                    $where_str.=" OR submissions.subscriber_id IN(".implode(',',$user_following_subscribers).")";
+                }
+                
+                $where_str.=')';
+                
+                $submissions = $submissions->whereRaw($where_str);
+            }
+            
+            // if logged in user is subscriber
+            if(isset($data['subscriber_id']) && !empty($data['subscriber_id'])){
+                $submissions = $submissions->where('submissions.subscriber_id',trim($data['subscriber_id']));
+            }
+            
+            $submissions = $submissions->where('submissions.is_deleted',0)
             ->where('submissions.status',1)       
             ->select('submissions.*','u.name','u.image as user_profile_image','u.user_name')           
             ->orderBy('submissions.id','DESC')        
@@ -1708,6 +1749,7 @@ class DataApiController extends Controller
             
             $message_list = UserMessages::join('users as u1', 'u1.id', '=', 'user_messages.from_id')    
             ->join('users as u2', 'u2.id', '=', 'user_messages.to_id')   
+            ->whereRaw("(user_messages.from_id = $user_id OR user_messages.to_id = $user_id)")                
             ->where('user_messages.is_deleted',0)        
             ->where('u1.is_deleted',0)   
             ->where('u2.is_deleted',0)           

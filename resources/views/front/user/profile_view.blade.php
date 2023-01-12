@@ -16,9 +16,14 @@
           </ul>
           <hr>
           <ul class="mt-4 following text-left">
-            <li><a href="" class="foBtn">Follow</a></li>
+            @if($user->user_role == 3)  
+                <?php $css_class = ($user_profile['is_following'] == 1)?'following':''; ?>                                     
+                <?php $text = ($user_profile['is_following'] == 1)?'Unfollow':'Follow'; ?> 
+                <li><a href="javascript:;" onclick="followUnfollowUser(this,{{$user_profile['id']}});" class="foBtn {{$css_class}}">{{$text}}</a></li>
+            @endif
             <li><a href="{{url('user/followers/'.$user_profile['id'])}}">Following: {{$user_profile['following_count']}}</a></li>
             <li><a href="{{url('user/followers/'.$user_profile['id'])}}">Followers: {{$user_profile['followers_count']}}</a></li>
+            <li><a href="{{url('user/message/create/'.$user_profile['id'])}}" class="foBtn"><i class="fas fa-envelope"></i> Message</a></li>
           </ul>
 
         </div>
@@ -76,6 +81,7 @@
 
 @section('scripts')
 <script src="{{ asset('js/front_data.js') }}" ></script>
+<script src="{{ asset('js/users.js') }}" ></script>
 <script type="text/javascript">
     $(document).ready(function(){
         $("#general_div .form-control").attr('readonly',true).css('background-color','#fff');

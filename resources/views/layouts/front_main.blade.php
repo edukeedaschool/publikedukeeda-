@@ -40,7 +40,7 @@
         </div>
         <div class="col-auto">
           <ul class="bellMsg">
-            <li><a href="javascript:;"><i class="fas fa-envelope"></i></a></li>
+            <li><a href="{{url('user/message/list')}}"><i class="fas fa-envelope"></i></a></li>
             <li><a href="javascript:;"><i class="fas fa-bell"></i></a></li>
             <li class="d-lg-none d-block"><a href="javascript:;" class="button-left"><i class="fas fa-bars"></i></a></li>
           </ul>
@@ -57,7 +57,7 @@
             <ul class="sidebarMenu">
                 <li><a href="{{url('/')}}"><i class="fas fa-home"></i> Home</a></li>
                 <li><a href="javascript:;"><i class="fas fa-bell"></i> Notification</a></li>
-                <li><a href="javascript:;"><i class="fas fa-envelope"></i> Message</a></li>
+                <li><a href="{{url('user/message/list')}}"><i class="fas fa-envelope"></i> Message</a></li>
                 <li><a href="javascript:;"><i class="fas fa-file-alt"></i> Your submissions</a></li>
                 <li><a href="{{url('user/profile')}}"><i class="fas fa-user"></i> profile</a></li>
                 @for($i=0;$i<count($user_teams);$i++)

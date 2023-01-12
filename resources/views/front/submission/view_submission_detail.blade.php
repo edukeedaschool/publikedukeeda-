@@ -6,9 +6,12 @@
       <div class="address1">
 
         <ul class="">
-            <li class="mb-5"><span>Submit to - </span><a href="javascript:;">{{$submission_data['subscriber_name']}} </a> &nbsp; ({{$submission_data['subscriber_bio']}})</li>
+            <li class="mb-5"><span>Submit to - </span><a href="{{url('subscriber/profile/view/'.$submission_data['subscriber_id'])}}">{{$submission_data['subscriber_name']}} </a> &nbsp; ({{$submission_data['subscriber_bio']}})</li>
              <li><span>Submit Date -</span> {{date('d/m/Y',strtotime($submission_data['created_at']))}}</li>
-            <li><span>Submit by -</span><a href="">{{$submission_data['submitted_by_name']}}</a> <div class="userImg2"><img src="{{$submission_data['submitted_by_profile_image_url']}}" class="img-fluid img-thumbnail"></div> </li>
+            <li>
+                <span>Submit by -</span><a href="{{url('user/profile/view/'.$submission_data['user_id'])}}">{{$submission_data['submitted_by_name']}}</a> 
+                <div class="userImg2"><a href="{{url('user/profile/view/'.$submission_data['user_id'])}}"><img src="{{$submission_data['submitted_by_profile_image_url']}}" class="img-fluid img-thumbnail"></a></div> 
+            </li>
             <li><span>Mail id -</span> {{$submission_data['submitted_by_email']}}</li>
             <li><span>Mobile number -</span> {{$submission_data['submitted_by_mobile_no']}}</li>
             <li><span>Age -</span> {{$submission_data['submitted_by_dob']}} years</li>

@@ -26,13 +26,14 @@
       <div class="tab-content pt-0">
         <div class="tab-pane active" role="tabpanel" id="openSub">
             @for($i=0;$i<count($submissions);$i++)
+                <?php  $profile_url = url('user/profile/view/'.$submissions[$i]['user_id']); ?>
                 <div>
                 <!--<p class="forTo">Forward to <a href="">Erling Haaland </a> <span>5 hrs ago</span> </p>-->
                 <div class="d-flex">
-                  <div class="userImage"><img src="{{$submissions[$i]['user_profile_image_url']}}" class="img-fluid"></div>
+                  <div class="userImage"><a href="{{$profile_url}}"><img src="{{$submissions[$i]['user_profile_image_url']}}" class="img-fluid"></a></div>
                   <div class="userDetail position-relative">
                     <div class="dropDown"><a href="#"><i class="fas fa-ellipsis-h"></i></a></div>
-                    <h4>{{$submissions[$i]['name']}} <span>{{'@'}}{{$submissions[$i]['user_name']}}</span></h4>
+                    <h4><a href="{{$profile_url}}" style="color:#2a3548">{{$submissions[$i]['name']}} <span>{{'@'}}{{$submissions[$i]['user_name']}}</span></a></h4>
                     <p>{{$submissions[$i]['summary']}}</p>
                     <div class="postImg">
                         @if(stripos($submissions[$i]['file'],'.pdf') === false )

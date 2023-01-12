@@ -1111,13 +1111,13 @@ class SubscriberController extends Controller
             $user = Auth::user();
             
             $headers = CommonHelper::getAPIHeaders();
-            $url = url('/api/subscriber/data/'.$subscriber_id);
+            $url = ($user->user_role == 3)?url('/api/subscriber/data/'.$subscriber_id.'?user_id='.$user->id):url('/api/subscriber/data/'.$subscriber_id);
             
             $response = CommonHelper::processCURLRequest($url,'','','',$headers);//print_r($response);
             $response = json_decode($response,true);
             $subscriber_data = isset($response['subscriber_data'])?$response['subscriber_data']:[];
             
-            $params = ['title'=>'View Subscriber Profile','subscriber_data'=>$subscriber_data];
+            $params = ['title'=>'View Subscriber Profile','subscriber_data'=>$subscriber_data,'user'=>$user];
             
             return view('front/subscriber/subscriber_profile_view',$params);
             
