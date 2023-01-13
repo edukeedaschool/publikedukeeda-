@@ -822,7 +822,7 @@ class DataApiController extends Controller
             ->get()->toArray();        
             //->paginate($this->REC_PER_PAGE);
             
-            $sub_group_list = $this->updateAPIResponse($sub_group_list,$qs_str);
+            //$sub_group_list = $this->updateAPIResponse($sub_group_list,$qs_str);
             
             return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'success','message' => 'Sub Group List','sub_group_list'=>$sub_group_list),200);
             
@@ -989,7 +989,7 @@ class DataApiController extends Controller
             $file_name = CommonHelper::uploadImage($request,$request->file('detail_file'),'documents/submission_documents',false);
             
             $subscriber_data = SubscriberList::where('id',trim($data['subscriber_id']))->first();
-            $subscriber_review_data = SubscriberReview::where('subscriber_id',trim($data['subscriber_id']))->where('review_level_id',1)->where('is_deleted',0)->first();
+            $subscriber_review_data = SubscriberReview::where('subscriber_id',trim($data['subscriber_id']))->orderBy('review_level_id')->where('is_deleted',0)->first();
             
             if(empty($subscriber_review_data)){
                 return response(array('httpStatus'=>200, "dateTime"=>time(), 'status'=>'fail', 'message'=>'Subscriber Review Data not available', 'errors' => 'Subscriber Review Data not available'),200);

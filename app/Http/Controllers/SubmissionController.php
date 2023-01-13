@@ -32,9 +32,9 @@ class SubmissionController extends Controller
             
             $headers = CommonHelper::getAPIHeaders();
             $url = url('/api/sub-group/list');
-            $response = CommonHelper::processCURLRequest($url,'','','',$headers);
+            $response = CommonHelper::processCURLRequest($url,'','','',$headers);//print_r($headers);
             $response = json_decode($response,true);
-            $sub_group_list = $response['sub_group_list'];//print_r($sub_group_list);
+            $sub_group_list = isset($response['sub_group_list'])?$response['sub_group_list']:[];
             
             
             return view('front/submission/submission_subscriber_add',array('user'=>$user,'title'=>'Add Submission','sub_group_list'=>$sub_group_list));
