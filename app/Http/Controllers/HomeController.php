@@ -25,11 +25,11 @@ class HomeController extends Controller
      * @return \Illuminate\Contracts\Support\Renderable
      */
     public function index(Request $request){
-        
         try{
             $data = $request->all();
-            $states_list = [];
             $user = Auth::user();
+            $qs_str = '';
+            $submissions_all = $submissions_pending = $submissions_closed = $submissions_my = [];
             
             /*if(! ($user->status == 1 && $user->is_deleted == 0)){
                 
@@ -45,13 +45,62 @@ class HomeController extends Controller
             }
             
             $headers = CommonHelper::getAPIHeaders();
-            $url = url('/api/submissions/list');
-            $response = CommonHelper::processCURLRequest($url,'','','',$headers);//print_r($response);
-            $response = json_decode($response,true);
             
-            $submissions = isset($response['submissions'])?$response['submissions']:[];
+            if($user->user_role == 2){
+                $subscriber_id = !empty($user->subscriber_id)?$user->subscriber_id:0;
+                
+                $qs_str = 'subscriber_id='.$subscriber_id;
+                $url = url('/api/submissions/list?'.$qs_str);
+                $response = CommonHelper::processCURLRequest($url,'','','',$headers);
+                $response = json_decode($response,true);
+                $submissions_all = isset($response['submissions'])?$response['submissions']:[];
+                
+                $qs_str = 'subscriber_id='.$subscriber_id.'&sub_type=pending';
+                $url = url('/api/submissions/list?'.$qs_str);
+                $response = CommonHelper::processCURLRequest($url,'','','',$headers);
+                $response = json_decode($response,true);
+                $submissions_pending = isset($response['submissions'])?$response['submissions']:[];
+                
+                $qs_str = 'subscriber_id='.$subscriber_id.'&sub_type=closed';
+                $url = url('/api/submissions/list?'.$qs_str);
+                $response = CommonHelper::processCURLRequest($url,'','','',$headers);
+                $response = json_decode($response,true);
+                $submissions_closed = isset($response['submissions'])?$response['submissions']:[];
+                
+            }elseif($user->user_role == 3){
+                
+                $qs_str = 'user_id='.$user->id;
+                $url = url('/api/submissions/list?'.$qs_str);
+                $response = CommonHelper::processCURLRequest($url,'','','',$headers);
+                $response = json_decode($response,true);
+                $submissions_all = isset($response['submissions'])?$response['submissions']:[];
+                
+                $qs_str = 'user_id='.$user->id.'&sub_type=my';
+                $url = url('/api/submissions/list?'.$qs_str);
+                $response = CommonHelper::processCURLRequest($url,'','','',$headers);
+                $response = json_decode($response,true);
+                $submissions_my = isset($response['submissions'])?$response['submissions']:[];
             
-            return view('home',array('user'=>$user,'title'=>'Home Page','submissions'=>$submissions));
+            }elseif($user->user_role == 5){
+                $reviewer_id = !empty($user->reviewer_id)?$user->reviewer_id:0;
+                
+                $qs_str = 'reviewer_id='.$reviewer_id;
+                $url = url('/api/submissions/list?'.$qs_str);
+                $response = CommonHelper::processCURLRequest($url,'','','',$headers);
+                $response = json_decode($response,true);
+                $submissions_all = isset($response['submissions'])?$response['submissions']:[];
+            }else{
+            
+                $headers = CommonHelper::getAPIHeaders();
+                $url = url('/api/submissions/list?'.$qs_str);
+                $response = CommonHelper::processCURLRequest($url,'','','',$headers);//print_r($response);
+                $response = json_decode($response,true);
+
+                $submissions_all = isset($response['submissions'])?$response['submissions']:[];
+            }
+            
+            return view('home',array('user'=>$user,'title'=>'Home Page','submissions_all'=>$submissions_all,'submissions_my'=>$submissions_my,
+            'submissions_pending'=>$submissions_pending,'submissions_closed'=>$submissions_closed));
          
         }catch (\Exception $e){
             return view('admin/page_error',array('message' =>$e->getMessage()));

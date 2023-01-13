@@ -14,7 +14,7 @@
                 <div class="form-group">
                     <label class="control-label" for="name"><b>Choose one</b></label>
                     <select class="form-control" id="sub_group_id"  name="sub_group_id" onchange="getSubmissionSubscribersList(this.value,'{{$user->id}}','subscriber_id','addsubmissionErrorMessage','');">
-                      <option value="">Subgroup 1</option>
+                      <option value="">Select</option>
                       @for($i=0;$i<count($sub_group_list);$i++)
                           <option value="{{$sub_group_list[$i]['id']}}">{{$sub_group_list[$i]['sub_group_name']}}</option>
                       @endfor    
