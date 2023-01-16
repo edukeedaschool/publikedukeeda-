@@ -370,7 +370,7 @@ class SubscriberController extends Controller
                     $validationRules['politicalPartyOfficialPosition'] = 'required';
                     //$validationRules['repAreaOfficialPartyPosition'] = 'required';
                     $validationRules['electedOfficialPositionName'] = 'required';
-                    //$validationRules['repAreaElectedOfficialPosition'] = 'required';
+                    
                     
                     if($group_data->group_sub_type !== null && $group_data->group_sub_type == 'person' && $data['politicalPartyOfficialPosition'] != "0"){
                         $validationRules['repAreaOfficialPartyPosition'] = 'required';
