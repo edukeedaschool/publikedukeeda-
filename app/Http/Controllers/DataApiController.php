@@ -1589,7 +1589,7 @@ class DataApiController extends Controller
             $data = $request->all();
             $where_str = '';
             
-            $submissions = Submissions::join('users as u', 'u.id', '=', 'submissions.user_id');   
+            $submissions = Submissions::join('users as u1', 'u1.id', '=', 'submissions.user_id');   
             
             // Feed / Your submissions,  Feed - All submission,  Your submission - Only my submissions 
             // For Subscriber, All submission / Pending / Closed,  Pending - Under Review,  Closed - Closed submissions
@@ -1597,31 +1597,54 @@ class DataApiController extends Controller
             // For subscriber: All submissions are submissions whose subscriber is this subscriber
                     
             // if logged in user is general user
-            if(isset($data['user_id']) && !empty($data['user_id'])){
-                $user_following_users = UserFollowers::where('follower_id',$data['user_id'])->where('status',1)->where('is_deleted',0)->select('user_id')->get()->toArray();  
-                $user_following_users = array_column($user_following_users,'user_id');
-                $user_following_users = array_merge($user_following_users,[$data['user_id']]);
-                $where_str = "(submissions.user_id IN(".implode(',',$user_following_users).")";
-                
-                $user_following_subscribers = SubscriberFollowers::where('user_id',$data['user_id'])->where('status',1)->where('is_deleted',0)->select('subscriber_id')->get()->toArray(); 
-                $user_following_subscribers = array_column($user_following_subscribers,'subscriber_id');
-                if(!empty($user_following_subscribers)){
-                    $where_str.=" OR submissions.subscriber_id IN(".implode(',',$user_following_subscribers).")";
+            if(isset($data['user_id']) && trim($data['user_id']) != ''){
+                if((!isset($data['sub_type'])) || (isset($data['sub_type']) && trim($data['sub_type']) == 'all') ){
+                    $user_following_users = UserFollowers::where('follower_id',$data['user_id'])->where('status',1)->where('is_deleted',0)->select('user_id')->get()->toArray();  
+                    $user_following_users = array_column($user_following_users,'user_id');
+                    $user_following_users = array_merge($user_following_users,[$data['user_id']]);
+                    $where_str = "(submissions.user_id IN(".implode(',',$user_following_users).")";
+
+                    $user_following_subscribers = SubscriberFollowers::where('user_id',$data['user_id'])->where('status',1)->where('is_deleted',0)->select('subscriber_id')->get()->toArray(); 
+                    $user_following_subscribers = array_column($user_following_subscribers,'subscriber_id');
+                    if(!empty($user_following_subscribers)){
+                        $where_str.=" OR submissions.subscriber_id IN(".implode(',',$user_following_subscribers).")";
+                    }
+
+                    $where_str.=')';
+
+                    $submissions = $submissions->whereRaw($where_str);
                 }
                 
-                $where_str.=')';
-                
-                $submissions = $submissions->whereRaw($where_str);
+                if(isset($data['sub_type']) && trim($data['sub_type']) == 'my'){
+                    $submissions = $submissions->where('submissions.user_id',trim($data['user_id']));
+                }
             }
             
             // if logged in user is subscriber
-            if(isset($data['subscriber_id']) && !empty($data['subscriber_id'])){
+            if(isset($data['subscriber_id']) && trim($data['subscriber_id']) != ''){
                 $submissions = $submissions->where('submissions.subscriber_id',trim($data['subscriber_id']));
+                
+                if(isset($data['sub_type']) && trim($data['sub_type']) == 'pending'){
+                    $submissions = $submissions->where('submissions.submission_status','under_review');
+                }
+                
+                if(isset($data['sub_type']) && trim($data['sub_type']) == 'closed'){
+                    $submissions = $submissions->wherein('submissions.submission_status',['closed','review_completed']);
+                }
             }
             
-            $submissions = $submissions->where('submissions.is_deleted',0)
+            // if logged in user is reviewer
+            if(isset($data['reviewer_id']) && trim($data['reviewer_id']) != ''){
+                $review_official_data = ReviewOfficial::where('id',trim($data['reviewer_id']))->first();
+                $submissions = $submissions->where('submissions.subscriber_id',$review_official_data->subscriber_id);
+            }
+            
+            $submissions = $submissions->join('subscriber_list as s', 's.id', '=', 'submissions.subscriber_id')
+            ->join('subscriber_list as sl', 'sl.id', '=', 'submissions.subscriber_id')        
+            ->join('users as u2', 'u2.id', '=', 'sl.user_id')        
+            ->where('submissions.is_deleted',0)
             ->where('submissions.status',1)       
-            ->select('submissions.*','u.name','u.image as user_profile_image','u.user_name')           
+            ->select('submissions.*','u1.name','u1.image as user_profile_image','u1.user_name','u2.name as subscriber_name')           
             ->orderBy('submissions.id','DESC')        
             ->get()->toArray();        
             

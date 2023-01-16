@@ -9,7 +9,7 @@
       
     </div>
     <div class="socialFeed">
-      <ul class="nav nav-fill navtop">
+      <!--<ul class="nav nav-fill navtop">
         <li class="nav-item">
           <a class="nav-link active" href="#openSub" data-toggle="tab">Pending</a>
         </li>
@@ -22,11 +22,12 @@
           <a class="nav-link" href="#yourSub" data-toggle="tab">Closed</a>
         </li>
       </ul>
-      <hr>
+      <hr>-->
+      <br/>
       <div class="tab-content pt-0">
         <div class="tab-pane active" role="tabpanel" id="openSub">
             @for($i=0;$i<count($submissions);$i++)
-                <?php  $profile_url = url('user/profile/view/'.$submissions[$i]['user_id']); ?>
+                <?php  $profile_url = ($submissions[$i]['user_id'] != $user->id)?url('user/profile/view/'.$submissions[$i]['user_id']):url('user/profile'); ?>
                 <div>
                 <!--<p class="forTo">Forward to <a href="">Erling Haaland </a> <span>5 hrs ago</span> </p>-->
                 <div class="d-flex">
