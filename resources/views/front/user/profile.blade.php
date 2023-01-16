@@ -195,7 +195,7 @@
                         <div class="form-group row no-gutters align-items-center">
                             <label class="col-md-4 control-label" for="email">Pin Code</label>
                             <div class="col-md-8">
-                                <input id="postal_code" type="text" class="form-control" name="postal_code" value="{{$user_profile['postal_code']}}"  >
+                                <input id="postal_code" type="text" class="form-control" name="postal_code" value="{{$user_profile['postal_code']}}" maxlength="6" >
                                 <div class="invalid-feedback" id="error_validation_postal_code"></div>
                             </div>
                         </div>

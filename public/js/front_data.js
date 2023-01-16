@@ -239,7 +239,7 @@ function editUserProfile(profile_type,action){
     }
     
     if(action == 'save'){
-        $("#profileUpdateSuccessMessage,#profileUpdateErrorMessage,.invalid-feedback").html('').hide();
+        $("#profileUpdateSuccessMessage,#profileUpdateErrorMessage,.invalid-feedback,#addressSuccessMessage,#addressErrorMessage").html('').hide();
         
         var form_data = $("#"+profile_type+"_form").serialize(); 
         ajaxSetup();
