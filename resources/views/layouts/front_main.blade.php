@@ -30,6 +30,12 @@
     $response = CommonHelper::processCURLRequest($url,'','','',$headers);//print_r($response);//exit;
     $response = json_decode($response,true);
     $user_teams = isset($response['users_teams'])?$response['users_teams']:[];
+    
+    
+    $url = url('/api/user/message/list-view-count/'.$user_data->id);
+    $response = CommonHelper::processCURLRequest($url,'','','',$headers);//print_r($response);//exit;
+    $response = json_decode($response,true);
+    $list_view_count = isset($response['message_count'])?$response['message_count']:0;
 ?>
 <body>
       <header class="d-flex align-items-center">
@@ -57,7 +63,11 @@
             <ul class="sidebarMenu">
                 <li><a href="{{url('/')}}"><i class="fas fa-home"></i> Home</a></li>
                 <li><a href="javascript:;"><i class="fas fa-bell"></i> Notification</a></li>
-                <li><a href="{{url('user/message/list')}}"><i class="fas fa-envelope"></i> Message</a></li>
+                @if($list_view_count > 0)
+                    <li><a href="{{url('user/message/list')}}" style="background-color:#EDBD89; "><i class="fas fa-envelope"></i> Message ({{$list_view_count}})</a></li>
+                @else
+                    <li><a href="{{url('user/message/list')}}"><i class="fas fa-envelope"></i> Message</a></li>
+                @endif
                 <li><a href="javascript:;"><i class="fas fa-file-alt"></i> Your submissions</a></li>
                 <li><a href="{{url('user/profile')}}"><i class="fas fa-user"></i> profile</a></li>
                 @for($i=0;$i<count($user_teams);$i++)
@@ -85,7 +95,8 @@
             
             @if(isset($user_data->id) && !empty($user_data->id))
                 <div class="userName">
-                    @if($user_data->user_role == 2)<a href="{{url('subscriber/profile/view/'.$user_data->subscriber_id)}}"> @else <a href="{{url('user/profile/view/'.$user_data->id)}}"> @endif
+                    <?php /* ?> @if($user_data->user_role == 2)<a href="{{url('subscriber/profile/view/'.$user_data->subscriber_id)}}"> @else <a href="{{url('user/profile/view/'.$user_data->id)}}"> @endif <?php */ ?>
+                    <a href="{{url('user/profile')}}">
                     @if(isset($user_data->image) && !empty($user_data->image))  
                         <figure><img src="{{url('images/user_images/'.$user_data->image)}}" class="img-fluid"></figure>
                     @else

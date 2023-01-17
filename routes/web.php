@@ -272,6 +272,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('/user/message/create/{userId}', [App\Http\Controllers\UserController::class, 'createUserMessage'])->name('createusermessage');
     Route::post('/user/message/save', [App\Http\Controllers\UserController::class, 'saveUserMessage'])->name('saveusermessage');
     Route::get('/user/message/list', [App\Http\Controllers\UserController::class, 'listUserMessages'])->name('listusermessages');
+    Route::post('/user/message/read-status/update', [App\Http\Controllers\UserController::class, 'updateUserMessageReadStatus'])->name('updateusermessagereadstatus');
 });
 
 Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('home');

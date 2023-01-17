@@ -1796,6 +1796,56 @@ class DataApiController extends Controller
         }    
     }
     
+    function getUserMessageListViewCount(Request $request,$user_id){
+        try{ 
+            $data = $request->all();
+            
+            $message_count = UserMessages::where('user_messages.to_id',$user_id)                
+            ->where('user_messages.list_viewed',0)         
+            ->where('user_messages.is_deleted',0)        
+            ->count();                
+            
+            return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'success','message' => 'Message List','message_count'=>$message_count),200);
+            
+        }catch (\Exception $e){
+            CommonHelper::saveException($e,'STORE',__FUNCTION__,__FILE__);
+            return response(array('httpStatus'=>200,"dateTime"=>time(),'status' => 'fail','error_message'=>$e->getMessage(),'message'=>'Error in Processing Request'),200);
+        }    
+    }
+    
+    function updateUserMessageListViewCount(Request $request){
+        try{ 
+            $data = $request->all();
+            
+            $updateArray = ['list_viewed'=>1];
+            $message_count = UserMessages::where('user_messages.to_id',$data['user_id'])->update($updateArray);                
+                       
+            return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'success','message' => 'Message updated'),200);
+            
+        }catch (\Exception $e){
+            CommonHelper::saveException($e,'STORE',__FUNCTION__,__FILE__);
+            return response(array('httpStatus'=>200,"dateTime"=>time(),'status' => 'fail','error_message'=>$e->getMessage(),'message'=>'Error in Processing Request'),200);
+        }    
+    }
+    
+    function updateUserMessageReadStatus(Request $request){
+        try{ 
+            $data = $request->all();
+            $message_data = UserMessages::where('id',$data['message_id'])->first();
+            
+            if($message_data->to_id == $data['user_id']){
+                $updateArray = ['is_read'=>1];
+                UserMessages::where('id',$data['message_id'])->update($updateArray);                
+            }
+                       
+            return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'success','message' => 'Message updated'),200);
+            
+        }catch (\Exception $e){
+            CommonHelper::saveException($e,'STORE',__FUNCTION__,__FILE__);
+            return response(array('httpStatus'=>200,"dateTime"=>time(),'status' => 'fail','error_message'=>$e->getMessage(),'message'=>'Error in Processing Request'),200);
+        }    
+    }
+    
     function updateAPIResponse($records_list,$qs_str){
         
         $records_list = json_decode(json_encode($records_list),true);

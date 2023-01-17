@@ -15,6 +15,6 @@ class UserMessages extends Model
      *
      * @var array<int, string>
      */
-    protected $fillable = ['from_id','to_id','message','is_read','is_deleted'];
+    protected $fillable = ['from_id','to_id','message','is_read','list_viewed','is_deleted'];
 
 }

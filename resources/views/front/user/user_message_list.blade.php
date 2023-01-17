@@ -10,15 +10,16 @@
             <h2 class="mt-3 justify-content-between d-flex">My Messages</h2>
             <table style="width:100%;">
                 @for($i=0;$i<count($message_list);$i++)
-                    <tr>
+                    
+                    <tr id="tr_{{$message_list[$i]['id']}}" @if($message_list[$i]['is_read'] == 0 && $message_list[$i]['to_id'] == $user->id) style="background-color:#FAECDE;" @endif>
                         <td>
-                            <a href="javascript:;" onclick="$('#msg_{{$message_list[$i]['id']}}').toggle();" style="color:#2a3548;"> 
+                            <a href="javascript:;" onclick="updateMessageReadStatus('{{$message_list[$i]['id']}}','{{$user->id}}');" style="color:#2a3548;"> 
                                 <img src="{{$message_list[$i]['from_profile_image_url']}}" class="img-thumbnail" style="max-width:50px; "> {{$message_list[$i]['from_name']}}
                             </a>
                         </td>
                         <td>&raquo;</td>
                         <td> 
-                            <a href="javascript:;" onclick="$('#msg_{{$message_list[$i]['id']}}').toggle();" style="color:#2a3548;">
+                            <a href="javascript:;" onclick="updateMessageReadStatus('{{$message_list[$i]['id']}}','{{$user->id}}');" style="color:#2a3548;">
                                 <img src="{{$message_list[$i]['to_profile_image_url']}}" class="img-thumbnail" style="max-width:50px; "> {{$message_list[$i]['to_name']}}
                             </a>
                         </td>
@@ -43,6 +44,6 @@
     $(document).ready(function(){
     });
 </script>
-<script src="{{ asset('js/users.js') }}" ></script>
+<script src="{{ asset('js/users.js?v=1.1') }}" ></script>
 @endsection
 

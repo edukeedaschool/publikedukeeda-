@@ -61,6 +61,9 @@ Route::group(['middleware' => ['data_api']], function () {
     Route::post('/submission/status/update', [App\Http\Controllers\DataApiController::class, 'updateSubmissionStatus'])->name('updatesubmissionstatus');
     Route::post('/user/message/add', [App\Http\Controllers\DataApiController::class, 'addUserMessage'])->name('addusermessage');
     Route::get('/user/message/list/{userId}', [App\Http\Controllers\DataApiController::class, 'getUserMessageList'])->name('getusermessagelist');
+    Route::get('/user/message/list-view-count/{userId}', [App\Http\Controllers\DataApiController::class, 'getUserMessageListViewCount'])->name('getusermessagelistviewcount');
+    Route::post('/user/message/view-count/update', [App\Http\Controllers\DataApiController::class, 'updateUserMessageListViewCount'])->name('updateusermessagelistviewcount');
+    Route::post('/user/message/read-status/update', [App\Http\Controllers\DataApiController::class, 'updateUserMessageReadStatus'])->name('updateusermessagereadstatus');
     
     Route::post('/signup', [App\Http\Controllers\DataApiController::class, 'signup'])->name('signup');
     Route::post('/change-password', [App\Http\Controllers\DataApiController::class, 'changePassword'])->name('changepassword');

@@ -221,3 +221,36 @@ function saveUserMessage(){
         }
     });
 }
+
+function updateMessageReadStatus(message_id,user_id){
+    $("#msg_"+message_id).toggle();
+    $("#tr_"+message_id).css('background-color','#FFF');
+    
+    ajaxSetup();
+
+    $.ajax({
+        url:ROOT_PATH+"/user/message/read-status/update",
+        method:"POST",
+        data:{message_id:message_id,user_id:user_id},
+        success:function(msg){
+            if(objectPropertyExists(msg,'status')){
+                if(msg.status == 'fail'){
+                    var errors = getResponseErrors(msg,'<br/>','error_validation_');
+                    if(errors != ''){
+                        $("#listMessageErrorMessage").html(errors).show();
+                    } 
+                }else{ 
+                    //$("#saveMessageSuccessMessage").html(msg.message).show();
+                    $("#listMessageErrorMessage,.invalid-feedback").html('').hide();
+                    
+                    //var url = ROOT_PATH+"/user/message/list";
+                    //setTimeout(function(){  window.location.href = url; }, 1000);
+                }
+            }else{
+                displayResponseError(msg,'listMessageErrorMessage');
+            }
+        },error:function(obj,status,error){
+            $("#listMessageErrorMessage").html('Error in processing request').show();
+        }
+    });
+}

@@ -631,12 +631,35 @@ class UserController extends Controller
             $response = CommonHelper::processCURLRequest($url,'','','',$headers);//print_r($response);
             $response = json_decode($response,true);
             
+            $url = url('/api/user/message/view-count/update');
+            $post_data = ['user_id'=>$user->id];
+            $response1 = CommonHelper::processCURLRequest($url,json_encode($post_data),'','',$headers);
+           
             $message_list = isset($response['message_list'])?$response['message_list']:[];
             
-            return view('front/user/user_message_list',array('title'=>'User Messages','message_list'=>$message_list));
+            return view('front/user/user_message_list',array('title'=>'User Messages','message_list'=>$message_list,'user'=>$user));
          
         }catch (\Exception $e){
             return view('admin/page_error',array('message' =>$e->getMessage()));
         }
+    }
+    
+    function updateUserMessageReadStatus(Request $request){
+        try{ 
+            $data = $request->all();
+            
+            $headers = CommonHelper::getAPIHeaders();
+            $url = url('/api/user/message/read-status/update');
+            
+            $post_data = ['user_id'=>$data['user_id'],'message_id'=>trim($data['message_id'])];
+            $response = CommonHelper::processCURLRequest($url,json_encode($post_data),'','',$headers);
+            $response = json_decode($response,true);
+                       
+            return response(array('httpStatus'=>200, 'dateTime'=>time(), 'status'=>'success','message' => 'Message updated'),200);
+            
+        }catch (\Exception $e){
+            CommonHelper::saveException($e,'STORE',__FUNCTION__,__FILE__);
+            return response(array('httpStatus'=>200,"dateTime"=>time(),'status' => 'fail','error_message'=>$e->getMessage(),'message'=>'Error in Processing Request'),200);
+        }    
     }
 }
